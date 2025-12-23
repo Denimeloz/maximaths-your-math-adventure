@@ -1,20 +1,22 @@
-import { Book, GraduationCap, Info, Menu, X } from "lucide-react";
+import { Book, GraduationCap, Info, Menu, X, Home, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import maximathsLogo from "@/assets/maximaths-logo.png";
+import { useNavigate, useLocation } from "react-router-dom";
+import newLogo from "@/assets/new-logo.png";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-sky-cloud/95 backdrop-blur-md border-b-4 border-rainbow-blue/30">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
           <img 
-            src={maximathsLogo} 
+            src={newLogo} 
             alt="MAXIMATHS Logo" 
             className="w-14 h-14 object-contain"
           />
@@ -33,6 +35,17 @@ const Header = () => {
 
         {/* Navigation Desktop */}
         <nav className="hidden md:flex items-center gap-2">
+          {!isHomePage && (
+            <Button 
+              variant="nav" 
+              size="sm" 
+              className="gap-2 rounded-full hover:bg-rainbow-green/20 hover:scale-105 transition-all"
+              onClick={() => navigate('/')}
+            >
+              <Home className="w-4 h-4 text-rainbow-green" />
+              Accueil
+            </Button>
+          )}
           <Button 
             variant="nav" 
             size="sm" 
@@ -67,10 +80,11 @@ const Header = () => {
           <Button 
             variant="orange" 
             size="sm" 
-            className="hidden sm:flex shadow-[0_5px_0_hsl(25_100%_35%)] text-sm font-bold"
+            className="hidden sm:flex shadow-[0_5px_0_hsl(25_100%_35%)] text-sm font-bold gap-2"
             onClick={() => navigate('/auth')}
           >
-            🎓 Espace Élève
+            <LogIn className="w-4 h-4" />
+            Connexion
           </Button>
           
           {/* Mobile menu button */}
@@ -87,6 +101,16 @@ const Header = () => {
       {mobileMenuOpen && (
         <div className="md:hidden bg-sky-cloud/98 border-t-2 border-border animate-slide-up">
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
+            {!isHomePage && (
+              <Button 
+                variant="ghost" 
+                className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-green/20"
+                onClick={() => { navigate('/'); setMobileMenuOpen(false); }}
+              >
+                <Home className="w-5 h-5 text-rainbow-green" />
+                Accueil
+              </Button>
+            )}
             <Button 
               variant="ghost" 
               className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-blue/20"
@@ -113,10 +137,11 @@ const Header = () => {
             </Button>
             <Button 
               variant="orange" 
-              className="mt-2 h-12 shadow-[0_5px_0_hsl(25_100%_35%)]"
+              className="mt-2 h-12 shadow-[0_5px_0_hsl(25_100%_35%)] gap-2"
               onClick={() => { navigate('/auth'); setMobileMenuOpen(false); }}
             >
-              🎓 Espace Élève
+              <LogIn className="w-5 h-5" />
+              Connexion
             </Button>
           </nav>
         </div>
