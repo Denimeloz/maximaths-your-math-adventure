@@ -14,6 +14,175 @@ export type Database = {
   }
   public: {
     Tables: {
+      badges: {
+        Row: {
+          condition_type: string
+          condition_value: number
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          name: string
+        }
+        Insert: {
+          condition_type: string
+          condition_value?: number
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          condition_type?: string
+          condition_value?: number
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      chapters: {
+        Row: {
+          content: string | null
+          course_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_published: boolean
+          order_index: number
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          content?: string | null
+          course_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          order_index?: number
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          content?: string | null
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          order_index?: number
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapters_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_published: boolean
+          level: Database["public"]["Enums"]["course_level"]
+          order_index: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          level: Database["public"]["Enums"]["course_level"]
+          order_index?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          level?: Database["public"]["Enums"]["course_level"]
+          order_index?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      exercises: {
+        Row: {
+          answer: string
+          chapter_id: string
+          created_at: string
+          difficulty: number
+          explanation: string | null
+          id: string
+          is_published: boolean
+          order_index: number
+          points: number
+          question: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          chapter_id: string
+          created_at?: string
+          difficulty?: number
+          explanation?: string | null
+          id?: string
+          is_published?: boolean
+          order_index?: number
+          points?: number
+          question: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          chapter_id?: string
+          created_at?: string
+          difficulty?: number
+          explanation?: string | null
+          id?: string
+          is_published?: boolean
+          order_index?: number
+          points?: number
+          question?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercises_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -56,6 +225,79 @@ export type Database = {
         }
         Relationships: []
       }
+      user_badges: {
+        Row: {
+          badge_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_progress: {
+        Row: {
+          attempts: number
+          best_score: number | null
+          completed_at: string | null
+          created_at: string
+          exercise_id: string
+          id: string
+          is_completed: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          best_score?: number | null
+          completed_at?: string | null
+          created_at?: string
+          exercise_id: string
+          id?: string
+          is_completed?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          best_score?: number | null
+          completed_at?: string | null
+          created_at?: string
+          exercise_id?: string
+          id?: string
+          is_completed?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_progress_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -89,6 +331,14 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      course_level:
+        | "6eme"
+        | "5eme"
+        | "4eme"
+        | "3eme"
+        | "seconde"
+        | "premiere"
+        | "terminale"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -217,6 +467,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      course_level: [
+        "6eme",
+        "5eme",
+        "4eme",
+        "3eme",
+        "seconde",
+        "premiere",
+        "terminale",
+      ],
     },
   },
 } as const
