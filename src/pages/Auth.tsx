@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
-import { Sparkles, Star, BookOpen, Calculator, ArrowLeft, Loader2, Mail, Lock, User, Briefcase, GraduationCap } from 'lucide-react';
+import { Sparkles, Star, BookOpen, Calculator, ArrowLeft, Loader2, Mail, Lock, User, Briefcase, GraduationCap, Eye, EyeOff } from 'lucide-react';
 
 const signUpSchema = z.object({
   firstName: z.string().min(2, 'Le prénom doit contenir au moins 2 caractères').max(50),
@@ -25,6 +25,7 @@ const signInSchema = z.object({
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -329,15 +330,28 @@ const Auth = () => {
                   <Lock className="w-4 h-4 text-rainbow-green" />
                   Mot de passe
                 </Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  className="rounded-xl border-2 focus:border-rainbow-green h-12"
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    className="rounded-xl border-2 focus:border-rainbow-green h-12 pr-12"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
                 {errors.password && (
                   <p className="text-destructive text-sm">{errors.password}</p>
                 )}
