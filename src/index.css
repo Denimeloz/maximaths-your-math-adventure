@@ -1,96 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Background - Sky blue gradient base */
+    --background: 200 80% 92%;
+    --foreground: 215 50% 15%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Card - White with slight blue tint */
+    --card: 200 50% 98%;
+    --card-foreground: 215 50% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* Popover */
+    --popover: 200 50% 98%;
+    --popover-foreground: 215 50% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - Sunny Yellow */
+    --primary: 45 100% 50%;
+    --primary-foreground: 215 50% 15%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - Orange Vif */
+    --secondary: 32 100% 50%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted - Soft blue */
+    --muted: 200 40% 90%;
+    --muted-foreground: 215 30% 40%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - Pink Candy */
+    --accent: 330 100% 70%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Border & Input */
+    --border: 200 40% 85%;
+    --input: 200 40% 90%;
+    --ring: 270 60% 65%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Custom Rainbow Colors */
+    --rainbow-yellow: 45 100% 50%;
+    --rainbow-orange: 32 100% 50%;
+    --rainbow-pink: 330 100% 70%;
+    --rainbow-purple: 260 50% 65%;
+    --rainbow-blue: 200 80% 70%;
+    --rainbow-green: 145 70% 55%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Sky Colors */
+    --sky-light: 200 85% 95%;
+    --sky-base: 200 80% 85%;
+    --sky-cloud: 200 30% 98%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    /* Feature card colors */
+    --card-green: 160 60% 85%;
+    --card-purple: 270 60% 88%;
+    --card-orange: 35 100% 88%;
+    --card-blue: 200 80% 88%;
 
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar */
+    --sidebar-background: 270 60% 50%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 45 100% 50%;
+    --sidebar-primary-foreground: 215 50% 15%;
+    --sidebar-accent: 270 50% 60%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 270 40% 45%;
+    --sidebar-ring: 45 100% 50%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 220 30% 12%;
+    --foreground: 200 40% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 30% 16%;
+    --card-foreground: 200 40% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 30% 16%;
+    --popover-foreground: 200 40% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 45 100% 50%;
+    --primary-foreground: 215 50% 15%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 32 100% 50%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 30% 20%;
+    --muted-foreground: 200 30% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 330 100% 70%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 220 30% 25%;
+    --input: 220 30% 20%;
+    --ring: 270 60% 65%;
+
+    --sidebar-background: 270 50% 20%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 45 100% 50%;
+    --sidebar-primary-foreground: 215 50% 15%;
+    --sidebar-accent: 270 40% 30%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 270 30% 25%;
+    --sidebar-ring: 45 100% 50%;
   }
 }
 
@@ -100,6 +121,181 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  /* Rainbow gradient text */
+  .text-rainbow {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--rainbow-yellow)) 0%,
+      hsl(var(--rainbow-orange)) 25%,
+      hsl(var(--rainbow-pink)) 50%,
+      hsl(var(--rainbow-purple)) 75%,
+      hsl(var(--rainbow-blue)) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* 3D Button effect */
+  .btn-3d {
+    @apply relative transition-all duration-200;
+    box-shadow: 0 4px 0 hsl(var(--primary-foreground) / 0.3), 
+                0 6px 20px hsl(var(--primary) / 0.3);
+  }
+
+  .btn-3d:hover {
+    @apply translate-y-0.5;
+    box-shadow: 0 2px 0 hsl(var(--primary-foreground) / 0.3), 
+                0 4px 15px hsl(var(--primary) / 0.4);
+  }
+
+  .btn-3d:active {
+    @apply translate-y-1;
+    box-shadow: 0 0 0 hsl(var(--primary-foreground) / 0.3), 
+                0 2px 10px hsl(var(--primary) / 0.4);
+  }
+
+  /* Card cartoon style */
+  .card-cartoon {
+    @apply rounded-3xl border-4 transition-all duration-300;
+    box-shadow: 0 8px 0 hsl(var(--border)), 
+                0 12px 30px hsl(var(--foreground) / 0.1);
+  }
+
+  .card-cartoon:hover {
+    @apply -translate-y-1;
+    box-shadow: 0 12px 0 hsl(var(--border)), 
+                0 16px 40px hsl(var(--foreground) / 0.15);
+  }
+
+  /* Cloud shapes */
+  .cloud {
+    @apply absolute rounded-full bg-sky-cloud;
+    filter: blur(1px);
+  }
+
+  /* Floating animation */
+  .float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .float-delayed {
+    animation: float 6s ease-in-out infinite 2s;
+  }
+
+  /* Star twinkle */
+  .twinkle {
+    animation: twinkle 2s ease-in-out infinite;
+  }
+}
+
+@layer utilities {
+  /* Sky gradient background */
+  .bg-sky-gradient {
+    background: linear-gradient(
+      180deg,
+      hsl(200 85% 92%) 0%,
+      hsl(200 80% 88%) 50%,
+      hsl(260 50% 90%) 100%
+    );
+  }
+
+  /* Rainbow gradient */
+  .bg-rainbow {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--rainbow-yellow)) 0%,
+      hsl(var(--rainbow-orange)) 25%,
+      hsl(var(--rainbow-pink)) 50%,
+      hsl(var(--rainbow-purple)) 75%,
+      hsl(var(--rainbow-blue)) 100%
+    );
+  }
+
+  /* Footer gradient */
+  .bg-footer-gradient {
+    background: linear-gradient(
+      135deg,
+      hsl(270 60% 55%) 0%,
+      hsl(300 60% 60%) 50%,
+      hsl(330 70% 65%) 100%
+    );
+  }
+
+  /* Sun rays effect */
+  .sun-rays {
+    background: 
+      repeating-conic-gradient(
+        from 0deg,
+        hsl(45 100% 70% / 0.1) 0deg 10deg,
+        transparent 10deg 20deg
+      );
+  }
+}
+
+/* Keyframes */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes wiggle {
+  0%, 100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
   }
 }
