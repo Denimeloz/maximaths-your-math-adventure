@@ -101,6 +101,7 @@ export type Database = {
           is_published: boolean
           level: Database["public"]["Enums"]["course_level"]
           order_index: number
+          pdf_url: string | null
           title: string
           updated_at: string
         }
@@ -113,6 +114,7 @@ export type Database = {
           is_published?: boolean
           level: Database["public"]["Enums"]["course_level"]
           order_index?: number
+          pdf_url?: string | null
           title: string
           updated_at?: string
         }
@@ -125,6 +127,7 @@ export type Database = {
           is_published?: boolean
           level?: Database["public"]["Enums"]["course_level"]
           order_index?: number
+          pdf_url?: string | null
           title?: string
           updated_at?: string
         }

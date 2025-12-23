@@ -41,6 +41,7 @@ interface Course {
   is_published: boolean;
   order_index: number;
   image_url: string | null;
+  pdf_url: string | null;
 }
 
 interface Profile {
@@ -65,6 +66,7 @@ const Admin = () => {
   const location = useLocation();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
   
   // Determine active tab from URL
   const getActiveTabFromPath = () => {
@@ -80,6 +82,7 @@ const Admin = () => {
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isUploadingPdf, setIsUploadingPdf] = useState(false);
   
   // Course form state
   const [showCourseForm, setShowCourseForm] = useState(false);
@@ -90,6 +93,7 @@ const Admin = () => {
     level: '6eme' as CourseLevel,
     category: 'algebre',
     image_url: '',
+    pdf_url: '',
   });
 
   // Sync activeTab with URL changes
@@ -227,6 +231,66 @@ const Admin = () => {
     }
   };
 
+  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (file.type !== 'application/pdf') {
+      toast({
+        title: "Erreur",
+        description: "Veuillez sélectionner un fichier PDF",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (max 20MB)
+    if (file.size > 20 * 1024 * 1024) {
+      toast({
+        title: "Erreur",
+        description: "Le fichier PDF ne doit pas dépasser 20MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploadingPdf(true);
+
+    try {
+      // Generate unique filename
+      const fileName = `pdfs/${Date.now()}-${Math.random().toString(36).substring(7)}.pdf`;
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('course-files')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('course-files')
+        .getPublicUrl(fileName);
+
+      setCourseForm(prev => ({ ...prev, pdf_url: publicUrl }));
+
+      toast({
+        title: "Succès ✨",
+        description: "Fichier PDF téléchargé avec succès",
+      });
+    } catch (error) {
+      console.error('Error uploading PDF:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de télécharger le fichier PDF",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingPdf(false);
+    }
+  };
+
   const handleSaveCourse = async () => {
     if (!courseForm.title.trim()) {
       toast({
@@ -246,6 +310,7 @@ const Admin = () => {
           level: courseForm.level,
           category: courseForm.category,
           image_url: courseForm.image_url || null,
+          pdf_url: courseForm.pdf_url || null,
         })
         .eq('id', editingCourse.id);
 
@@ -272,6 +337,7 @@ const Admin = () => {
           level: courseForm.level,
           category: courseForm.category,
           image_url: courseForm.image_url || null,
+          pdf_url: courseForm.pdf_url || null,
           order_index: courses.length,
         });
 
@@ -300,6 +366,7 @@ const Admin = () => {
       level: course.level,
       category: course.category,
       image_url: course.image_url || '',
+      pdf_url: course.pdf_url || '',
     });
     setShowCourseForm(true);
   };
@@ -376,6 +443,7 @@ const Admin = () => {
       level: '6eme',
       category: 'algebre',
       image_url: '',
+      pdf_url: '',
     });
   };
 
@@ -711,6 +779,69 @@ const Admin = () => {
                             <SelectItem value="statistiques">Statistiques</SelectItem>
                           </SelectContent>
                         </Select>
+                      </div>
+                    </div>
+
+                    {/* PDF Upload */}
+                    <div>
+                      <label className="text-sm font-body text-muted-foreground mb-1 block">Fichier PDF du cours</label>
+                      <div className="flex items-center gap-4">
+                        {courseForm.pdf_url ? (
+                          <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl">
+                            <FileText className="w-8 h-8 text-rainbow-blue" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-body text-foreground truncate">Fichier PDF ajouté</p>
+                              <a 
+                                href={courseForm.pdf_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-xs text-rainbow-blue hover:underline"
+                              >
+                                Voir le fichier
+                              </a>
+                            </div>
+                            <button
+                              onClick={() => setCourseForm(prev => ({ ...prev, pdf_url: '' }))}
+                              className="w-6 h-6 bg-destructive rounded-full flex items-center justify-center"
+                            >
+                              <X className="w-3 h-3 text-destructive-foreground" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="w-full p-4 rounded-xl border-2 border-dashed border-muted-foreground/30 flex items-center justify-center gap-3">
+                            <FileText className="w-8 h-8 text-muted-foreground/50" />
+                            <span className="text-sm text-muted-foreground">Aucun fichier PDF</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="mt-2">
+                        <input
+                          type="file"
+                          ref={pdfInputRef}
+                          onChange={handlePdfUpload}
+                          accept=".pdf,application/pdf"
+                          className="hidden"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => pdfInputRef.current?.click()}
+                          disabled={isUploadingPdf}
+                          className="rounded-xl"
+                        >
+                          {isUploadingPdf ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Upload...
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="w-4 h-4 mr-2" />
+                              {courseForm.pdf_url ? 'Changer le PDF' : 'Télécharger un PDF'}
+                            </>
+                          )}
+                        </Button>
+                        <p className="text-xs text-muted-foreground mt-1">Max 20MB, PDF uniquement</p>
                       </div>
                     </div>
                     
