@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { SidebarProvider } from '@/components/ui/sidebar';
@@ -62,10 +62,19 @@ interface UserRole {
 const Admin = () => {
   const { user, isAdmin, signOut, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'courses' | 'users'>('dashboard');
+  // Determine active tab from URL
+  const getActiveTabFromPath = () => {
+    const path = location.pathname;
+    if (path === '/admin/courses') return 'courses';
+    if (path === '/admin/users') return 'users';
+    return 'dashboard';
+  };
+  
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'courses' | 'users'>(getActiveTabFromPath);
   const [courses, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<(Profile & { role?: string })[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
@@ -82,6 +91,11 @@ const Admin = () => {
     category: 'algebre',
     image_url: '',
   });
+
+  // Sync activeTab with URL changes
+  useEffect(() => {
+    setActiveTab(getActiveTabFromPath());
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -418,14 +432,14 @@ const Admin = () => {
           {/* Tabs */}
           <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
             {[
-              { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-              { id: 'courses', label: 'Cours', icon: BookOpen },
-              { id: 'users', label: 'Utilisateurs', icon: Users },
+              { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/admin' },
+              { id: 'courses', label: 'Cours', icon: BookOpen, path: '/admin/courses' },
+              { id: 'users', label: 'Utilisateurs', icon: Users, path: '/admin/users' },
             ].map((tab) => (
               <Button
                 key={tab.id}
                 variant={activeTab === tab.id ? 'default' : 'outline'}
-                onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                onClick={() => navigate(tab.path)}
                 className="rounded-xl flex items-center gap-2"
               >
                 <tab.icon className="w-4 h-4" />
@@ -461,14 +475,14 @@ const Admin = () => {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Button 
-                    onClick={() => setActiveTab('courses')} 
+                    onClick={() => navigate('/admin/courses')} 
                     className="h-auto py-6 flex flex-col items-center gap-2 rounded-xl btn-3d bg-primary"
                   >
                     <Plus className="w-8 h-8" />
                     <span className="font-display">Créer un cours</span>
                   </Button>
                   <Button 
-                    onClick={() => setActiveTab('users')} 
+                    onClick={() => navigate('/admin/users')} 
                     variant="outline"
                     className="h-auto py-6 flex flex-col items-center gap-2 rounded-xl"
                   >

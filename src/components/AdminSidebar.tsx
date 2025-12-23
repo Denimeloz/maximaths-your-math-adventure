@@ -28,9 +28,7 @@ import { Button } from '@/components/ui/button';
 const menuItems = [
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
   { title: 'Cours', url: '/admin/courses', icon: BookOpen },
-  { title: 'Chapitres', url: '/admin/chapters', icon: FileText },
   { title: 'Utilisateurs', url: '/admin/users', icon: Users },
-  { title: 'Statistiques', url: '/admin/stats', icon: BarChart3 },
 ];
 
 const accountItems = [
