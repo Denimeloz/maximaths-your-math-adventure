@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,16 +18,19 @@ import {
   Save, 
   Camera,
   Loader2,
-  ArrowLeft
+  ArrowLeft,
+  Upload
 } from 'lucide-react';
 
 const Profile = () => {
   const { user, profile, isAdmin, isLoading: authLoading, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -57,6 +60,82 @@ const Profile = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez sélectionner une image",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "Erreur",
+        description: "L'image ne doit pas dépasser 2MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+
+    try {
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/avatar.${fileExt}`;
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      // Update profile with avatar URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ 
+          avatar_url: `${publicUrl}?t=${Date.now()}`,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', user.id);
+
+      if (updateError) throw updateError;
+
+      await refreshProfile();
+
+      toast({
+        title: "Succès ✨",
+        description: "Photo de profil mise à jour",
+      });
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour la photo",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingAvatar(false);
+    }
   };
 
   const handleSave = async () => {
@@ -139,7 +218,7 @@ const Profile = () => {
               {/* Avatar Section */}
               <div className="flex flex-col items-center mb-8">
                 <div className="relative">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-rainbow-purple to-rainbow-pink flex items-center justify-center">
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-rainbow-purple to-rainbow-pink flex items-center justify-center overflow-hidden">
                     {profile?.avatar_url ? (
                       <img 
                         src={profile.avatar_url} 
@@ -149,8 +228,24 @@ const Profile = () => {
                     ) : (
                       <User className="w-12 h-12 text-secondary-foreground" />
                     )}
+                    {isUploadingAvatar && (
+                      <div className="absolute inset-0 bg-background/50 flex items-center justify-center rounded-full">
+                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                      </div>
+                    )}
                   </div>
-                  <button className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleAvatarChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <button 
+                    onClick={handleAvatarClick}
+                    disabled={isUploadingAvatar}
+                    className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+                  >
                     <Camera className="w-4 h-4 text-primary-foreground" />
                   </button>
                 </div>
@@ -216,15 +311,20 @@ const Profile = () => {
                     <Briefcase className="w-4 h-4 text-rainbow-orange" />
                     Profession
                   </Label>
-                  <Input
+                  <select
                     id="profession"
                     name="profession"
                     value={formData.profession}
                     onChange={handleChange}
                     disabled={!isEditing}
-                    placeholder="Élève, Enseignant, Parent..."
-                    className="rounded-xl border-2 focus:border-rainbow-orange h-12"
-                  />
+                    className="w-full h-12 px-4 rounded-xl border-2 border-input bg-background focus:border-rainbow-orange focus:outline-none focus:ring-2 focus:ring-rainbow-orange/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="">Sélectionnez une profession</option>
+                    <option value="Élève">Élève</option>
+                    <option value="Enseignant">Enseignant</option>
+                    <option value="Parent">Parent</option>
+                    <option value="Autre">Autre</option>
+                  </select>
                 </div>
 
                 <div className="space-y-2">

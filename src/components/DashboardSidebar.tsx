@@ -20,8 +20,7 @@ import {
   Settings, 
   LogOut,
   GraduationCap,
-  Sparkles,
-  Shield
+  Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -40,7 +39,7 @@ const courseItems = [
 export function DashboardSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { profile, isAdmin, signOut } = useAuth();
+  const { profile, signOut } = useAuth();
 
   const handleSignOut = async () => {
     await signOut();
@@ -118,24 +117,6 @@ export function DashboardSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {isAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="font-display text-muted-foreground">Administration</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton 
-                    onClick={() => navigate('/admin')}
-                    className="cursor-pointer hover:bg-muted/50"
-                  >
-                    <Shield className="w-4 h-4 mr-2 text-rainbow-purple" />
-                    <span>Panel Admin</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-border">

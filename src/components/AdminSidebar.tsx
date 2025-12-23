@@ -21,8 +21,7 @@ import {
   LogOut,
   Shield,
   FileText,
-  BarChart3,
-  Home
+  BarChart3
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -121,22 +120,6 @@ export function AdminSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel className="font-display text-muted-foreground">Navigation</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  onClick={() => navigate('/dashboard')}
-                  className="cursor-pointer hover:bg-muted/50"
-                >
-                  <Home className="w-4 h-4 mr-2" />
-                  <span>Espace utilisateur</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-border">
