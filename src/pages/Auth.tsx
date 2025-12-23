@@ -13,7 +13,7 @@ const signUpSchema = z.object({
   lastName: z.string().min(2, 'Le nom doit contenir au moins 2 caractères').max(50),
   email: z.string().email('Email invalide').max(255),
   password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
-  profession: z.string().min(2, 'Veuillez indiquer votre profession').max(100),
+  profession: z.string().min(1, 'Veuillez sélectionner votre profession'),
   level: z.enum(['college', 'lycee', 'both', 'other']),
 });
 
@@ -272,19 +272,47 @@ const Auth = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="profession" className="font-body font-semibold flex items-center gap-2">
+                  <div className="space-y-3">
+                    <Label className="font-body font-semibold flex items-center gap-2">
                       <Briefcase className="w-4 h-4 text-rainbow-orange" />
                       Profession
                     </Label>
-                    <Input
-                      id="profession"
-                      name="profession"
-                      value={formData.profession}
-                      onChange={handleChange}
-                      placeholder="Élève, Enseignant, Parent..."
-                      className="rounded-xl border-2 focus:border-rainbow-orange h-12"
-                    />
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { value: 'eleve', label: 'Élève' },
+                        { value: 'enseignant', label: 'Enseignant' },
+                        { value: 'parent', label: 'Parent' },
+                        { value: 'autre', label: 'Autre' },
+                      ].map((option) => (
+                        <label
+                          key={option.value}
+                          className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                            formData.profession === option.value
+                              ? 'border-rainbow-orange bg-rainbow-orange/10'
+                              : 'border-input hover:border-rainbow-orange/50'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="profession"
+                            value={option.value}
+                            checked={formData.profession === option.value}
+                            onChange={handleChange}
+                            className="sr-only"
+                          />
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                            formData.profession === option.value
+                              ? 'border-rainbow-orange bg-rainbow-orange'
+                              : 'border-muted-foreground'
+                          }`}>
+                            {formData.profession === option.value && (
+                              <div className="w-2 h-2 rounded-full bg-white" />
+                            )}
+                          </div>
+                          <span className="font-body font-medium">{option.label}</span>
+                        </label>
+                      ))}
+                    </div>
                     {errors.profession && (
                       <p className="text-destructive text-sm">{errors.profession}</p>
                     )}

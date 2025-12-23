@@ -1,6 +1,6 @@
 import { Mail, Heart, Star, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
-import brainIcon from "@/assets/brain-icon.png";
+import newLogo from "@/assets/new-logo.png";
 
 const Footer = () => {
   return (
@@ -15,7 +15,7 @@ const Footer = () => {
           {/* Logo */}
           <div className="text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
-              <img src={brainIcon} alt="" className="w-14 h-14 rounded-xl shadow-lg" />
+              <img src={newLogo} alt="" className="w-14 h-14 rounded-xl shadow-lg" />
               <h3 className="text-4xl font-display">
                 <span className="text-rainbow-yellow">MAXI</span>
                 <span className="text-sky-cloud">MATHS</span>
