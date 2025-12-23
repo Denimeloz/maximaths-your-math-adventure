@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import brainIcon from "@/assets/brain-icon.png";
+import maximathsLogo from "@/assets/maximaths-logo.png";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -21,9 +21,9 @@ const Header = () => {
         {/* Logo */}
         <div className="flex items-center gap-3">
           <img 
-            src={brainIcon} 
+            src={maximathsLogo} 
             alt="MAXIMATHS Logo" 
-            className="w-12 h-12 rounded-xl shadow-lg"
+            className="w-14 h-14 object-contain"
           />
           <span className="text-2xl md:text-3xl font-display tracking-tight">
             <span className="text-rainbow-coral">M</span>
