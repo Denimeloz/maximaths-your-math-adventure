@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Calculator, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import brainIcon from "@/assets/brain-icon.png";
 
 const LevelCards = () => {
+  const navigate = useNavigate();
   const collegeClasses = ["6ème", "5ème", "4ème", "3ème"];
   const lyceeClasses = ["2nde", "1ère", "Terminale"];
 
@@ -55,6 +57,7 @@ const LevelCards = () => {
             <Button 
               variant="default" 
               className="w-full gap-2 bg-rainbow-green hover:bg-rainbow-green/90 text-foreground h-14 text-lg shadow-[0_6px_0_hsl(145_70%_35%)] hover:shadow-[0_4px_0_hsl(145_70%_35%)] hover:translate-y-0.5 active:translate-y-1 active:shadow-[0_2px_0_hsl(145_70%_35%)]"
+              onClick={() => navigate('/college')}
             >
               Explorer le Collège
               <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
@@ -99,6 +102,7 @@ const LevelCards = () => {
             <Button 
               variant="default" 
               className="w-full gap-2 bg-rainbow-purple hover:bg-rainbow-purple/90 text-accent-foreground h-14 text-lg shadow-[0_6px_0_hsl(260_50%_45%)] hover:shadow-[0_4px_0_hsl(260_50%_45%)] hover:translate-y-0.5 active:translate-y-1 active:shadow-[0_2px_0_hsl(260_50%_45%)]"
+              onClick={() => navigate('/lycee')}
             >
               Explorer le Lycée
               <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />

@@ -1,4 +1,5 @@
 import { Mail, Heart, Star, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
 import brainIcon from "@/assets/brain-icon.png";
 
 const Footer = () => {
@@ -25,10 +26,10 @@ const Footer = () => {
 
           {/* Links */}
           <nav className="flex flex-wrap justify-center gap-8 font-body font-bold text-lg">
-            <a href="#" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block">Collège</a>
-            <a href="#" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block">Lycée</a>
-            <a href="#" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block">À propos</a>
-            <a href="#" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block">Contact</a>
+            <Link to="/college" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block">Collège</Link>
+            <Link to="/lycee" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block">Lycée</Link>
+            <Link to="/about" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block">À propos</Link>
+            <a href="mailto:maximathsclasse@gmail.com" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block">Contact</a>
           </nav>
 
           {/* Contact */}

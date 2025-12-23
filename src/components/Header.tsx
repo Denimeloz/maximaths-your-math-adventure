@@ -33,15 +33,30 @@ const Header = () => {
 
         {/* Navigation Desktop */}
         <nav className="hidden md:flex items-center gap-2">
-          <Button variant="nav" size="sm" className="gap-2 rounded-full hover:bg-rainbow-blue/20 hover:scale-105 transition-all">
+          <Button 
+            variant="nav" 
+            size="sm" 
+            className="gap-2 rounded-full hover:bg-rainbow-blue/20 hover:scale-105 transition-all"
+            onClick={() => navigate('/college')}
+          >
             <Book className="w-4 h-4 text-rainbow-blue" />
             Collège
           </Button>
-          <Button variant="nav" size="sm" className="gap-2 rounded-full hover:bg-rainbow-purple/20 hover:scale-105 transition-all">
+          <Button 
+            variant="nav" 
+            size="sm" 
+            className="gap-2 rounded-full hover:bg-rainbow-purple/20 hover:scale-105 transition-all"
+            onClick={() => navigate('/lycee')}
+          >
             <GraduationCap className="w-4 h-4 text-rainbow-purple" />
             Lycée
           </Button>
-          <Button variant="nav" size="sm" className="gap-2 rounded-full hover:bg-rainbow-pink/20 hover:scale-105 transition-all">
+          <Button 
+            variant="nav" 
+            size="sm" 
+            className="gap-2 rounded-full hover:bg-rainbow-pink/20 hover:scale-105 transition-all"
+            onClick={() => navigate('/about')}
+          >
             <Info className="w-4 h-4 text-rainbow-pink" />
             À propos
           </Button>
@@ -72,15 +87,27 @@ const Header = () => {
       {mobileMenuOpen && (
         <div className="md:hidden bg-sky-cloud/98 border-t-2 border-border animate-slide-up">
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
-            <Button variant="ghost" className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-blue/20">
+            <Button 
+              variant="ghost" 
+              className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-blue/20"
+              onClick={() => { navigate('/college'); setMobileMenuOpen(false); }}
+            >
               <Book className="w-5 h-5 text-rainbow-blue" />
               Collège
             </Button>
-            <Button variant="ghost" className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-purple/20">
+            <Button 
+              variant="ghost" 
+              className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-purple/20"
+              onClick={() => { navigate('/lycee'); setMobileMenuOpen(false); }}
+            >
               <GraduationCap className="w-5 h-5 text-rainbow-purple" />
               Lycée
             </Button>
-            <Button variant="ghost" className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-pink/20">
+            <Button 
+              variant="ghost" 
+              className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-pink/20"
+              onClick={() => { navigate('/about'); setMobileMenuOpen(false); }}
+            >
               <Info className="w-5 h-5 text-rainbow-pink" />
               À propos
             </Button>
