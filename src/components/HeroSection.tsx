@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Sparkles, Star, Zap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/maximaths-hero.jpeg";
 import brainIcon from "@/assets/brain-icon.png";
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative min-h-screen bg-hero-gradient overflow-hidden pt-20">
       {/* Math pattern overlay */}
@@ -78,7 +81,12 @@ const HeroSection = () => {
 
         {/* CTA Button - enhanced bounce effect */}
         <div className="animate-slide-up" style={{ animationDelay: "0.6s" }}>
-          <Button variant="hero" size="xl" className="gap-3 text-xl group">
+          <Button 
+            variant="hero" 
+            size="xl" 
+            className="gap-3 text-xl group"
+            onClick={() => navigate('/auth')}
+          >
             <Sparkles className="w-7 h-7 group-hover:animate-wiggle" />
             Commencer l'aventure
           </Button>
