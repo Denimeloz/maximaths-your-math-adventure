@@ -9,14 +9,19 @@ import DashboardPreview from "@/components/DashboardPreview";
 import Footer from "@/components/Footer";
 
 const Index = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isAdmin, isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLoading && user) {
-      navigate('/dashboard');
+      // Redirection intelligente selon le rôle
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     }
-  }, [user, isLoading, navigate]);
+  }, [user, isAdmin, isLoading, navigate]);
 
   if (isLoading) {
     return (
