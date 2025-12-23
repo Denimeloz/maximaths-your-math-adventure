@@ -6,32 +6,32 @@
 
 @layer base {
   :root {
-    /* Background - Sky blue gradient base */
-    --background: 200 80% 92%;
-    --foreground: 215 50% 15%;
+    /* Background - Sky blue from reference #E0F2FE */
+    --background: 200 80% 94%;
+    --foreground: 222 47% 15%;
 
     /* Card - White with slight blue tint */
     --card: 200 50% 98%;
-    --card-foreground: 215 50% 15%;
+    --card-foreground: 222 47% 15%;
 
     /* Popover */
     --popover: 200 50% 98%;
-    --popover-foreground: 215 50% 15%;
+    --popover-foreground: 222 47% 15%;
 
-    /* Primary - Sunny Yellow */
-    --primary: 45 100% 50%;
-    --primary-foreground: 215 50% 15%;
+    /* Primary - Sunny Yellow #FFD700 */
+    --primary: 51 100% 50%;
+    --primary-foreground: 222 47% 15%;
 
-    /* Secondary - Orange Vif */
-    --secondary: 32 100% 50%;
+    /* Secondary - Orange Vif #FFA500 */
+    --secondary: 39 100% 50%;
     --secondary-foreground: 0 0% 100%;
 
     /* Muted - Soft blue */
     --muted: 200 40% 90%;
-    --muted-foreground: 215 30% 40%;
+    --muted-foreground: 222 30% 45%;
 
-    /* Accent - Pink Candy */
-    --accent: 330 100% 70%;
+    /* Accent - Pink Candy #FF69B4 */
+    --accent: 330 100% 71%;
     --accent-foreground: 0 0% 100%;
 
     /* Destructive */
@@ -41,77 +41,80 @@
     /* Border & Input */
     --border: 200 40% 85%;
     --input: 200 40% 90%;
-    --ring: 270 60% 65%;
+    --ring: 260 50% 65%;
 
     --radius: 1rem;
 
-    /* Custom Rainbow Colors */
-    --rainbow-yellow: 45 100% 50%;
-    --rainbow-orange: 32 100% 50%;
-    --rainbow-pink: 330 100% 70%;
+    /* Custom Rainbow Colors - from reference */
+    --rainbow-yellow: 51 100% 50%;
+    --rainbow-orange: 39 100% 50%;
+    --rainbow-pink: 330 100% 71%;
     --rainbow-purple: 260 50% 65%;
-    --rainbow-blue: 200 80% 70%;
-    --rainbow-green: 145 70% 55%;
+    --rainbow-blue: 199 89% 60%;
+    --rainbow-green: 145 70% 50%;
+    --rainbow-coral: 16 100% 66%;
 
     /* Sky Colors */
     --sky-light: 200 85% 95%;
-    --sky-base: 200 80% 85%;
+    --sky-base: 200 80% 88%;
     --sky-cloud: 200 30% 98%;
+    --sky-deep: 207 89% 68%;
 
-    /* Feature card colors */
-    --card-green: 160 60% 85%;
-    --card-purple: 270 60% 88%;
-    --card-orange: 35 100% 88%;
-    --card-blue: 200 80% 88%;
+    /* Feature card colors - more vibrant */
+    --card-green: 160 60% 88%;
+    --card-purple: 260 70% 90%;
+    --card-orange: 39 100% 90%;
+    --card-blue: 200 80% 90%;
+    --card-pink: 330 80% 92%;
 
     /* Sidebar */
-    --sidebar-background: 270 60% 50%;
+    --sidebar-background: 260 60% 50%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 45 100% 50%;
-    --sidebar-primary-foreground: 215 50% 15%;
-    --sidebar-accent: 270 50% 60%;
+    --sidebar-primary: 51 100% 50%;
+    --sidebar-primary-foreground: 222 47% 15%;
+    --sidebar-accent: 260 50% 60%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 270 40% 45%;
-    --sidebar-ring: 45 100% 50%;
+    --sidebar-border: 260 40% 45%;
+    --sidebar-ring: 51 100% 50%;
   }
 
   .dark {
-    --background: 220 30% 12%;
+    --background: 222 30% 10%;
     --foreground: 200 40% 95%;
 
-    --card: 220 30% 16%;
+    --card: 222 30% 14%;
     --card-foreground: 200 40% 95%;
 
-    --popover: 220 30% 16%;
+    --popover: 222 30% 14%;
     --popover-foreground: 200 40% 95%;
 
-    --primary: 45 100% 50%;
-    --primary-foreground: 215 50% 15%;
+    --primary: 51 100% 50%;
+    --primary-foreground: 222 47% 15%;
 
-    --secondary: 32 100% 50%;
+    --secondary: 39 100% 50%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 30% 20%;
+    --muted: 222 30% 20%;
     --muted-foreground: 200 30% 60%;
 
-    --accent: 330 100% 70%;
+    --accent: 330 100% 71%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 30% 25%;
-    --input: 220 30% 20%;
-    --ring: 270 60% 65%;
+    --border: 222 30% 25%;
+    --input: 222 30% 20%;
+    --ring: 260 60% 65%;
 
-    --sidebar-background: 270 50% 20%;
+    --sidebar-background: 260 50% 18%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 45 100% 50%;
-    --sidebar-primary-foreground: 215 50% 15%;
-    --sidebar-accent: 270 40% 30%;
+    --sidebar-primary: 51 100% 50%;
+    --sidebar-primary-foreground: 222 47% 15%;
+    --sidebar-accent: 260 40% 28%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 270 30% 25%;
-    --sidebar-ring: 45 100% 50%;
+    --sidebar-border: 260 30% 25%;
+    --sidebar-ring: 51 100% 50%;
   }
 }
 
@@ -134,10 +137,11 @@
   .text-rainbow {
     background: linear-gradient(
       90deg,
-      hsl(var(--rainbow-yellow)) 0%,
-      hsl(var(--rainbow-orange)) 25%,
-      hsl(var(--rainbow-pink)) 50%,
-      hsl(var(--rainbow-purple)) 75%,
+      hsl(var(--rainbow-coral)) 0%,
+      hsl(var(--rainbow-yellow)) 20%,
+      hsl(var(--rainbow-orange)) 40%,
+      hsl(var(--rainbow-pink)) 60%,
+      hsl(var(--rainbow-purple)) 80%,
       hsl(var(--rainbow-blue)) 100%
     );
     -webkit-background-clip: text;
@@ -145,42 +149,62 @@
     background-clip: text;
   }
 
-  /* 3D Button effect */
+  /* 3D Button effect - enhanced sticker style */
   .btn-3d {
     @apply relative transition-all duration-200;
-    box-shadow: 0 4px 0 hsl(var(--primary-foreground) / 0.3), 
-                0 6px 20px hsl(var(--primary) / 0.3);
+    box-shadow: 0 6px 0 hsl(var(--primary-foreground) / 0.25), 
+                0 8px 25px hsl(var(--primary) / 0.35);
   }
 
   .btn-3d:hover {
-    @apply translate-y-0.5;
-    box-shadow: 0 2px 0 hsl(var(--primary-foreground) / 0.3), 
-                0 4px 15px hsl(var(--primary) / 0.4);
+    @apply translate-y-1;
+    box-shadow: 0 4px 0 hsl(var(--primary-foreground) / 0.25), 
+                0 6px 20px hsl(var(--primary) / 0.4);
   }
 
   .btn-3d:active {
-    @apply translate-y-1;
-    box-shadow: 0 0 0 hsl(var(--primary-foreground) / 0.3), 
-                0 2px 10px hsl(var(--primary) / 0.4);
+    @apply translate-y-1.5;
+    box-shadow: 0 2px 0 hsl(var(--primary-foreground) / 0.25), 
+                0 4px 15px hsl(var(--primary) / 0.4);
   }
 
-  /* Card cartoon style */
+  /* Card cartoon sticker style - enhanced */
   .card-cartoon {
-    @apply rounded-3xl border-4 transition-all duration-300;
-    box-shadow: 0 8px 0 hsl(var(--border)), 
-                0 12px 30px hsl(var(--foreground) / 0.1);
+    @apply rounded-3xl border-[5px] transition-all duration-300;
+    box-shadow: 
+      0 10px 0 -2px hsl(var(--border)),
+      0 15px 35px -5px hsl(var(--foreground) / 0.12);
   }
 
   .card-cartoon:hover {
-    @apply -translate-y-1;
-    box-shadow: 0 12px 0 hsl(var(--border)), 
-                0 16px 40px hsl(var(--foreground) / 0.15);
+    @apply -translate-y-2;
+    box-shadow: 
+      0 16px 0 -2px hsl(var(--border)),
+      0 22px 50px -5px hsl(var(--foreground) / 0.18);
+  }
+
+  /* Super sticker card - more pronounced 3D effect */
+  .card-sticker {
+    @apply rounded-[2rem] border-[6px] transition-all duration-300;
+    box-shadow: 
+      0 12px 0 -3px rgba(0,0,0,0.1),
+      0 20px 40px -10px rgba(0,0,0,0.15),
+      inset 0 -4px 0 0 rgba(0,0,0,0.05);
+  }
+
+  .card-sticker:hover {
+    @apply -translate-y-3 scale-[1.02];
+    box-shadow: 
+      0 20px 0 -3px rgba(0,0,0,0.1),
+      0 30px 60px -15px rgba(0,0,0,0.2),
+      inset 0 -4px 0 0 rgba(0,0,0,0.05);
   }
 
   /* Cloud shapes */
   .cloud {
     @apply absolute rounded-full bg-sky-cloud;
-    filter: blur(1px);
+    filter: blur(2px);
+    box-shadow: 0 8px 32px rgba(255,255,255,0.5);
   }
 
   /* Floating animation */
@@ -192,41 +216,70 @@
     animation: float 6s ease-in-out infinite 2s;
   }
 
+  .float-slow {
+    animation: float 8s ease-in-out infinite;
+  }
+
   /* Star twinkle */
   .twinkle {
     animation: twinkle 2s ease-in-out infinite;
   }
+
+  /* Icon float animation */
+  .icon-float {
+    animation: icon-float 4s ease-in-out infinite;
+  }
+
+  /* Sticker wiggle on hover */
+  .sticker-wiggle:hover {
+    animation: sticker-wiggle 0.5s ease-in-out;
+  }
 }
 
 @layer utilities {
-  /* Sky gradient background */
+  /* Sky gradient background - enhanced with more depth */
   .bg-sky-gradient {
     background: linear-gradient(
       180deg,
-      hsl(200 85% 92%) 0%,
-      hsl(200 80% 88%) 50%,
-      hsl(260 50% 90%) 100%
+      hsl(200 85% 94%) 0%,
+      hsl(200 80% 90%) 40%,
+      hsl(220 70% 92%) 70%,
+      hsl(260 50% 92%) 100%
     );
+  }
+
+  /* Hero gradient - more vibrant */
+  .bg-hero-gradient {
+    background: 
+      radial-gradient(ellipse 80% 50% at 50% 0%, hsl(51 100% 90% / 0.3) 0%, transparent 50%),
+      linear-gradient(
+        180deg,
+        hsl(200 85% 94%) 0%,
+        hsl(200 80% 90%) 50%,
+        hsl(220 60% 92%) 100%
+      );
   }
 
   /* Rainbow gradient */
   .bg-rainbow {
     background: linear-gradient(
       135deg,
-      hsl(var(--rainbow-yellow)) 0%,
-      hsl(var(--rainbow-orange)) 25%,
-      hsl(var(--rainbow-pink)) 50%,
-      hsl(var(--rainbow-purple)) 75%,
+      hsl(var(--rainbow-coral)) 0%,
+      hsl(var(--rainbow-yellow)) 20%,
+      hsl(var(--rainbow-orange)) 40%,
+      hsl(var(--rainbow-pink)) 60%,
+      hsl(var(--rainbow-purple)) 80%,
       hsl(var(--rainbow-blue)) 100%
     );
   }
 
-  /* Footer gradient */
+  /* Footer gradient - enhanced */
   .bg-footer-gradient {
     background: linear-gradient(
       135deg,
-      hsl(270 60% 55%) 0%,
-      hsl(300 60% 60%) 50%,
+      hsl(260 60% 50%) 0%,
+      hsl(280 60% 55%) 40%,
+      hsl(310 65% 60%) 80%,
       hsl(330 70% 65%) 100%
     );
   }
@@ -236,9 +289,14 @@
     background: 
       repeating-conic-gradient(
         from 0deg,
-        hsl(45 100% 70% / 0.1) 0deg 10deg,
+        hsl(51 100% 75% / 0.15) 0deg 10deg,
         transparent 10deg 20deg
       );
+  }
+
+  /* Decorative math symbols background */
+  .math-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239370DB' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   }
 }
 
@@ -252,14 +310,29 @@
   }
 }
 
+@keyframes icon-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(-5deg);
+  }
+  25% {
+    transform: translateY(-10px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(0px) rotate(5deg);
+  }
+  75% {
+    transform: translateY(-5px) rotate(0deg);
+  }
+}
+
 @keyframes twinkle {
   0%, 100% {
     opacity: 1;
     transform: scale(1);
   }
   50% {
-    opacity: 0.5;
-    transform: scale(0.8);
+    opacity: 0.4;
+    transform: scale(0.7);
   }
 }
 
@@ -269,10 +342,10 @@
     transform: scale(0.3);
   }
   50% {
-    transform: scale(1.05);
+    transform: scale(1.08);
   }
   70% {
-    transform: scale(0.9);
+    transform: scale(0.95);
   }
   100% {
     opacity: 1;
@@ -283,7 +356,7 @@
 @keyframes slide-up {
   0% {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(40px);
   }
   100% {
     opacity: 1;
@@ -293,9 +366,31 @@
 
 @keyframes wiggle {
   0%, 100% {
-    transform: rotate(-3deg);
+    transform: rotate(-5deg);
   }
   50% {
-    transform: rotate(3deg);
+    transform: rotate(5deg);
   }
+}
+
+@keyframes sticker-wiggle {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-3deg) scale(1.02); }
+  50% { transform: rotate(3deg) scale(1.02); }
+  75% { transform: rotate(-2deg) scale(1.01); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px hsl(51 100% 50% / 0.4), 0 6px 0 hsl(35 100% 35%);
+  }
+  50% { 
+    box-shadow: 0 0 40px hsl(51 100% 50% / 0.6), 0 6px 0 hsl(35 100% 35%);
+  }
+}
+
+@keyframes rainbow-shift {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
 }
