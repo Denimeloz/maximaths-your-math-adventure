@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import { AdminSidebar } from '@/components/AdminSidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,7 +13,6 @@ import {
   Users, 
   BookOpen, 
   GraduationCap,
-  LogOut,
   Plus,
   Trash2,
   Eye,
@@ -22,7 +23,8 @@ import {
   Shield,
   LayoutDashboard,
   FileText,
-  Settings
+  TrendingUp,
+  Award
 } from 'lucide-react';
 
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
@@ -141,11 +143,6 @@ const Admin = () => {
       }));
       setUsers(usersWithRoles);
     }
-  };
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
   };
 
   const handleSaveCourse = async () => {
@@ -323,215 +320,112 @@ const Admin = () => {
   if (!isAdmin) return null;
 
   const stats = [
-    { icon: Users, label: 'Utilisateurs', value: users.length, color: 'text-rainbow-blue' },
-    { icon: BookOpen, label: 'Cours', value: courses.length, color: 'text-rainbow-green' },
-    { icon: GraduationCap, label: 'Publiés', value: courses.filter(c => c.is_published).length, color: 'text-rainbow-purple' },
+    { icon: Users, label: 'Utilisateurs', value: users.length, color: 'text-rainbow-blue', bg: 'bg-rainbow-blue/10' },
+    { icon: BookOpen, label: 'Cours', value: courses.length, color: 'text-rainbow-green', bg: 'bg-rainbow-green/10' },
+    { icon: GraduationCap, label: 'Publiés', value: courses.filter(c => c.is_published).length, color: 'text-rainbow-purple', bg: 'bg-rainbow-purple/10' },
+    { icon: Award, label: 'Admins', value: users.filter(u => u.role === 'admin').length, color: 'text-rainbow-orange', bg: 'bg-rainbow-orange/10' },
   ];
 
   return (
-    <div className="min-h-screen bg-hero-gradient">
-      {/* Header */}
-      <header className="bg-card/80 backdrop-blur-sm border-b border-border sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <button 
-            onClick={() => navigate('/')}
-            className="text-2xl font-display text-rainbow"
-          >
-            MAXIMATHS
-          </button>
-          
-          <div className="flex items-center gap-4">
-            <span className="px-3 py-1 bg-rainbow-purple/20 text-rainbow-purple rounded-full text-sm font-body font-semibold flex items-center gap-2">
-              <Shield className="w-4 h-4" />
-              Admin
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSignOut}
-              className="rounded-full"
-            >
-              <LogOut className="w-5 h-5" />
-            </Button>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-hero-gradient">
+        <AdminSidebar />
+        
+        <main className="flex-1 p-6 lg:p-8 overflow-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-display text-foreground flex items-center gap-3">
+              <Shield className="w-8 h-8 text-rainbow-purple" />
+              Panel Administrateur
+            </h1>
+            <p className="text-muted-foreground font-body mt-1">
+              Gérez votre plateforme MAXIMATHS
+            </p>
           </div>
-        </div>
-      </header>
 
-      <div className="container mx-auto px-4 py-8">
-        {/* Tabs */}
-        <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
-          {[
-            { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-            { id: 'courses', label: 'Cours', icon: BookOpen },
-            { id: 'users', label: 'Utilisateurs', icon: Users },
-          ].map((tab) => (
-            <Button
-              key={tab.id}
-              variant={activeTab === tab.id ? 'default' : 'outline'}
-              onClick={() => setActiveTab(tab.id as typeof activeTab)}
-              className="rounded-xl flex items-center gap-2"
-            >
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
-            </Button>
-          ))}
-        </div>
-
-        {/* Dashboard Tab */}
-        {activeTab === 'dashboard' && (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {stats.map((stat, index) => (
-                <div 
-                  key={index}
-                  className="card-cartoon bg-card border-border p-6 text-center"
-                >
-                  <stat.icon className={`w-12 h-12 mx-auto mb-3 ${stat.color}`} />
-                  <p className="text-4xl font-display text-foreground mb-1">{stat.value}</p>
-                  <p className="text-muted-foreground font-body">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="card-sticker bg-card border-rainbow-blue/30 p-8">
-              <h2 className="text-2xl font-display text-foreground mb-4">Bienvenue dans l'espace Admin</h2>
-              <p className="text-muted-foreground font-body mb-6">
-                Gérez les cours, les chapitres et les utilisateurs depuis cette interface.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Button onClick={() => setActiveTab('courses')} className="btn-3d bg-primary rounded-xl">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Créer un cours
-                </Button>
-                <Button onClick={() => setActiveTab('users')} variant="outline" className="rounded-xl">
-                  <Users className="w-4 h-4 mr-2" />
-                  Gérer les utilisateurs
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Courses Tab */}
-        {activeTab === 'courses' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-display text-foreground">Gestion des Cours</h2>
-              <Button 
-                onClick={() => setShowCourseForm(true)} 
-                className="btn-3d bg-primary rounded-xl"
+          {/* Tabs */}
+          <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
+            {[
+              { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+              { id: 'courses', label: 'Cours', icon: BookOpen },
+              { id: 'users', label: 'Utilisateurs', icon: Users },
+            ].map((tab) => (
+              <Button
+                key={tab.id}
+                variant={activeTab === tab.id ? 'default' : 'outline'}
+                onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                className="rounded-xl flex items-center gap-2"
               >
-                <Plus className="w-4 h-4 mr-2" />
-                Nouveau cours
+                <tab.icon className="w-4 h-4" />
+                {tab.label}
               </Button>
-            </div>
+            ))}
+          </div>
 
-            {/* Course Form Modal */}
-            {showCourseForm && (
-              <div className="card-sticker bg-card border-rainbow-purple/30 p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-display text-foreground">
-                    {editingCourse ? 'Modifier le cours' : 'Nouveau cours'}
-                  </h3>
-                  <Button variant="ghost" size="icon" onClick={resetCourseForm}>
-                    <X className="w-5 h-5" />
+          {/* Dashboard Tab */}
+          {activeTab === 'dashboard' && (
+            <div className="space-y-8">
+              {/* Stats Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {stats.map((stat, index) => (
+                  <div 
+                    key={index}
+                    className="card-cartoon bg-card border-border p-6"
+                  >
+                    <div className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center mb-4`}>
+                      <stat.icon className={`w-6 h-6 ${stat.color}`} />
+                    </div>
+                    <p className="text-3xl font-display text-foreground">{stat.value}</p>
+                    <p className="text-muted-foreground font-body text-sm">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Quick Actions */}
+              <div className="card-sticker bg-card border-rainbow-purple/30 p-8">
+                <h2 className="text-2xl font-display text-foreground mb-4 flex items-center gap-2">
+                  <TrendingUp className="w-6 h-6 text-rainbow-purple" />
+                  Actions rapides
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button 
+                    onClick={() => setActiveTab('courses')} 
+                    className="h-auto py-6 flex flex-col items-center gap-2 rounded-xl btn-3d bg-primary"
+                  >
+                    <Plus className="w-8 h-8" />
+                    <span className="font-display">Créer un cours</span>
+                  </Button>
+                  <Button 
+                    onClick={() => setActiveTab('users')} 
+                    variant="outline"
+                    className="h-auto py-6 flex flex-col items-center gap-2 rounded-xl"
+                  >
+                    <Users className="w-8 h-8" />
+                    <span className="font-display">Gérer les utilisateurs</span>
+                  </Button>
+                  <Button 
+                    onClick={() => navigate('/profile')} 
+                    variant="outline"
+                    className="h-auto py-6 flex flex-col items-center gap-2 rounded-xl"
+                  >
+                    <Shield className="w-8 h-8" />
+                    <span className="font-display">Mon profil</span>
                   </Button>
                 </div>
-                
-                <div className="grid gap-4">
-                  <div>
-                    <label className="text-sm font-body text-muted-foreground mb-1 block">Titre *</label>
-                    <Input
-                      value={courseForm.title}
-                      onChange={(e) => setCourseForm(prev => ({ ...prev, title: e.target.value }))}
-                      placeholder="Titre du cours"
-                      className="rounded-xl"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="text-sm font-body text-muted-foreground mb-1 block">Description</label>
-                    <Textarea
-                      value={courseForm.description}
-                      onChange={(e) => setCourseForm(prev => ({ ...prev, description: e.target.value }))}
-                      placeholder="Description du cours"
-                      className="rounded-xl"
-                      rows={3}
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-body text-muted-foreground mb-1 block">Niveau</label>
-                      <Select 
-                        value={courseForm.level} 
-                        onValueChange={(v) => setCourseForm(prev => ({ ...prev, level: v as CourseLevel }))}
-                      >
-                        <SelectTrigger className="rounded-xl">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="6eme">6ème</SelectItem>
-                          <SelectItem value="5eme">5ème</SelectItem>
-                          <SelectItem value="4eme">4ème</SelectItem>
-                          <SelectItem value="3eme">3ème</SelectItem>
-                          <SelectItem value="seconde">Seconde</SelectItem>
-                          <SelectItem value="premiere">Première</SelectItem>
-                          <SelectItem value="terminale">Terminale</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm font-body text-muted-foreground mb-1 block">Catégorie</label>
-                      <Select 
-                        value={courseForm.category} 
-                        onValueChange={(v) => setCourseForm(prev => ({ ...prev, category: v }))}
-                      >
-                        <SelectTrigger className="rounded-xl">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="algebre">Algèbre</SelectItem>
-                          <SelectItem value="geometrie">Géométrie</SelectItem>
-                          <SelectItem value="analyse">Analyse</SelectItem>
-                          <SelectItem value="probabilites">Probabilités</SelectItem>
-                          <SelectItem value="statistiques">Statistiques</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-3 pt-4">
-                    <Button onClick={handleSaveCourse} className="btn-3d bg-primary rounded-xl">
-                      <Save className="w-4 h-4 mr-2" />
-                      {editingCourse ? 'Enregistrer' : 'Créer'}
-                    </Button>
-                    <Button variant="outline" onClick={resetCourseForm} className="rounded-xl">
-                      Annuler
-                    </Button>
-                  </div>
-                </div>
               </div>
-            )}
 
-            {/* Courses List */}
-            <div className="space-y-4">
-              {courses.length === 0 ? (
-                <div className="card-cartoon bg-card border-border p-12 text-center">
-                  <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                  <p className="text-muted-foreground font-body">Aucun cours créé</p>
-                </div>
-              ) : (
-                courses.map((course) => (
-                  <div 
-                    key={course.id}
-                    className="card-cartoon bg-card border-border p-6 flex items-center justify-between"
-                  >
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-display text-foreground">{course.title}</h3>
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-body ${
+              {/* Recent Activity */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="card-cartoon bg-card border-border p-6">
+                  <h3 className="font-display text-lg text-foreground mb-4">Derniers cours</h3>
+                  <div className="space-y-3">
+                    {courses.slice(0, 5).map((course) => (
+                      <div key={course.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
+                        <div>
+                          <p className="font-body text-foreground font-medium">{course.title}</p>
+                          <p className="text-xs text-muted-foreground">{getLevelLabel(course.level)}</p>
+                        </div>
+                        <span className={`px-2 py-1 rounded-full text-xs font-body ${
                           course.is_published 
                             ? 'bg-rainbow-green/20 text-rainbow-green' 
                             : 'bg-muted text-muted-foreground'
@@ -539,99 +433,268 @@ const Admin = () => {
                           {course.is_published ? 'Publié' : 'Brouillon'}
                         </span>
                       </div>
-                      <p className="text-sm text-muted-foreground font-body">
-                        {getLevelLabel(course.level)} • {course.category}
-                      </p>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleTogglePublish(course)}
-                        className="rounded-full"
-                      >
-                        {course.is_published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEditCourse(course)}
-                        className="rounded-full"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteCourse(course.id)}
-                        className="rounded-full text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
+                    ))}
+                    {courses.length === 0 && (
+                      <p className="text-muted-foreground text-center py-4">Aucun cours créé</p>
+                    )}
                   </div>
-                ))
-              )}
-            </div>
-          </div>
-        )}
+                </div>
 
-        {/* Users Tab */}
-        {activeTab === 'users' && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-display text-foreground">Gestion des Utilisateurs</h2>
-            
-            <div className="space-y-4">
-              {users.map((userItem) => (
-                <div 
-                  key={userItem.id}
-                  className="card-cartoon bg-card border-border p-6 flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-rainbow-purple to-rainbow-pink flex items-center justify-center">
-                      <span className="text-lg font-display text-secondary-foreground">
-                        {userItem.first_name?.[0]?.toUpperCase() || '?'}
-                      </span>
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-display text-foreground">
-                          {userItem.first_name} {userItem.last_name}
-                        </h3>
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-body ${
+                <div className="card-cartoon bg-card border-border p-6">
+                  <h3 className="font-display text-lg text-foreground mb-4">Derniers utilisateurs</h3>
+                  <div className="space-y-3">
+                    {users.slice(0, 5).map((userItem) => (
+                      <div key={userItem.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rainbow-purple to-rainbow-pink flex items-center justify-center">
+                          <span className="text-sm font-display text-secondary-foreground">
+                            {userItem.first_name?.[0]?.toUpperCase() || '?'}
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-body text-foreground font-medium truncate">
+                            {userItem.first_name} {userItem.last_name}
+                          </p>
+                          <p className="text-xs text-muted-foreground truncate">{userItem.email}</p>
+                        </div>
+                        <span className={`px-2 py-1 rounded-full text-xs font-body ${
                           userItem.role === 'admin'
                             ? 'bg-rainbow-purple/20 text-rainbow-purple'
                             : 'bg-muted text-muted-foreground'
                         }`}>
-                          {userItem.role === 'admin' ? 'Admin' : 'Utilisateur'}
+                          {userItem.role === 'admin' ? 'Admin' : 'User'}
                         </span>
                       </div>
-                      <p className="text-sm text-muted-foreground font-body">{userItem.email}</p>
-                      {userItem.level && (
-                        <p className="text-xs text-muted-foreground font-body mt-1">
-                          {userItem.profession} • {userItem.level}
-                        </p>
-                      )}
-                    </div>
+                    ))}
+                    {users.length === 0 && (
+                      <p className="text-muted-foreground text-center py-4">Aucun utilisateur</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Courses Tab */}
+          {activeTab === 'courses' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-display text-foreground">Gestion des Cours</h2>
+                <Button 
+                  onClick={() => setShowCourseForm(true)} 
+                  className="btn-3d bg-primary rounded-xl"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau cours
+                </Button>
+              </div>
+
+              {/* Course Form Modal */}
+              {showCourseForm && (
+                <div className="card-sticker bg-card border-rainbow-purple/30 p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-display text-foreground">
+                      {editingCourse ? 'Modifier le cours' : 'Nouveau cours'}
+                    </h3>
+                    <Button variant="ghost" size="icon" onClick={resetCourseForm}>
+                      <X className="w-5 h-5" />
+                    </Button>
                   </div>
                   
-                  <Button
-                    variant={userItem.role === 'admin' ? 'outline' : 'default'}
-                    onClick={() => handleToggleUserRole(userItem.user_id, userItem.role || 'user')}
-                    className="rounded-xl"
-                    disabled={userItem.user_id === user?.id}
-                  >
-                    <Shield className="w-4 h-4 mr-2" />
-                    {userItem.role === 'admin' ? 'Retirer Admin' : 'Promouvoir Admin'}
-                  </Button>
+                  <div className="grid gap-4">
+                    <div>
+                      <label className="text-sm font-body text-muted-foreground mb-1 block">Titre *</label>
+                      <Input
+                        value={courseForm.title}
+                        onChange={(e) => setCourseForm(prev => ({ ...prev, title: e.target.value }))}
+                        placeholder="Titre du cours"
+                        className="rounded-xl"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-body text-muted-foreground mb-1 block">Description</label>
+                      <Textarea
+                        value={courseForm.description}
+                        onChange={(e) => setCourseForm(prev => ({ ...prev, description: e.target.value }))}
+                        placeholder="Description du cours"
+                        className="rounded-xl"
+                        rows={3}
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-body text-muted-foreground mb-1 block">Niveau</label>
+                        <Select 
+                          value={courseForm.level} 
+                          onValueChange={(v) => setCourseForm(prev => ({ ...prev, level: v as CourseLevel }))}
+                        >
+                          <SelectTrigger className="rounded-xl">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="6eme">6ème</SelectItem>
+                            <SelectItem value="5eme">5ème</SelectItem>
+                            <SelectItem value="4eme">4ème</SelectItem>
+                            <SelectItem value="3eme">3ème</SelectItem>
+                            <SelectItem value="seconde">Seconde</SelectItem>
+                            <SelectItem value="premiere">Première</SelectItem>
+                            <SelectItem value="terminale">Terminale</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div>
+                        <label className="text-sm font-body text-muted-foreground mb-1 block">Catégorie</label>
+                        <Select 
+                          value={courseForm.category} 
+                          onValueChange={(v) => setCourseForm(prev => ({ ...prev, category: v }))}
+                        >
+                          <SelectTrigger className="rounded-xl">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="algebre">Algèbre</SelectItem>
+                            <SelectItem value="geometrie">Géométrie</SelectItem>
+                            <SelectItem value="analyse">Analyse</SelectItem>
+                            <SelectItem value="probabilites">Probabilités</SelectItem>
+                            <SelectItem value="statistiques">Statistiques</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-3 pt-4">
+                      <Button onClick={handleSaveCourse} className="btn-3d bg-primary rounded-xl">
+                        <Save className="w-4 h-4 mr-2" />
+                        {editingCourse ? 'Enregistrer' : 'Créer'}
+                      </Button>
+                      <Button variant="outline" onClick={resetCourseForm} className="rounded-xl">
+                        Annuler
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              ))}
+              )}
+
+              {/* Courses List */}
+              <div className="space-y-4">
+                {courses.length === 0 ? (
+                  <div className="card-cartoon bg-card border-border p-12 text-center">
+                    <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                    <p className="text-muted-foreground font-body">Aucun cours créé</p>
+                  </div>
+                ) : (
+                  courses.map((course) => (
+                    <div 
+                      key={course.id}
+                      className="card-cartoon bg-card border-border p-6 flex items-center justify-between"
+                    >
+                      <div>
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-lg font-display text-foreground">{course.title}</h3>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-body ${
+                            course.is_published 
+                              ? 'bg-rainbow-green/20 text-rainbow-green' 
+                              : 'bg-muted text-muted-foreground'
+                          }`}>
+                            {course.is_published ? 'Publié' : 'Brouillon'}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground font-body">
+                          {getLevelLabel(course.level)} • {course.category}
+                        </p>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleTogglePublish(course)}
+                          className="rounded-full"
+                        >
+                          {course.is_published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditCourse(course)}
+                          className="rounded-full"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteCourse(course.id)}
+                          className="rounded-full text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {/* Users Tab */}
+          {activeTab === 'users' && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-display text-foreground">Gestion des Utilisateurs</h2>
+              
+              <div className="space-y-4">
+                {users.map((userItem) => (
+                  <div 
+                    key={userItem.id}
+                    className="card-cartoon bg-card border-border p-6 flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-rainbow-purple to-rainbow-pink flex items-center justify-center">
+                        <span className="text-lg font-display text-secondary-foreground">
+                          {userItem.first_name?.[0]?.toUpperCase() || '?'}
+                        </span>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-display text-foreground">
+                            {userItem.first_name} {userItem.last_name}
+                          </h3>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-body ${
+                            userItem.role === 'admin'
+                              ? 'bg-rainbow-purple/20 text-rainbow-purple'
+                              : 'bg-muted text-muted-foreground'
+                          }`}>
+                            {userItem.role === 'admin' ? 'Admin' : 'Utilisateur'}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground font-body">{userItem.email}</p>
+                        {userItem.level && (
+                          <p className="text-xs text-muted-foreground font-body mt-1">
+                            {userItem.profession} • {userItem.level}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <Button
+                      variant={userItem.role === 'admin' ? 'outline' : 'default'}
+                      onClick={() => handleToggleUserRole(userItem.user_id, userItem.role || 'user')}
+                      className="rounded-xl"
+                      disabled={userItem.user_id === user?.id}
+                    >
+                      <Shield className="w-4 h-4 mr-2" />
+                      {userItem.role === 'admin' ? 'Retirer Admin' : 'Promouvoir Admin'}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </main>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 
