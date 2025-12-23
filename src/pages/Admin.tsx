@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,7 +24,10 @@ import {
   LayoutDashboard,
   FileText,
   TrendingUp,
-  Award
+  Award,
+  Upload,
+  Image,
+  Loader2
 } from 'lucide-react';
 
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
@@ -37,6 +40,7 @@ interface Course {
   category: string;
   is_published: boolean;
   order_index: number;
+  image_url: string | null;
 }
 
 interface Profile {
@@ -59,12 +63,14 @@ const Admin = () => {
   const { user, isAdmin, signOut, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [activeTab, setActiveTab] = useState<'dashboard' | 'courses' | 'users'>('dashboard');
   const [courses, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<(Profile & { role?: string })[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   
   // Course form state
   const [showCourseForm, setShowCourseForm] = useState(false);
@@ -74,6 +80,7 @@ const Admin = () => {
     description: '',
     level: '6eme' as CourseLevel,
     category: 'algebre',
+    image_url: '',
   });
 
   useEffect(() => {
@@ -145,6 +152,67 @@ const Admin = () => {
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez sélectionner une image",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Erreur",
+        description: "L'image ne doit pas dépasser 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploadingImage(true);
+
+    try {
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `courses/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('course-files')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('course-files')
+        .getPublicUrl(fileName);
+
+      setCourseForm(prev => ({ ...prev, image_url: publicUrl }));
+
+      toast({
+        title: "Succès ✨",
+        description: "Image téléchargée avec succès",
+      });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de télécharger l'image",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
   const handleSaveCourse = async () => {
     if (!courseForm.title.trim()) {
       toast({
@@ -163,6 +231,7 @@ const Admin = () => {
           description: courseForm.description || null,
           level: courseForm.level,
           category: courseForm.category,
+          image_url: courseForm.image_url || null,
         })
         .eq('id', editingCourse.id);
 
@@ -188,6 +257,7 @@ const Admin = () => {
           description: courseForm.description || null,
           level: courseForm.level,
           category: courseForm.category,
+          image_url: courseForm.image_url || null,
           order_index: courses.length,
         });
 
@@ -215,6 +285,7 @@ const Admin = () => {
       description: course.description || '',
       level: course.level,
       category: course.category,
+      image_url: course.image_url || '',
     });
     setShowCourseForm(true);
   };
@@ -290,6 +361,7 @@ const Admin = () => {
       description: '',
       level: '6eme',
       category: 'algebre',
+      image_url: '',
     });
   };
 
@@ -421,9 +493,18 @@ const Admin = () => {
                   <div className="space-y-3">
                     {courses.slice(0, 5).map((course) => (
                       <div key={course.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
-                        <div>
-                          <p className="font-body text-foreground font-medium">{course.title}</p>
-                          <p className="text-xs text-muted-foreground">{getLevelLabel(course.level)}</p>
+                        <div className="flex items-center gap-3">
+                          {course.image_url ? (
+                            <img src={course.image_url} alt={course.title} className="w-10 h-10 rounded-lg object-cover" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg bg-rainbow-purple/20 flex items-center justify-center">
+                              <BookOpen className="w-5 h-5 text-rainbow-purple" />
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-body text-foreground font-medium">{course.title}</p>
+                            <p className="text-xs text-muted-foreground">{getLevelLabel(course.level)}</p>
+                          </div>
                         </div>
                         <span className={`px-2 py-1 rounded-full text-xs font-body ${
                           course.is_published 
@@ -521,6 +602,61 @@ const Admin = () => {
                         rows={3}
                       />
                     </div>
+
+                    {/* Image Upload */}
+                    <div>
+                      <label className="text-sm font-body text-muted-foreground mb-1 block">Image du cours</label>
+                      <div className="flex items-center gap-4">
+                        {courseForm.image_url ? (
+                          <div className="relative">
+                            <img 
+                              src={courseForm.image_url} 
+                              alt="Preview" 
+                              className="w-24 h-24 rounded-xl object-cover"
+                            />
+                            <button
+                              onClick={() => setCourseForm(prev => ({ ...prev, image_url: '' }))}
+                              className="absolute -top-2 -right-2 w-6 h-6 bg-destructive rounded-full flex items-center justify-center"
+                            >
+                              <X className="w-3 h-3 text-destructive-foreground" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="w-24 h-24 rounded-xl border-2 border-dashed border-muted-foreground/30 flex items-center justify-center">
+                            <Image className="w-8 h-8 text-muted-foreground/50" />
+                          </div>
+                        )}
+                        <div>
+                          <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleImageUpload}
+                            accept="image/*"
+                            className="hidden"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isUploadingImage}
+                            className="rounded-xl"
+                          >
+                            {isUploadingImage ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Upload...
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="w-4 h-4 mr-2" />
+                                {courseForm.image_url ? 'Changer' : 'Télécharger'}
+                              </>
+                            )}
+                          </Button>
+                          <p className="text-xs text-muted-foreground mt-1">Max 5MB, JPG/PNG</p>
+                        </div>
+                      </div>
+                    </div>
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -590,20 +726,29 @@ const Admin = () => {
                       key={course.id}
                       className="card-cartoon bg-card border-border p-6 flex items-center justify-between"
                     >
-                      <div>
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-display text-foreground">{course.title}</h3>
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-body ${
-                            course.is_published 
-                              ? 'bg-rainbow-green/20 text-rainbow-green' 
-                              : 'bg-muted text-muted-foreground'
-                          }`}>
-                            {course.is_published ? 'Publié' : 'Brouillon'}
-                          </span>
+                      <div className="flex items-center gap-4">
+                        {course.image_url ? (
+                          <img src={course.image_url} alt={course.title} className="w-16 h-16 rounded-xl object-cover" />
+                        ) : (
+                          <div className="w-16 h-16 rounded-xl bg-rainbow-purple/20 flex items-center justify-center">
+                            <BookOpen className="w-8 h-8 text-rainbow-purple" />
+                          </div>
+                        )}
+                        <div>
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-lg font-display text-foreground">{course.title}</h3>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-body ${
+                              course.is_published 
+                                ? 'bg-rainbow-green/20 text-rainbow-green' 
+                                : 'bg-muted text-muted-foreground'
+                            }`}>
+                              {course.is_published ? 'Publié' : 'Brouillon'}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground font-body">
+                            {getLevelLabel(course.level)} • {course.category}
+                          </p>
                         </div>
-                        <p className="text-sm text-muted-foreground font-body">
-                          {getLevelLabel(course.level)} • {course.category}
-                        </p>
                       </div>
                       
                       <div className="flex items-center gap-2">
