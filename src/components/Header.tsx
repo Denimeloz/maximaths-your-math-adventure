@@ -1,10 +1,19 @@
-import { Book, GraduationCap, Info, Menu, X } from "lucide-react";
+import { Book, GraduationCap, Info, Menu, X, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import brainIcon from "@/assets/brain-icon.png";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-sky-cloud/95 backdrop-blur-md border-b-4 border-rainbow-blue/30">
@@ -47,13 +56,36 @@ const Header = () => {
 
         {/* CTA Button & Mobile Menu */}
         <div className="flex items-center gap-3">
-          <Button 
-            variant="orange" 
-            size="sm" 
-            className="hidden sm:flex shadow-[0_5px_0_hsl(25_100%_35%)] text-sm font-bold"
-          >
-            🎓 Espace Élève
-          </Button>
+          {user ? (
+            <div className="hidden sm:flex items-center gap-2">
+              <Button 
+                variant="orange" 
+                size="sm" 
+                className="shadow-[0_5px_0_hsl(25_100%_35%)] text-sm font-bold"
+                onClick={() => navigate('/dashboard')}
+              >
+                <User className="w-4 h-4 mr-1" />
+                {profile?.first_name || 'Mon espace'}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleSignOut}
+                className="rounded-full hover:bg-destructive/20"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </div>
+          ) : (
+            <Button 
+              variant="orange" 
+              size="sm" 
+              className="hidden sm:flex shadow-[0_5px_0_hsl(25_100%_35%)] text-sm font-bold"
+              onClick={() => navigate('/auth')}
+            >
+              🎓 Espace Élève
+            </Button>
+          )}
           
           {/* Mobile menu button */}
           <button 
@@ -81,9 +113,34 @@ const Header = () => {
               <Info className="w-5 h-5 text-rainbow-pink" />
               À propos
             </Button>
-            <Button variant="orange" className="mt-2 h-12 shadow-[0_5px_0_hsl(25_100%_35%)]">
-              🎓 Espace Élève
-            </Button>
+            {user ? (
+              <>
+                <Button 
+                  variant="orange" 
+                  className="mt-2 h-12 shadow-[0_5px_0_hsl(25_100%_35%)]"
+                  onClick={() => { navigate('/dashboard'); setMobileMenuOpen(false); }}
+                >
+                  <User className="w-5 h-5 mr-2" />
+                  Mon espace
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  className="h-12 rounded-xl hover:bg-destructive/20 text-destructive"
+                  onClick={handleSignOut}
+                >
+                  <LogOut className="w-5 h-5 mr-2" />
+                  Déconnexion
+                </Button>
+              </>
+            ) : (
+              <Button 
+                variant="orange" 
+                className="mt-2 h-12 shadow-[0_5px_0_hsl(25_100%_35%)]"
+                onClick={() => { navigate('/auth'); setMobileMenuOpen(false); }}
+              >
+                🎓 Espace Élève
+              </Button>
+            )}
           </nav>
         </div>
       )}
