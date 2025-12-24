@@ -947,10 +947,6 @@ const Admin = () => {
             </div>
           )}
 
-          {/* Chapters Tab */}
-          {activeTab === 'chapters' && (
-            <ChapterManager courses={courses.map(c => ({ id: c.id, title: c.title, level: c.level }))} onRefresh={fetchCourses} />
-          )}
 
           {/* Exercises Tab */}
           {activeTab === 'exercises' && (
