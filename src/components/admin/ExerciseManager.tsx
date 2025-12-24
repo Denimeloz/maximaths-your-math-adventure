@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, Upload, FileText, Loader2 } from 'lucide-react';
 
 interface Exercise {
   id: string;
-  chapter_id: string;
+  course_id: string | null;
   title: string;
   question: string;
   answer: string;
@@ -17,12 +17,6 @@ interface Exercise {
   points: number;
   is_published: boolean;
   order_index: number;
-}
-
-interface Chapter {
-  id: string;
-  title: string;
-  course_id: string;
 }
 
 interface Course {
@@ -37,37 +31,58 @@ interface ExerciseManagerProps {
 export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => {
   const { toast } = useToast();
   const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [chapters, setChapters] = useState<Chapter[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>('');
   const [showForm, setShowForm] = useState(false);
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
-    chapter_id: '',
+    course_id: '',
     title: '',
     question: '',
     answer: '',
     explanation: '',
     difficulty: 1,
     points: 10,
+    file_url: '',
   });
 
   useEffect(() => {
-    fetchChapters();
     fetchExercises();
   }, []);
-
-  const fetchChapters = async () => {
-    const { data } = await supabase.from('chapters').select('id, title, course_id').order('order_index');
-    if (data) setChapters(data);
-  };
 
   const fetchExercises = async () => {
     const { data } = await supabase.from('exercises').select('*').order('order_index');
     if (data) setExercises(data);
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: "Erreur", description: "Le fichier ne doit pas dépasser 20MB", variant: "destructive" });
+      return;
+    }
+
+    setIsUploadingFile(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `exercises/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('course-files').upload(fileName, file);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from('course-files').getPublicUrl(fileName);
+      setForm(prev => ({ ...prev, file_url: publicUrl }));
+      toast({ title: "Succès", description: "Fichier téléchargé" });
+    } catch (error) {
+      toast({ title: "Erreur", description: "Impossible de télécharger le fichier", variant: "destructive" });
+    } finally {
+      setIsUploadingFile(false);
+    }
+  };
+
   const handleSave = async () => {
-    if (!form.title.trim() || !form.chapter_id || !form.question || !form.answer) {
+    if (!form.title.trim() || !form.course_id || !form.question || !form.answer) {
       toast({ title: "Erreur", description: "Champs requis manquants", variant: "destructive" });
       return;
     }
@@ -91,18 +106,18 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
         resetForm();
       }
     } else {
-      const exercisesForChapter = exercises.filter(e => e.chapter_id === form.chapter_id);
+      const exercisesForCourse = exercises.filter(e => e.course_id === form.course_id);
       const { error } = await supabase
         .from('exercises')
         .insert({
-          chapter_id: form.chapter_id,
+          course_id: form.course_id,
           title: form.title,
           question: form.question,
           answer: form.answer,
           explanation: form.explanation || null,
           difficulty: form.difficulty,
           points: form.points,
-          order_index: exercisesForChapter.length,
+          order_index: exercisesForCourse.length,
         });
 
       if (!error) {
@@ -130,13 +145,14 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
   const handleEdit = (exercise: Exercise) => {
     setEditingExercise(exercise);
     setForm({
-      chapter_id: exercise.chapter_id,
+      course_id: exercise.course_id || '',
       title: exercise.title,
       question: exercise.question,
       answer: exercise.answer,
       explanation: exercise.explanation || '',
       difficulty: exercise.difficulty,
       points: exercise.points,
+      file_url: '',
     });
     setShowForm(true);
   };
@@ -144,14 +160,17 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
   const resetForm = () => {
     setShowForm(false);
     setEditingExercise(null);
-    setForm({ chapter_id: '', title: '', question: '', answer: '', explanation: '', difficulty: 1, points: 10 });
+    setForm({ course_id: '', title: '', question: '', answer: '', explanation: '', difficulty: 1, points: 10, file_url: '' });
   };
 
-  const filteredChapters = selectedCourse
-    ? chapters.filter(c => c.course_id === selectedCourse)
-    : chapters;
+  const filteredExercises = selectedCourse
+    ? exercises.filter(e => e.course_id === selectedCourse)
+    : exercises;
 
-  const getExercisesForChapter = (chapterId: string) => exercises.filter(e => e.chapter_id === chapterId);
+  const getCourseName = (courseId: string | null) => {
+    if (!courseId) return 'Non assigné';
+    return courses.find(c => c.id === courseId)?.title || 'Inconnu';
+  };
 
   return (
     <div className="space-y-6">
@@ -190,16 +209,16 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
 
           <div className="grid gap-4">
             <div>
-              <label className="text-sm font-body text-muted-foreground mb-1 block">Chapitre *</label>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Cours *</label>
               <select
-                value={form.chapter_id}
-                onChange={(e) => setForm(prev => ({ ...prev, chapter_id: e.target.value }))}
+                value={form.course_id}
+                onChange={(e) => setForm(prev => ({ ...prev, course_id: e.target.value }))}
                 className="w-full p-2 rounded-xl border border-input bg-background"
                 disabled={!!editingExercise}
               >
-                <option value="">Sélectionner un chapitre</option>
-                {filteredChapters.map(chapter => (
-                  <option key={chapter.id} value={chapter.id}>{chapter.title}</option>
+                <option value="">Sélectionner un cours</option>
+                {courses.map(course => (
+                  <option key={course.id} value={course.id}>{course.title}</option>
                 ))}
               </select>
             </div>
@@ -247,6 +266,32 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
               />
             </div>
 
+            {/* File Upload */}
+            <div>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Fichier joint (PDF, Word, etc.)</label>
+              <div className="flex items-center gap-4">
+                {form.file_url ? (
+                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl flex-1">
+                    <FileText className="w-6 h-6 text-rainbow-blue" />
+                    <a href={form.file_url} target="_blank" rel="noopener noreferrer" className="text-sm text-rainbow-blue hover:underline truncate">
+                      Voir le fichier
+                    </a>
+                    <button onClick={() => setForm(prev => ({ ...prev, file_url: '' }))} className="ml-auto">
+                      <X className="w-4 h-4 text-destructive" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".pdf,.doc,.docx,.ppt,.pptx" />
+                    <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isUploadingFile} className="rounded-xl">
+                      {isUploadingFile ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                      {isUploadingFile ? 'Upload...' : 'Ajouter un fichier'}
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-body text-muted-foreground mb-1 block">Difficulté (1-5)</label>
@@ -284,46 +329,36 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
         </div>
       )}
 
-      <div className="space-y-4">
-        {filteredChapters.map(chapter => (
-          <div key={chapter.id} className="card-cartoon bg-card border-border p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <span className="font-display text-foreground">{chapter.title}</span>
-              <span className="px-2 py-0.5 rounded-full bg-rainbow-orange/20 text-rainbow-orange text-xs">
-                {getExercisesForChapter(chapter.id).length} exercices
-              </span>
-            </div>
-
-            <div className="space-y-2">
-              {getExercisesForChapter(chapter.id).map(exercise => (
-                <div key={exercise.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-xl">
-                  <div className="flex-1">
-                    <p className="font-body text-foreground font-medium">{exercise.title}</p>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>Difficulté: {exercise.difficulty}/5</span>
-                      <span>•</span>
-                      <span>{exercise.points} pts</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleTogglePublish(exercise)} className="rounded-xl">
-                      {exercise.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(exercise)} className="rounded-xl">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(exercise.id)} className="rounded-xl text-destructive">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
+      <div className="space-y-3">
+        {filteredExercises.map(exercise => (
+          <div key={exercise.id} className="card-cartoon bg-card border-border p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="font-display text-foreground">{exercise.title}</p>
+                <p className="text-sm text-muted-foreground">{getCourseName(exercise.course_id)}</p>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                  <span>Difficulté: {exercise.difficulty}/5</span>
+                  <span>•</span>
+                  <span>{exercise.points} pts</span>
                 </div>
-              ))}
-              {getExercisesForChapter(chapter.id).length === 0 && (
-                <p className="text-muted-foreground text-sm text-center py-2">Aucun exercice</p>
-              )}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" onClick={() => handleTogglePublish(exercise)} className="rounded-xl">
+                  {exercise.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => handleEdit(exercise)} className="rounded-xl">
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => handleDelete(exercise.id)} className="rounded-xl text-destructive">
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </div>
         ))}
+        {filteredExercises.length === 0 && (
+          <p className="text-muted-foreground text-center py-8">Aucun exercice</p>
+        )}
       </div>
     </div>
   );

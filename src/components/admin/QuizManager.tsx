@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, HelpCircle } from 'lucide-react';
+import { Plus, Trash2, Eye, EyeOff, Save, X, HelpCircle, Upload, FileText, Loader2 } from 'lucide-react';
 
 interface Quiz {
   id: string;
-  chapter_id: string;
+  course_id: string | null;
   title: string;
   description: string | null;
   passing_score: number;
@@ -28,12 +28,6 @@ interface QuizQuestion {
   order_index: number;
 }
 
-interface Chapter {
-  id: string;
-  title: string;
-  course_id: string;
-}
-
 interface Course {
   id: string;
   title: string;
@@ -47,7 +41,6 @@ export const QuizManager: React.FC<QuizManagerProps> = ({ courses }) => {
   const { toast } = useToast();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
-  const [chapters, setChapters] = useState<Chapter[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>('');
   const [showQuizForm, setShowQuizForm] = useState(false);
   const [showQuestionForm, setShowQuestionForm] = useState(false);
@@ -55,7 +48,7 @@ export const QuizManager: React.FC<QuizManagerProps> = ({ courses }) => {
   const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
 
   const [quizForm, setQuizForm] = useState({
-    chapter_id: '',
+    course_id: '',
     title: '',
     description: '',
     passing_score: 60,
@@ -75,12 +68,10 @@ export const QuizManager: React.FC<QuizManagerProps> = ({ courses }) => {
   }, []);
 
   const fetchData = async () => {
-    const [chaptersRes, quizzesRes, questionsRes] = await Promise.all([
-      supabase.from('chapters').select('id, title, course_id').order('order_index'),
+    const [quizzesRes, questionsRes] = await Promise.all([
       supabase.from('quizzes').select('*').order('order_index'),
       supabase.from('quiz_questions').select('*').order('order_index'),
     ]);
-    if (chaptersRes.data) setChapters(chaptersRes.data);
     if (quizzesRes.data) setQuizzes(quizzesRes.data);
     if (questionsRes.data) {
       setQuestions(questionsRes.data.map(q => ({
@@ -91,8 +82,8 @@ export const QuizManager: React.FC<QuizManagerProps> = ({ courses }) => {
   };
 
   const handleSaveQuiz = async () => {
-    if (!quizForm.title.trim() || !quizForm.chapter_id) {
-      toast({ title: "Erreur", description: "Titre et chapitre requis", variant: "destructive" });
+    if (!quizForm.title.trim() || !quizForm.course_id) {
+      toast({ title: "Erreur", description: "Titre et cours requis", variant: "destructive" });
       return;
     }
 
@@ -113,16 +104,16 @@ export const QuizManager: React.FC<QuizManagerProps> = ({ courses }) => {
         resetQuizForm();
       }
     } else {
-      const quizzesForChapter = quizzes.filter(q => q.chapter_id === quizForm.chapter_id);
+      const quizzesForCourse = quizzes.filter(q => q.course_id === quizForm.course_id);
       const { error } = await supabase
         .from('quizzes')
         .insert({
-          chapter_id: quizForm.chapter_id,
+          course_id: quizForm.course_id,
           title: quizForm.title,
           description: quizForm.description || null,
           passing_score: quizForm.passing_score,
           time_limit_minutes: quizForm.time_limit_minutes || null,
-          order_index: quizzesForChapter.length,
+          order_index: quizzesForCourse.length,
         });
 
       if (!error) {
@@ -187,7 +178,7 @@ export const QuizManager: React.FC<QuizManagerProps> = ({ courses }) => {
   const resetQuizForm = () => {
     setShowQuizForm(false);
     setEditingQuiz(null);
-    setQuizForm({ chapter_id: '', title: '', description: '', passing_score: 60, time_limit_minutes: 30 });
+    setQuizForm({ course_id: '', title: '', description: '', passing_score: 60, time_limit_minutes: 30 });
   };
 
   const resetQuestionForm = () => {
@@ -195,11 +186,16 @@ export const QuizManager: React.FC<QuizManagerProps> = ({ courses }) => {
     setQuestionForm({ question: '', options: ['', '', '', ''], correct_answer: 0, explanation: '', points: 1 });
   };
 
-  const filteredChapters = selectedCourse
-    ? chapters.filter(c => c.course_id === selectedCourse)
-    : chapters;
+  const filteredQuizzes = selectedCourse
+    ? quizzes.filter(q => q.course_id === selectedCourse)
+    : quizzes;
 
   const getQuestionsForQuiz = (quizId: string) => questions.filter(q => q.quiz_id === quizId);
+
+  const getCourseName = (courseId: string | null) => {
+    if (!courseId) return 'Non assigné';
+    return courses.find(c => c.id === courseId)?.title || 'Inconnu';
+  };
 
   return (
     <div className="space-y-6">
@@ -238,16 +234,16 @@ export const QuizManager: React.FC<QuizManagerProps> = ({ courses }) => {
 
           <div className="grid gap-4">
             <div>
-              <label className="text-sm font-body text-muted-foreground mb-1 block">Chapitre *</label>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Cours *</label>
               <select
-                value={quizForm.chapter_id}
-                onChange={(e) => setQuizForm(prev => ({ ...prev, chapter_id: e.target.value }))}
+                value={quizForm.course_id}
+                onChange={(e) => setQuizForm(prev => ({ ...prev, course_id: e.target.value }))}
                 className="w-full p-2 rounded-xl border border-input bg-background"
                 disabled={!!editingQuiz}
               >
-                <option value="">Sélectionner un chapitre</option>
-                {filteredChapters.map(chapter => (
-                  <option key={chapter.id} value={chapter.id}>{chapter.title}</option>
+                <option value="">Sélectionner un cours</option>
+                {courses.map(course => (
+                  <option key={course.id} value={course.id}>{course.title}</option>
                 ))}
               </select>
             </div>
@@ -393,58 +389,56 @@ export const QuizManager: React.FC<QuizManagerProps> = ({ courses }) => {
       )}
 
       <div className="space-y-4">
-        {quizzes.map(quiz => {
-          const chapter = chapters.find(c => c.id === quiz.chapter_id);
-          if (selectedCourse && chapter?.course_id !== selectedCourse) return null;
-
-          return (
-            <div key={quiz.id} className="card-cartoon bg-card border-border p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <p className="font-display text-foreground">{quiz.title}</p>
-                  <p className="text-sm text-muted-foreground">{chapter?.title}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedQuizId(quiz.id);
-                      setShowQuestionForm(true);
-                    }}
-                    className="rounded-xl"
-                  >
-                    <Plus className="w-3 h-3 mr-1" />
-                    Question
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleTogglePublish(quiz)} className="rounded-xl">
-                    {quiz.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDeleteQuiz(quiz.id)} className="rounded-xl text-destructive">
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+        {filteredQuizzes.map(quiz => (
+          <div key={quiz.id} className="card-cartoon bg-card border-border p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="font-display text-foreground">{quiz.title}</p>
+                <p className="text-sm text-muted-foreground">{getCourseName(quiz.course_id)}</p>
               </div>
-
-              <div className="space-y-2">
-                {getQuestionsForQuiz(quiz.id).map((q, idx) => (
-                  <div key={q.id} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <HelpCircle className="w-4 h-4 text-rainbow-blue" />
-                      <span className="text-sm">{idx + 1}. {q.question.substring(0, 50)}...</span>
-                    </div>
-                    <Button variant="ghost" size="icon" onClick={() => handleDeleteQuestion(q.id)} className="h-8 w-8 text-destructive">
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                ))}
-                {getQuestionsForQuiz(quiz.id).length === 0 && (
-                  <p className="text-muted-foreground text-sm text-center py-2">Aucune question</p>
-                )}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedQuizId(quiz.id);
+                    setShowQuestionForm(true);
+                  }}
+                  className="rounded-xl"
+                >
+                  <Plus className="w-3 h-3 mr-1" />
+                  Question
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => handleTogglePublish(quiz)} className="rounded-xl">
+                  {quiz.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => handleDeleteQuiz(quiz.id)} className="rounded-xl text-destructive">
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
             </div>
-          );
-        })}
+
+            <div className="space-y-2">
+              {getQuestionsForQuiz(quiz.id).map((q, idx) => (
+                <div key={q.id} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <HelpCircle className="w-4 h-4 text-rainbow-blue" />
+                    <span className="text-sm">{idx + 1}. {q.question.substring(0, 50)}...</span>
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={() => handleDeleteQuestion(q.id)} className="h-8 w-8 text-destructive">
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              ))}
+              {getQuestionsForQuiz(quiz.id).length === 0 && (
+                <p className="text-muted-foreground text-sm text-center py-2">Aucune question</p>
+              )}
+            </div>
+          </div>
+        ))}
+        {filteredQuizzes.length === 0 && (
+          <p className="text-muted-foreground text-center py-8">Aucun quiz</p>
+        )}
       </div>
     </div>
   );

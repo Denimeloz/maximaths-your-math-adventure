@@ -64,7 +64,8 @@ export type Database = {
       assignments: {
         Row: {
           allow_late_submission: boolean
-          chapter_id: string
+          chapter_id: string | null
+          course_id: string | null
           created_at: string
           description: string | null
           due_date: string | null
@@ -78,7 +79,8 @@ export type Database = {
         }
         Insert: {
           allow_late_submission?: boolean
-          chapter_id: string
+          chapter_id?: string | null
+          course_id?: string | null
           created_at?: string
           description?: string | null
           due_date?: string | null
@@ -92,7 +94,8 @@ export type Database = {
         }
         Update: {
           allow_late_submission?: boolean
-          chapter_id?: string
+          chapter_id?: string | null
+          course_id?: string | null
           created_at?: string
           description?: string | null
           due_date?: string | null
@@ -110,6 +113,13 @@ export type Database = {
             columns: ["chapter_id"]
             isOneToOne: false
             referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
             referencedColumns: ["id"]
           },
         ]
@@ -193,7 +203,8 @@ export type Database = {
       }
       course_files: {
         Row: {
-          chapter_id: string
+          chapter_id: string | null
+          course_id: string | null
           created_at: string
           description: string | null
           file_size: number | null
@@ -205,7 +216,8 @@ export type Database = {
           title: string
         }
         Insert: {
-          chapter_id: string
+          chapter_id?: string | null
+          course_id?: string | null
           created_at?: string
           description?: string | null
           file_size?: number | null
@@ -217,7 +229,8 @@ export type Database = {
           title: string
         }
         Update: {
-          chapter_id?: string
+          chapter_id?: string | null
+          course_id?: string | null
           created_at?: string
           description?: string | null
           file_size?: number | null
@@ -234,6 +247,13 @@ export type Database = {
             columns: ["chapter_id"]
             isOneToOne: false
             referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_files_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
             referencedColumns: ["id"]
           },
         ]
@@ -329,7 +349,8 @@ export type Database = {
       }
       evaluations: {
         Row: {
-          chapter_id: string
+          chapter_id: string | null
+          course_id: string | null
           created_at: string
           description: string | null
           duration_minutes: number | null
@@ -342,7 +363,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          chapter_id: string
+          chapter_id?: string | null
+          course_id?: string | null
           created_at?: string
           description?: string | null
           duration_minutes?: number | null
@@ -355,7 +377,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          chapter_id?: string
+          chapter_id?: string | null
+          course_id?: string | null
           created_at?: string
           description?: string | null
           duration_minutes?: number | null
@@ -375,12 +398,20 @@ export type Database = {
             referencedRelation: "chapters"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "evaluations_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
         ]
       }
       exercises: {
         Row: {
           answer: string
-          chapter_id: string
+          chapter_id: string | null
+          course_id: string | null
           created_at: string
           difficulty: number
           explanation: string | null
@@ -394,7 +425,8 @@ export type Database = {
         }
         Insert: {
           answer: string
-          chapter_id: string
+          chapter_id?: string | null
+          course_id?: string | null
           created_at?: string
           difficulty?: number
           explanation?: string | null
@@ -408,7 +440,8 @@ export type Database = {
         }
         Update: {
           answer?: string
-          chapter_id?: string
+          chapter_id?: string | null
+          course_id?: string | null
           created_at?: string
           difficulty?: number
           explanation?: string | null
@@ -428,12 +461,20 @@ export type Database = {
             referencedRelation: "chapters"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "exercises_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
         ]
       }
       lessons: {
         Row: {
-          chapter_id: string
+          chapter_id: string | null
           content: string
+          course_id: string | null
           created_at: string
           id: string
           is_published: boolean
@@ -442,8 +483,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          chapter_id: string
+          chapter_id?: string | null
           content: string
+          course_id?: string | null
           created_at?: string
           id?: string
           is_published?: boolean
@@ -452,8 +494,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          chapter_id?: string
+          chapter_id?: string | null
           content?: string
+          course_id?: string | null
           created_at?: string
           id?: string
           is_published?: boolean
@@ -467,6 +510,13 @@ export type Database = {
             columns: ["chapter_id"]
             isOneToOne: false
             referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
             referencedColumns: ["id"]
           },
         ]
@@ -603,7 +653,8 @@ export type Database = {
       }
       quizzes: {
         Row: {
-          chapter_id: string
+          chapter_id: string | null
+          course_id: string | null
           created_at: string
           description: string | null
           id: string
@@ -615,7 +666,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          chapter_id: string
+          chapter_id?: string | null
+          course_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -627,7 +679,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          chapter_id?: string
+          chapter_id?: string | null
+          course_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -644,6 +697,13 @@ export type Database = {
             columns: ["chapter_id"]
             isOneToOne: false
             referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quizzes_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
             referencedColumns: ["id"]
           },
         ]
@@ -741,7 +801,8 @@ export type Database = {
       }
       videos: {
         Row: {
-          chapter_id: string
+          chapter_id: string | null
+          course_id: string | null
           created_at: string
           description: string | null
           duration_seconds: number | null
@@ -752,7 +813,8 @@ export type Database = {
           video_url: string
         }
         Insert: {
-          chapter_id: string
+          chapter_id?: string | null
+          course_id?: string | null
           created_at?: string
           description?: string | null
           duration_seconds?: number | null
@@ -763,7 +825,8 @@ export type Database = {
           video_url: string
         }
         Update: {
-          chapter_id?: string
+          chapter_id?: string | null
+          course_id?: string | null
           created_at?: string
           description?: string | null
           duration_seconds?: number | null
@@ -779,6 +842,13 @@ export type Database = {
             columns: ["chapter_id"]
             isOneToOne: false
             referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "videos_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
             referencedColumns: ["id"]
           },
         ]

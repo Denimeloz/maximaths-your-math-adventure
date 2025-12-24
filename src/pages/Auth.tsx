@@ -145,7 +145,7 @@ const Auth = () => {
             title: "Bienvenue! 🚀",
             description: "Connexion réussie.",
           });
-          navigate('/');
+          // La redirection sera gérée automatiquement par le useEffect qui surveille user et isAdmin
         }
       }
     } catch (err) {
