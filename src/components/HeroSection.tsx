@@ -91,13 +91,6 @@ const HeroSection = () => {
             Commencer l'aventure
           </Button>
         </div>
-
-        {/* Scroll indicator - enhanced */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
-          <div className="w-10 h-14 rounded-full border-4 border-rainbow-purple/40 flex items-start justify-center pt-2 bg-sky-cloud/50">
-            <div className="w-2.5 h-4 bg-rainbow-purple rounded-full animate-pulse" />
-          </div>
-        </div>
       </div>
     </section>
   );

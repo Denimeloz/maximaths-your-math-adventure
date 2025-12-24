@@ -35,7 +35,7 @@ const NotFound = () => {
           Oups ! Cette page s'est perdue...
         </h1>
         <p className="text-lg text-muted-foreground font-body mb-8 max-w-md mx-auto">
-          La page que tu cherches n'existe pas ou a été déplacée. 
+          La page que tu cherches n'existe pas encore ou a été déplacée. 
           Retourne à l'accueil pour continuer ton aventure mathématique !
         </p>
         
