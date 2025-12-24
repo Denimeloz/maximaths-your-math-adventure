@@ -9,6 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { ChapterManager } from '@/components/admin/ChapterManager';
+import { ExerciseManager } from '@/components/admin/ExerciseManager';
+import { QuizManager } from '@/components/admin/QuizManager';
+import { AssignmentManager } from '@/components/admin/AssignmentManager';
+import { EvaluationManager } from '@/components/admin/EvaluationManager';
+import { SubmissionGrader } from '@/components/admin/SubmissionGrader';
 import { 
   Users, 
   BookOpen, 
@@ -27,7 +33,13 @@ import {
   Award,
   Upload,
   Image,
-  Loader2
+  Loader2,
+  Layers,
+  PenTool,
+  HelpCircle,
+  ClipboardList,
+  FileCheck,
+  CheckSquare
 } from 'lucide-react';
 
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
@@ -76,7 +88,7 @@ const Admin = () => {
     return 'dashboard';
   };
   
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'courses' | 'users'>(getActiveTabFromPath);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'courses' | 'chapters' | 'exercises' | 'quizzes' | 'assignments' | 'evaluations' | 'grading' | 'users'>(getActiveTabFromPath);
   const [courses, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<(Profile & { role?: string })[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
@@ -500,15 +512,22 @@ const Admin = () => {
           {/* Tabs */}
           <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
             {[
-              { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/admin' },
-              { id: 'courses', label: 'Cours', icon: BookOpen, path: '/admin/courses' },
-              { id: 'users', label: 'Utilisateurs', icon: Users, path: '/admin/users' },
+              { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+              { id: 'courses', label: 'Cours', icon: BookOpen },
+              { id: 'chapters', label: 'Chapitres', icon: Layers },
+              { id: 'exercises', label: 'Exercices', icon: PenTool },
+              { id: 'quizzes', label: 'Quiz', icon: HelpCircle },
+              { id: 'assignments', label: 'Devoirs', icon: ClipboardList },
+              { id: 'evaluations', label: 'Évaluations', icon: FileCheck },
+              { id: 'grading', label: 'Correction', icon: CheckSquare },
+              { id: 'users', label: 'Utilisateurs', icon: Users },
             ].map((tab) => (
               <Button
                 key={tab.id}
                 variant={activeTab === tab.id ? 'default' : 'outline'}
-                onClick={() => navigate(tab.path)}
-                className="rounded-xl flex items-center gap-2"
+                onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                className="rounded-xl flex items-center gap-2 whitespace-nowrap"
+                size="sm"
               >
                 <tab.icon className="w-4 h-4" />
                 {tab.label}
