@@ -948,6 +948,36 @@ const Admin = () => {
             </div>
           )}
 
+          {/* Chapters Tab */}
+          {activeTab === 'chapters' && (
+            <ChapterManager courses={courses.map(c => ({ id: c.id, title: c.title, level: c.level }))} onRefresh={fetchCourses} />
+          )}
+
+          {/* Exercises Tab */}
+          {activeTab === 'exercises' && (
+            <ExerciseManager courses={courses.map(c => ({ id: c.id, title: c.title }))} />
+          )}
+
+          {/* Quizzes Tab */}
+          {activeTab === 'quizzes' && (
+            <QuizManager courses={courses.map(c => ({ id: c.id, title: c.title }))} />
+          )}
+
+          {/* Assignments Tab */}
+          {activeTab === 'assignments' && (
+            <AssignmentManager courses={courses.map(c => ({ id: c.id, title: c.title }))} />
+          )}
+
+          {/* Evaluations Tab */}
+          {activeTab === 'evaluations' && (
+            <EvaluationManager courses={courses.map(c => ({ id: c.id, title: c.title }))} />
+          )}
+
+          {/* Grading Tab */}
+          {activeTab === 'grading' && (
+            <SubmissionGrader />
+          )}
+
           {/* Users Tab */}
           {activeTab === 'users' && (
             <div className="space-y-6">
