@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, FileCheck, Clock } from 'lucide-react';
+import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, FileCheck, Clock, Upload, FileText, Loader2 } from 'lucide-react';
 
 interface Evaluation {
   id: string;
-  chapter_id: string;
+  course_id: string | null;
   title: string;
   description: string | null;
   instructions: string | null;
@@ -16,12 +16,6 @@ interface Evaluation {
   duration_minutes: number | null;
   is_published: boolean;
   order_index: number;
-}
-
-interface Chapter {
-  id: string;
-  title: string;
-  course_id: string;
 }
 
 interface Course {
@@ -36,17 +30,19 @@ interface EvaluationManagerProps {
 export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses }) => {
   const { toast } = useToast();
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
-  const [chapters, setChapters] = useState<Chapter[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>('');
   const [showForm, setShowForm] = useState(false);
   const [editingEvaluation, setEditingEvaluation] = useState<Evaluation | null>(null);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
-    chapter_id: '',
+    course_id: '',
     title: '',
     description: '',
     instructions: '',
     max_points: 100,
     duration_minutes: 60,
+    file_url: '',
   });
 
   useEffect(() => {
@@ -54,17 +50,38 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
   }, []);
 
   const fetchData = async () => {
-    const [chaptersRes, evaluationsRes] = await Promise.all([
-      supabase.from('chapters').select('id, title, course_id').order('order_index'),
-      supabase.from('evaluations').select('*').order('order_index'),
-    ]);
-    if (chaptersRes.data) setChapters(chaptersRes.data);
-    if (evaluationsRes.data) setEvaluations(evaluationsRes.data);
+    const { data } = await supabase.from('evaluations').select('*').order('order_index');
+    if (data) setEvaluations(data);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: "Erreur", description: "Le fichier ne doit pas dépasser 20MB", variant: "destructive" });
+      return;
+    }
+
+    setIsUploadingFile(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `evaluations/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('course-files').upload(fileName, file);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from('course-files').getPublicUrl(fileName);
+      setForm(prev => ({ ...prev, file_url: publicUrl }));
+      toast({ title: "Succès", description: "Fichier téléchargé" });
+    } catch (error) {
+      toast({ title: "Erreur", description: "Impossible de télécharger le fichier", variant: "destructive" });
+    } finally {
+      setIsUploadingFile(false);
+    }
   };
 
   const handleSave = async () => {
-    if (!form.title.trim() || !form.chapter_id) {
-      toast({ title: "Erreur", description: "Titre et chapitre requis", variant: "destructive" });
+    if (!form.title.trim() || !form.course_id) {
+      toast({ title: "Erreur", description: "Titre et cours requis", variant: "destructive" });
       return;
     }
 
@@ -88,13 +105,13 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
         resetForm();
       }
     } else {
-      const evaluationsForChapter = evaluations.filter(e => e.chapter_id === form.chapter_id);
+      const evaluationsForCourse = evaluations.filter(e => e.course_id === form.course_id);
       const { error } = await supabase
         .from('evaluations')
         .insert({
           ...data,
-          chapter_id: form.chapter_id,
-          order_index: evaluationsForChapter.length,
+          course_id: form.course_id,
+          order_index: evaluationsForCourse.length,
         });
 
       if (!error) {
@@ -120,12 +137,13 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
   const handleEdit = (evaluation: Evaluation) => {
     setEditingEvaluation(evaluation);
     setForm({
-      chapter_id: evaluation.chapter_id,
+      course_id: evaluation.course_id || '',
       title: evaluation.title,
       description: evaluation.description || '',
       instructions: evaluation.instructions || '',
       max_points: evaluation.max_points,
       duration_minutes: evaluation.duration_minutes || 60,
+      file_url: '',
     });
     setShowForm(true);
   };
@@ -134,18 +152,24 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
     setShowForm(false);
     setEditingEvaluation(null);
     setForm({
-      chapter_id: '',
+      course_id: '',
       title: '',
       description: '',
       instructions: '',
       max_points: 100,
       duration_minutes: 60,
+      file_url: '',
     });
   };
 
-  const filteredChapters = selectedCourse
-    ? chapters.filter(c => c.course_id === selectedCourse)
-    : chapters;
+  const filteredEvaluations = selectedCourse
+    ? evaluations.filter(e => e.course_id === selectedCourse)
+    : evaluations;
+
+  const getCourseName = (courseId: string | null) => {
+    if (!courseId) return 'Non assigné';
+    return courses.find(c => c.id === courseId)?.title || 'Inconnu';
+  };
 
   return (
     <div className="space-y-6">
@@ -184,16 +208,16 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
 
           <div className="grid gap-4">
             <div>
-              <label className="text-sm font-body text-muted-foreground mb-1 block">Chapitre *</label>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Cours *</label>
               <select
-                value={form.chapter_id}
-                onChange={(e) => setForm(prev => ({ ...prev, chapter_id: e.target.value }))}
+                value={form.course_id}
+                onChange={(e) => setForm(prev => ({ ...prev, course_id: e.target.value }))}
                 className="w-full p-2 rounded-xl border border-input bg-background"
                 disabled={!!editingEvaluation}
               >
-                <option value="">Sélectionner un chapitre</option>
-                {filteredChapters.map(chapter => (
-                  <option key={chapter.id} value={chapter.id}>{chapter.title}</option>
+                <option value="">Sélectionner un cours</option>
+                {courses.map(course => (
+                  <option key={course.id} value={course.id}>{course.title}</option>
                 ))}
               </select>
             </div>
@@ -228,6 +252,32 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
                 className="rounded-xl"
                 rows={4}
               />
+            </div>
+
+            {/* File Upload */}
+            <div>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Fichier joint (PDF, Word, etc.)</label>
+              <div className="flex items-center gap-4">
+                {form.file_url ? (
+                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl flex-1">
+                    <FileText className="w-6 h-6 text-rainbow-blue" />
+                    <a href={form.file_url} target="_blank" rel="noopener noreferrer" className="text-sm text-rainbow-blue hover:underline truncate">
+                      Voir le fichier
+                    </a>
+                    <button onClick={() => setForm(prev => ({ ...prev, file_url: '' }))} className="ml-auto">
+                      <X className="w-4 h-4 text-destructive" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".pdf,.doc,.docx,.ppt,.pptx" />
+                    <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isUploadingFile} className="rounded-xl">
+                      {isUploadingFile ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                      {isUploadingFile ? 'Upload...' : 'Ajouter un fichier'}
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -267,47 +317,42 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
       )}
 
       <div className="space-y-4">
-        {evaluations.map(evaluation => {
-          const chapter = chapters.find(c => c.id === evaluation.chapter_id);
-          if (selectedCourse && chapter?.course_id !== selectedCourse) return null;
-
-          return (
-            <div key={evaluation.id} className="card-cartoon bg-card border-border p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-rainbow-coral/20 flex items-center justify-center">
-                    <FileCheck className="w-5 h-5 text-rainbow-coral" />
-                  </div>
-                  <div>
-                    <p className="font-display text-foreground">{evaluation.title}</p>
-                    <p className="text-sm text-muted-foreground">{chapter?.title}</p>
-                    {evaluation.duration_minutes && (
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="w-3 h-3" />
-                        {evaluation.duration_minutes} min
-                      </div>
-                    )}
-                  </div>
+        {filteredEvaluations.map(evaluation => (
+          <div key={evaluation.id} className="card-cartoon bg-card border-border p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-rainbow-coral/20 flex items-center justify-center">
+                  <FileCheck className="w-5 h-5 text-rainbow-coral" />
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-1 rounded-full bg-rainbow-purple/20 text-rainbow-purple text-xs">
-                    {evaluation.max_points} pts
-                  </span>
-                  <Button variant="ghost" size="icon" onClick={() => handleTogglePublish(evaluation)} className="rounded-xl">
-                    {evaluation.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleEdit(evaluation)} className="rounded-xl">
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(evaluation.id)} className="rounded-xl text-destructive">
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                <div>
+                  <p className="font-display text-foreground">{evaluation.title}</p>
+                  <p className="text-sm text-muted-foreground">{getCourseName(evaluation.course_id)}</p>
+                  {evaluation.duration_minutes && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock className="w-3 h-3" />
+                      {evaluation.duration_minutes} min
+                    </div>
+                  )}
                 </div>
               </div>
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-1 rounded-full bg-rainbow-purple/20 text-rainbow-purple text-xs">
+                  {evaluation.max_points} pts
+                </span>
+                <Button variant="ghost" size="icon" onClick={() => handleTogglePublish(evaluation)} className="rounded-xl">
+                  {evaluation.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => handleEdit(evaluation)} className="rounded-xl">
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => handleDelete(evaluation.id)} className="rounded-xl text-destructive">
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
-          );
-        })}
-        {evaluations.length === 0 && (
+          </div>
+        ))}
+        {filteredEvaluations.length === 0 && (
           <p className="text-muted-foreground text-center py-8">Aucune évaluation créée</p>
         )}
       </div>

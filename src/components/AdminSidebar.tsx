@@ -20,23 +20,37 @@ import {
   Settings, 
   LogOut,
   Shield,
-  FileText,
-  BarChart3
+  PenTool,
+  HelpCircle,
+  ClipboardList,
+  FileCheck,
+  CheckSquare,
+  Home
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const menuItems = [
-  { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
-  { title: 'Cours', url: '/admin/courses', icon: BookOpen },
-  { title: 'Utilisateurs', url: '/admin/users', icon: Users },
+  { title: 'Dashboard', url: '/admin', icon: LayoutDashboard, tab: 'dashboard' },
+  { title: 'Cours', url: '/admin/courses', icon: BookOpen, tab: 'courses' },
+  { title: 'Exercices', url: '/admin', icon: PenTool, tab: 'exercises' },
+  { title: 'Quiz', url: '/admin', icon: HelpCircle, tab: 'quizzes' },
+  { title: 'Devoirs', url: '/admin', icon: ClipboardList, tab: 'assignments' },
+  { title: 'Évaluations', url: '/admin', icon: FileCheck, tab: 'evaluations' },
+  { title: 'Correction', url: '/admin', icon: CheckSquare, tab: 'grading' },
+  { title: 'Utilisateurs', url: '/admin/users', icon: Users, tab: 'users' },
 ];
 
 const accountItems = [
+  { title: 'Accueil', url: '/', icon: Home },
   { title: 'Mon profil', url: '/profile', icon: User },
-  { title: 'Paramètres', url: '/admin/settings', icon: Settings },
 ];
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
+}
+
+export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { profile, signOut } = useAuth();
@@ -46,12 +60,15 @@ export function AdminSidebar() {
     navigate('/');
   };
 
-  const isActive = (path: string) => {
-    if (path === '/admin') {
-      return location.pathname === '/admin';
+  const handleMenuClick = (item: typeof menuItems[0]) => {
+    if (onTabChange && item.tab) {
+      onTabChange(item.tab);
+    } else {
+      navigate(item.url);
     }
-    return location.pathname.startsWith(path);
   };
+
+  const isActive = (tab: string) => activeTab === tab;
 
   return (
     <Sidebar className="border-r border-border bg-card">
@@ -73,15 +90,15 @@ export function AdminSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="font-display text-muted-foreground">Administration</SidebarGroupLabel>
+          <SidebarGroupLabel className="font-display text-muted-foreground">Gestion</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
-                    onClick={() => navigate(item.url)}
+                    onClick={() => handleMenuClick(item)}
                     className={`cursor-pointer transition-colors ${
-                      isActive(item.url) 
+                      isActive(item.tab) 
                         ? 'bg-rainbow-purple/10 text-rainbow-purple font-medium' 
                         : 'hover:bg-muted/50'
                     }`}
@@ -103,11 +120,7 @@ export function AdminSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     onClick={() => navigate(item.url)}
-                    className={`cursor-pointer transition-colors ${
-                      isActive(item.url) 
-                        ? 'bg-primary/10 text-primary font-medium' 
-                        : 'hover:bg-muted/50'
-                    }`}
+                    className="cursor-pointer transition-colors hover:bg-muted/50"
                   >
                     <item.icon className="w-4 h-4 mr-2" />
                     <span>{item.title}</span>
@@ -117,7 +130,6 @@ export function AdminSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-border">

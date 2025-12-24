@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, ClipboardList, Calendar } from 'lucide-react';
+import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, ClipboardList, Calendar, Upload, FileText, Loader2 } from 'lucide-react';
 
 interface Assignment {
   id: string;
-  chapter_id: string;
+  course_id: string | null;
   title: string;
   description: string | null;
   instructions: string | null;
@@ -17,12 +17,6 @@ interface Assignment {
   allow_late_submission: boolean;
   is_published: boolean;
   order_index: number;
-}
-
-interface Chapter {
-  id: string;
-  title: string;
-  course_id: string;
 }
 
 interface Course {
@@ -37,18 +31,20 @@ interface AssignmentManagerProps {
 export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses }) => {
   const { toast } = useToast();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [chapters, setChapters] = useState<Chapter[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>('');
   const [showForm, setShowForm] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
-    chapter_id: '',
+    course_id: '',
     title: '',
     description: '',
     instructions: '',
     max_points: 100,
     due_date: '',
     allow_late_submission: false,
+    file_url: '',
   });
 
   useEffect(() => {
@@ -56,17 +52,38 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
   }, []);
 
   const fetchData = async () => {
-    const [chaptersRes, assignmentsRes] = await Promise.all([
-      supabase.from('chapters').select('id, title, course_id').order('order_index'),
-      supabase.from('assignments').select('*').order('order_index'),
-    ]);
-    if (chaptersRes.data) setChapters(chaptersRes.data);
-    if (assignmentsRes.data) setAssignments(assignmentsRes.data);
+    const { data } = await supabase.from('assignments').select('*').order('order_index');
+    if (data) setAssignments(data);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: "Erreur", description: "Le fichier ne doit pas dépasser 20MB", variant: "destructive" });
+      return;
+    }
+
+    setIsUploadingFile(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `assignments/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('course-files').upload(fileName, file);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from('course-files').getPublicUrl(fileName);
+      setForm(prev => ({ ...prev, file_url: publicUrl }));
+      toast({ title: "Succès", description: "Fichier téléchargé" });
+    } catch (error) {
+      toast({ title: "Erreur", description: "Impossible de télécharger le fichier", variant: "destructive" });
+    } finally {
+      setIsUploadingFile(false);
+    }
   };
 
   const handleSave = async () => {
-    if (!form.title.trim() || !form.chapter_id) {
-      toast({ title: "Erreur", description: "Titre et chapitre requis", variant: "destructive" });
+    if (!form.title.trim() || !form.course_id) {
+      toast({ title: "Erreur", description: "Titre et cours requis", variant: "destructive" });
       return;
     }
 
@@ -91,13 +108,13 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
         resetForm();
       }
     } else {
-      const assignmentsForChapter = assignments.filter(a => a.chapter_id === form.chapter_id);
+      const assignmentsForCourse = assignments.filter(a => a.course_id === form.course_id);
       const { error } = await supabase
         .from('assignments')
         .insert({
           ...data,
-          chapter_id: form.chapter_id,
-          order_index: assignmentsForChapter.length,
+          course_id: form.course_id,
+          order_index: assignmentsForCourse.length,
         });
 
       if (!error) {
@@ -123,13 +140,14 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
   const handleEdit = (assignment: Assignment) => {
     setEditingAssignment(assignment);
     setForm({
-      chapter_id: assignment.chapter_id,
+      course_id: assignment.course_id || '',
       title: assignment.title,
       description: assignment.description || '',
       instructions: assignment.instructions || '',
       max_points: assignment.max_points,
       due_date: assignment.due_date ? assignment.due_date.split('T')[0] : '',
       allow_late_submission: assignment.allow_late_submission,
+      file_url: '',
     });
     setShowForm(true);
   };
@@ -138,19 +156,25 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
     setShowForm(false);
     setEditingAssignment(null);
     setForm({
-      chapter_id: '',
+      course_id: '',
       title: '',
       description: '',
       instructions: '',
       max_points: 100,
       due_date: '',
       allow_late_submission: false,
+      file_url: '',
     });
   };
 
-  const filteredChapters = selectedCourse
-    ? chapters.filter(c => c.course_id === selectedCourse)
-    : chapters;
+  const filteredAssignments = selectedCourse
+    ? assignments.filter(a => a.course_id === selectedCourse)
+    : assignments;
+
+  const getCourseName = (courseId: string | null) => {
+    if (!courseId) return 'Non assigné';
+    return courses.find(c => c.id === courseId)?.title || 'Inconnu';
+  };
 
   return (
     <div className="space-y-6">
@@ -189,16 +213,16 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
 
           <div className="grid gap-4">
             <div>
-              <label className="text-sm font-body text-muted-foreground mb-1 block">Chapitre *</label>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Cours *</label>
               <select
-                value={form.chapter_id}
-                onChange={(e) => setForm(prev => ({ ...prev, chapter_id: e.target.value }))}
+                value={form.course_id}
+                onChange={(e) => setForm(prev => ({ ...prev, course_id: e.target.value }))}
                 className="w-full p-2 rounded-xl border border-input bg-background"
                 disabled={!!editingAssignment}
               >
-                <option value="">Sélectionner un chapitre</option>
-                {filteredChapters.map(chapter => (
-                  <option key={chapter.id} value={chapter.id}>{chapter.title}</option>
+                <option value="">Sélectionner un cours</option>
+                {courses.map(course => (
+                  <option key={course.id} value={course.id}>{course.title}</option>
                 ))}
               </select>
             </div>
@@ -233,6 +257,32 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
                 className="rounded-xl"
                 rows={4}
               />
+            </div>
+
+            {/* File Upload */}
+            <div>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Fichier joint (PDF, Word, etc.)</label>
+              <div className="flex items-center gap-4">
+                {form.file_url ? (
+                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl flex-1">
+                    <FileText className="w-6 h-6 text-rainbow-blue" />
+                    <a href={form.file_url} target="_blank" rel="noopener noreferrer" className="text-sm text-rainbow-blue hover:underline truncate">
+                      Voir le fichier
+                    </a>
+                    <button onClick={() => setForm(prev => ({ ...prev, file_url: '' }))} className="ml-auto">
+                      <X className="w-4 h-4 text-destructive" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".pdf,.doc,.docx,.ppt,.pptx" />
+                    <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isUploadingFile} className="rounded-xl">
+                      {isUploadingFile ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                      {isUploadingFile ? 'Upload...' : 'Ajouter un fichier'}
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -281,46 +331,44 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
       )}
 
       <div className="space-y-4">
-        {assignments.map(assignment => {
-          const chapter = chapters.find(c => c.id === assignment.chapter_id);
-          if (selectedCourse && chapter?.course_id !== selectedCourse) return null;
-
-          return (
-            <div key={assignment.id} className="card-cartoon bg-card border-border p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-rainbow-pink/20 flex items-center justify-center">
-                    <ClipboardList className="w-5 h-5 text-rainbow-pink" />
-                  </div>
-                  <div>
-                    <p className="font-display text-foreground">{assignment.title}</p>
-                    <p className="text-sm text-muted-foreground">{chapter?.title}</p>
-                    {assignment.due_date && (
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Calendar className="w-3 h-3" />
-                        {new Date(assignment.due_date).toLocaleDateString('fr-FR')}
-                      </div>
-                    )}
-                  </div>
+        {filteredAssignments.map(assignment => (
+          <div key={assignment.id} className="card-cartoon bg-card border-border p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-rainbow-pink/20 flex items-center justify-center">
+                  <ClipboardList className="w-5 h-5 text-rainbow-pink" />
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-1 rounded-full bg-rainbow-purple/20 text-rainbow-purple text-xs">
-                    {assignment.max_points} pts
-                  </span>
-                  <Button variant="ghost" size="icon" onClick={() => handleTogglePublish(assignment)} className="rounded-xl">
-                    {assignment.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleEdit(assignment)} className="rounded-xl">
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(assignment.id)} className="rounded-xl text-destructive">
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                <div>
+                  <p className="font-display text-foreground">{assignment.title}</p>
+                  <p className="text-sm text-muted-foreground">{getCourseName(assignment.course_id)}</p>
+                  {assignment.due_date && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Calendar className="w-3 h-3" />
+                      {new Date(assignment.due_date).toLocaleDateString('fr-FR')}
+                    </div>
+                  )}
                 </div>
               </div>
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-1 rounded-full bg-rainbow-purple/20 text-rainbow-purple text-xs">
+                  {assignment.max_points} pts
+                </span>
+                <Button variant="ghost" size="icon" onClick={() => handleTogglePublish(assignment)} className="rounded-xl">
+                  {assignment.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => handleEdit(assignment)} className="rounded-xl">
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => handleDelete(assignment.id)} className="rounded-xl text-destructive">
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
+        {filteredAssignments.length === 0 && (
+          <p className="text-muted-foreground text-center py-8">Aucun devoir</p>
+        )}
       </div>
     </div>
   );

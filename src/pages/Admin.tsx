@@ -88,7 +88,7 @@ const Admin = () => {
     return 'dashboard';
   };
   
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'courses' | 'chapters' | 'exercises' | 'quizzes' | 'assignments' | 'evaluations' | 'grading' | 'users'>(getActiveTabFromPath);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'courses' | 'exercises' | 'quizzes' | 'assignments' | 'evaluations' | 'grading' | 'users'>(getActiveTabFromPath);
   const [courses, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<(Profile & { role?: string })[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
@@ -495,7 +495,7 @@ const Admin = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-hero-gradient">
-        <AdminSidebar />
+        <AdminSidebar activeTab={activeTab} onTabChange={(tab) => setActiveTab(tab as typeof activeTab)} />
         
         <main className="flex-1 p-6 lg:p-8 overflow-auto">
           {/* Header */}
@@ -514,7 +514,6 @@ const Admin = () => {
             {[
               { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
               { id: 'courses', label: 'Cours', icon: BookOpen },
-              { id: 'chapters', label: 'Chapitres', icon: Layers },
               { id: 'exercises', label: 'Exercices', icon: PenTool },
               { id: 'quizzes', label: 'Quiz', icon: HelpCircle },
               { id: 'assignments', label: 'Devoirs', icon: ClipboardList },
