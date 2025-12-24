@@ -150,8 +150,7 @@ const College = () => {
                 className={`card-sticker bg-card ${getLevelColor(course.level)} p-6 cursor-pointer group`}
                 onClick={() => {
                   if (user) {
-                    // Navigate to course detail (to be implemented)
-                    navigate('/dashboard');
+                    navigate(`/course/${course.id}`);
                   } else {
                     navigate('/auth');
                   }

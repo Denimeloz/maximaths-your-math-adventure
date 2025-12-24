@@ -13,6 +13,9 @@ import College from "./pages/College";
 import Lycee from "./pages/Lycee";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
+import CourseView from "./pages/CourseView";
+import QuizPage from "./pages/QuizPage";
+import AssignmentSubmit from "./pages/AssignmentSubmit";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +41,9 @@ const App = () => (
             <Route path="/college" element={<College />} />
             <Route path="/lycee" element={<Lycee />} />
             <Route path="/about" element={<About />} />
+            <Route path="/course/:courseId" element={<CourseView />} />
+            <Route path="/quiz/:quizId" element={<QuizPage />} />
+            <Route path="/assignment/:assignmentId" element={<AssignmentSubmit />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
