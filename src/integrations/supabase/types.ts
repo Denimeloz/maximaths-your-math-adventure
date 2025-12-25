@@ -409,47 +409,50 @@ export type Database = {
       }
       exercises: {
         Row: {
-          answer: string
+          answer: string | null
           chapter_id: string | null
           course_id: string | null
           created_at: string
           difficulty: number
           explanation: string | null
+          file_url: string | null
           id: string
           is_published: boolean
           order_index: number
           points: number
-          question: string
+          question: string | null
           title: string
           updated_at: string
         }
         Insert: {
-          answer: string
+          answer?: string | null
           chapter_id?: string | null
           course_id?: string | null
           created_at?: string
           difficulty?: number
           explanation?: string | null
+          file_url?: string | null
           id?: string
           is_published?: boolean
           order_index?: number
           points?: number
-          question: string
+          question?: string | null
           title: string
           updated_at?: string
         }
         Update: {
-          answer?: string
+          answer?: string | null
           chapter_id?: string | null
           course_id?: string | null
           created_at?: string
           difficulty?: number
           explanation?: string | null
+          file_url?: string | null
           id?: string
           is_published?: boolean
           order_index?: number
           points?: number
-          question?: string
+          question?: string | null
           title?: string
           updated_at?: string
         }
@@ -466,6 +469,44 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_progress: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          lesson_id: string
+          read_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          lesson_id: string
+          read_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          lesson_id?: string
+          read_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
             referencedColumns: ["id"]
           },
         ]
