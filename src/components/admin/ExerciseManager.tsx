@@ -10,9 +10,8 @@ interface Exercise {
   id: string;
   course_id: string | null;
   title: string;
-  question: string;
-  answer: string;
-  explanation: string | null;
+  description: string | null;
+  file_url: string | null;
   difficulty: number;
   points: number;
   is_published: boolean;
@@ -39,9 +38,7 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
   const [form, setForm] = useState({
     course_id: '',
     title: '',
-    question: '',
-    answer: '',
-    explanation: '',
+    description: '',
     difficulty: 1,
     points: 10,
     file_url: '',
@@ -52,8 +49,18 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
   }, []);
 
   const fetchExercises = async () => {
-    const { data } = await supabase.from('exercises').select('*').order('order_index');
-    if (data) setExercises(data);
+    const { data } = await supabase
+      .from('exercises')
+      .select('id, course_id, title, explanation, file_url, difficulty, points, is_published, order_index')
+      .order('order_index');
+    if (data) {
+      // Map explanation to description for display
+      const mapped = data.map(e => ({
+        ...e,
+        description: e.explanation,
+      }));
+      setExercises(mapped as Exercise[]);
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,8 +89,8 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
   };
 
   const handleSave = async () => {
-    if (!form.title.trim() || !form.course_id || !form.question || !form.answer) {
-      toast({ title: "Erreur", description: "Champs requis manquants", variant: "destructive" });
+    if (!form.title.trim() || !form.course_id) {
+      toast({ title: "Erreur", description: "Le cours et le titre sont requis", variant: "destructive" });
       return;
     }
 
@@ -92,9 +99,8 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
         .from('exercises')
         .update({
           title: form.title,
-          question: form.question,
-          answer: form.answer,
-          explanation: form.explanation || null,
+          explanation: form.description || null,
+          file_url: form.file_url || null,
           difficulty: form.difficulty,
           points: form.points,
         })
@@ -112,9 +118,10 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
         .insert({
           course_id: form.course_id,
           title: form.title,
-          question: form.question,
-          answer: form.answer,
-          explanation: form.explanation || null,
+          question: '',
+          answer: '',
+          explanation: form.description || null,
+          file_url: form.file_url || null,
           difficulty: form.difficulty,
           points: form.points,
           order_index: exercisesForCourse.length,
@@ -147,12 +154,10 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
     setForm({
       course_id: exercise.course_id || '',
       title: exercise.title,
-      question: exercise.question,
-      answer: exercise.answer,
-      explanation: exercise.explanation || '',
+      description: exercise.description || '',
       difficulty: exercise.difficulty,
       points: exercise.points,
-      file_url: '',
+      file_url: exercise.file_url || '',
     });
     setShowForm(true);
   };
@@ -160,7 +165,7 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
   const resetForm = () => {
     setShowForm(false);
     setEditingExercise(null);
-    setForm({ course_id: '', title: '', question: '', answer: '', explanation: '', difficulty: 1, points: 10, file_url: '' });
+    setForm({ course_id: '', title: '', description: '', difficulty: 1, points: 10, file_url: '' });
   };
 
   const filteredExercises = selectedCourse
@@ -234,35 +239,13 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
             </div>
 
             <div>
-              <label className="text-sm font-body text-muted-foreground mb-1 block">Question *</label>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Description</label>
               <Textarea
-                value={form.question}
-                onChange={(e) => setForm(prev => ({ ...prev, question: e.target.value }))}
-                placeholder="Énoncé de l'exercice"
+                value={form.description}
+                onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Description de l'exercice"
                 className="rounded-xl"
                 rows={4}
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-body text-muted-foreground mb-1 block">Réponse (Corrigé) *</label>
-              <Textarea
-                value={form.answer}
-                onChange={(e) => setForm(prev => ({ ...prev, answer: e.target.value }))}
-                placeholder="Réponse / Solution"
-                className="rounded-xl"
-                rows={4}
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-body text-muted-foreground mb-1 block">Explication</label>
-              <Textarea
-                value={form.explanation}
-                onChange={(e) => setForm(prev => ({ ...prev, explanation: e.target.value }))}
-                placeholder="Explication détaillée"
-                className="rounded-xl"
-                rows={3}
               />
             </div>
 
@@ -340,6 +323,15 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
                   <span>Difficulté: {exercise.difficulty}/5</span>
                   <span>•</span>
                   <span>{exercise.points} pts</span>
+                  {exercise.file_url && (
+                    <>
+                      <span>•</span>
+                      <a href={exercise.file_url} target="_blank" rel="noopener noreferrer" className="text-rainbow-blue hover:underline flex items-center gap-1">
+                        <FileText className="w-3 h-3" />
+                        Fichier
+                      </a>
+                    </>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-2">

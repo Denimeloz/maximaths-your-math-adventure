@@ -14,6 +14,8 @@ import { QuizManager } from '@/components/admin/QuizManager';
 import { AssignmentManager } from '@/components/admin/AssignmentManager';
 import { EvaluationManager } from '@/components/admin/EvaluationManager';
 import { SubmissionGrader } from '@/components/admin/SubmissionGrader';
+import { FileVideoManager } from '@/components/admin/FileVideoManager';
+import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { 
   Users, 
   BookOpen, 
@@ -87,7 +89,7 @@ const Admin = () => {
     return 'dashboard';
   };
   
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'courses' | 'exercises' | 'quizzes' | 'assignments' | 'evaluations' | 'grading' | 'users'>(getActiveTabFromPath);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'courses' | 'exercises' | 'quizzes' | 'assignments' | 'evaluations' | 'grading' | 'files' | 'users'>(getActiveTabFromPath);
   const [courses, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<(Profile & { role?: string })[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
@@ -518,6 +520,7 @@ const Admin = () => {
               { id: 'assignments', label: 'Devoirs', icon: ClipboardList },
               { id: 'evaluations', label: 'Évaluations', icon: FileCheck },
               { id: 'grading', label: 'Correction', icon: CheckSquare },
+              { id: 'files', label: 'Fichiers', icon: FileText },
               { id: 'users', label: 'Utilisateurs', icon: Users },
             ].map((tab) => (
               <Button
@@ -534,125 +537,7 @@ const Admin = () => {
           </div>
 
           {/* Dashboard Tab */}
-          {activeTab === 'dashboard' && (
-            <div className="space-y-8">
-              {/* Stats Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map((stat, index) => (
-                  <div 
-                    key={index}
-                    className="card-cartoon bg-card border-border p-6"
-                  >
-                    <div className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center mb-4`}>
-                      <stat.icon className={`w-6 h-6 ${stat.color}`} />
-                    </div>
-                    <p className="text-3xl font-display text-foreground">{stat.value}</p>
-                    <p className="text-muted-foreground font-body text-sm">{stat.label}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Quick Actions */}
-              <div className="card-sticker bg-card border-rainbow-purple/30 p-8">
-                <h2 className="text-2xl font-display text-foreground mb-4 flex items-center gap-2">
-                  <TrendingUp className="w-6 h-6 text-rainbow-purple" />
-                  Actions rapides
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Button 
-                    onClick={() => navigate('/admin/courses')} 
-                    className="h-auto py-6 flex flex-col items-center gap-2 rounded-xl btn-3d bg-primary"
-                  >
-                    <Plus className="w-8 h-8" />
-                    <span className="font-display">Créer un cours</span>
-                  </Button>
-                  <Button 
-                    onClick={() => navigate('/admin/users')} 
-                    variant="outline"
-                    className="h-auto py-6 flex flex-col items-center gap-2 rounded-xl"
-                  >
-                    <Users className="w-8 h-8" />
-                    <span className="font-display">Gérer les utilisateurs</span>
-                  </Button>
-                  <Button 
-                    onClick={() => navigate('/profile')} 
-                    variant="outline"
-                    className="h-auto py-6 flex flex-col items-center gap-2 rounded-xl"
-                  >
-                    <Shield className="w-8 h-8" />
-                    <span className="font-display">Mon profil</span>
-                  </Button>
-                </div>
-              </div>
-
-              {/* Recent Activity */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="card-cartoon bg-card border-border p-6">
-                  <h3 className="font-display text-lg text-foreground mb-4">Derniers cours</h3>
-                  <div className="space-y-3">
-                    {courses.slice(0, 5).map((course) => (
-                      <div key={course.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
-                        <div className="flex items-center gap-3">
-                          {course.image_url ? (
-                            <img src={course.image_url} alt={course.title} className="w-10 h-10 rounded-lg object-cover" />
-                          ) : (
-                            <div className="w-10 h-10 rounded-lg bg-rainbow-purple/20 flex items-center justify-center">
-                              <BookOpen className="w-5 h-5 text-rainbow-purple" />
-                            </div>
-                          )}
-                          <div>
-                            <p className="font-body text-foreground font-medium">{course.title}</p>
-                            <p className="text-xs text-muted-foreground">{getLevelLabel(course.level)}</p>
-                          </div>
-                        </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-body ${
-                          course.is_published 
-                            ? 'bg-rainbow-green/20 text-rainbow-green' 
-                            : 'bg-muted text-muted-foreground'
-                        }`}>
-                          {course.is_published ? 'Publié' : 'Brouillon'}
-                        </span>
-                      </div>
-                    ))}
-                    {courses.length === 0 && (
-                      <p className="text-muted-foreground text-center py-4">Aucun cours créé</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="card-cartoon bg-card border-border p-6">
-                  <h3 className="font-display text-lg text-foreground mb-4">Derniers utilisateurs</h3>
-                  <div className="space-y-3">
-                    {users.slice(0, 5).map((userItem) => (
-                      <div key={userItem.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rainbow-purple to-rainbow-pink flex items-center justify-center">
-                          <span className="text-sm font-display text-secondary-foreground">
-                            {userItem.first_name?.[0]?.toUpperCase() || '?'}
-                          </span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-body text-foreground font-medium truncate">
-                            {userItem.first_name} {userItem.last_name}
-                          </p>
-                          <p className="text-xs text-muted-foreground truncate">{userItem.email}</p>
-                        </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-body ${
-                          userItem.role === 'admin'
-                            ? 'bg-rainbow-purple/20 text-rainbow-purple'
-                            : 'bg-muted text-muted-foreground'
-                        }`}>
-                          {userItem.role === 'admin' ? 'Admin' : 'User'}
-                        </span>
-                      </div>
-                    ))}
-                    {users.length === 0 && (
-                      <p className="text-muted-foreground text-center py-4">Aucun utilisateur</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {activeTab === 'dashboard' && <AdminDashboard />}
 
           {/* Courses Tab */}
           {activeTab === 'courses' && (
@@ -970,6 +855,11 @@ const Admin = () => {
           {/* Grading Tab */}
           {activeTab === 'grading' && (
             <SubmissionGrader />
+          )}
+
+          {/* Files Tab */}
+          {activeTab === 'files' && (
+            <FileVideoManager courses={courses.map(c => ({ id: c.id, title: c.title }))} />
           )}
 
           {/* Users Tab */}
