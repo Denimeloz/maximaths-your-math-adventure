@@ -1,26 +1,31 @@
-import { Book, GraduationCap, Info, Menu, X, Home, LogIn } from "lucide-react";
+import { Book, GraduationCap, Info, Menu, X, Home, LogIn, User, LayoutDashboard, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { GlobalSearch } from "@/components/GlobalSearch";
+import { NotificationBell } from "@/components/NotificationBell";
 import newLogo from "@/assets/new-logo.png";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, isAdmin } = useAuth();
   const isHomePage = location.pathname === '/';
+  const isDashboard = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/course') || location.pathname.startsWith('/admin');
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-sky-cloud/95 backdrop-blur-md border-b-4 border-rainbow-blue/30">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+      <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
         {/* Logo */}
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+        <div className="flex items-center gap-3 cursor-pointer shrink-0" onClick={() => navigate('/')}>
           <img 
             src={newLogo} 
             alt="MAXIMATHS Logo" 
             className="w-14 h-14 object-contain"
           />
-          <span className="text-2xl md:text-3xl font-display tracking-tight">
+          <span className="text-2xl md:text-3xl font-display tracking-tight hidden sm:block">
             <span className="text-rainbow-coral">M</span>
             <span className="text-rainbow-yellow">A</span>
             <span className="text-rainbow-orange">X</span>
@@ -33,9 +38,16 @@ const Header = () => {
           </span>
         </div>
 
+        {/* Search bar - show only when logged in */}
+        {user && isDashboard && (
+          <div className="hidden lg:block flex-1 max-w-md">
+            <GlobalSearch />
+          </div>
+        )}
+
         {/* Navigation Desktop */}
         <nav className="hidden md:flex items-center gap-2">
-          {!isHomePage && (
+          {!isHomePage && !isDashboard && (
             <Button 
               variant="nav" 
               size="sm" 
@@ -46,46 +58,82 @@ const Header = () => {
               Accueil
             </Button>
           )}
-          <Button 
-            variant="nav" 
-            size="sm" 
-            className="gap-2 rounded-full hover:bg-rainbow-blue/20 hover:scale-105 transition-all"
-            onClick={() => navigate('/college')}
-          >
-            <Book className="w-4 h-4 text-rainbow-blue" />
-            Collège
-          </Button>
-          <Button 
-            variant="nav" 
-            size="sm" 
-            className="gap-2 rounded-full hover:bg-rainbow-purple/20 hover:scale-105 transition-all"
-            onClick={() => navigate('/lycee')}
-          >
-            <GraduationCap className="w-4 h-4 text-rainbow-purple" />
-            Lycée
-          </Button>
-          <Button 
-            variant="nav" 
-            size="sm" 
-            className="gap-2 rounded-full hover:bg-rainbow-pink/20 hover:scale-105 transition-all"
-            onClick={() => navigate('/about')}
-          >
-            <Info className="w-4 h-4 text-rainbow-pink" />
-            À propos
-          </Button>
+          {!isDashboard && (
+            <>
+              <Button 
+                variant="nav" 
+                size="sm" 
+                className="gap-2 rounded-full hover:bg-rainbow-blue/20 hover:scale-105 transition-all"
+                onClick={() => navigate('/college')}
+              >
+                <Book className="w-4 h-4 text-rainbow-blue" />
+                Collège
+              </Button>
+              <Button 
+                variant="nav" 
+                size="sm" 
+                className="gap-2 rounded-full hover:bg-rainbow-purple/20 hover:scale-105 transition-all"
+                onClick={() => navigate('/lycee')}
+              >
+                <GraduationCap className="w-4 h-4 text-rainbow-purple" />
+                Lycée
+              </Button>
+              <Button 
+                variant="nav" 
+                size="sm" 
+                className="gap-2 rounded-full hover:bg-rainbow-pink/20 hover:scale-105 transition-all"
+                onClick={() => navigate('/about')}
+              >
+                <Info className="w-4 h-4 text-rainbow-pink" />
+                À propos
+              </Button>
+            </>
+          )}
         </nav>
 
         {/* CTA Button & Mobile Menu */}
-        <div className="flex items-center gap-3">
-          <Button 
-            variant="orange" 
-            size="sm" 
-            className="hidden sm:flex shadow-[0_5px_0_hsl(25_100%_35%)] text-sm font-bold gap-2"
-            onClick={() => navigate('/auth')}
-          >
-            <LogIn className="w-4 h-4" />
-            Connexion
-          </Button>
+        <div className="flex items-center gap-2">
+          {user ? (
+            <>
+              <NotificationBell />
+              {isAdmin && (
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="rounded-xl hidden sm:flex"
+                  onClick={() => navigate('/admin')}
+                >
+                  <Shield className="w-5 h-5 text-rainbow-purple" />
+                </Button>
+              )}
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="rounded-xl hidden sm:flex"
+                onClick={() => navigate('/dashboard')}
+              >
+                <LayoutDashboard className="w-5 h-5 text-rainbow-blue" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="rounded-xl hidden sm:flex"
+                onClick={() => navigate('/profile')}
+              >
+                <User className="w-5 h-5 text-rainbow-green" />
+              </Button>
+            </>
+          ) : (
+            <Button 
+              variant="orange" 
+              size="sm" 
+              className="hidden sm:flex shadow-[0_5px_0_hsl(25_100%_35%)] text-sm font-bold gap-2"
+              onClick={() => navigate('/auth')}
+            >
+              <LogIn className="w-4 h-4" />
+              Connexion
+            </Button>
+          )}
           
           {/* Mobile menu button */}
           <button 
@@ -101,6 +149,11 @@ const Header = () => {
       {mobileMenuOpen && (
         <div className="md:hidden bg-sky-cloud/98 border-t-2 border-border animate-slide-up">
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
+            {user && (
+              <div className="mb-4">
+                <GlobalSearch onClose={() => setMobileMenuOpen(false)} />
+              </div>
+            )}
             {!isHomePage && (
               <Button 
                 variant="ghost" 
@@ -135,14 +188,47 @@ const Header = () => {
               <Info className="w-5 h-5 text-rainbow-pink" />
               À propos
             </Button>
-            <Button 
-              variant="orange" 
-              className="mt-2 h-12 shadow-[0_5px_0_hsl(25_100%_35%)] gap-2"
-              onClick={() => { navigate('/auth'); setMobileMenuOpen(false); }}
-            >
-              <LogIn className="w-5 h-5" />
-              Connexion
-            </Button>
+            
+            {user ? (
+              <>
+                <div className="border-t border-border my-2" />
+                <Button 
+                  variant="ghost" 
+                  className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-blue/20"
+                  onClick={() => { navigate('/dashboard'); setMobileMenuOpen(false); }}
+                >
+                  <LayoutDashboard className="w-5 h-5 text-rainbow-blue" />
+                  Tableau de bord
+                </Button>
+                {isAdmin && (
+                  <Button 
+                    variant="ghost" 
+                    className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-purple/20"
+                    onClick={() => { navigate('/admin'); setMobileMenuOpen(false); }}
+                  >
+                    <Shield className="w-5 h-5 text-rainbow-purple" />
+                    Administration
+                  </Button>
+                )}
+                <Button 
+                  variant="ghost" 
+                  className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-green/20"
+                  onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }}
+                >
+                  <User className="w-5 h-5 text-rainbow-green" />
+                  Mon profil
+                </Button>
+              </>
+            ) : (
+              <Button 
+                variant="orange" 
+                className="mt-2 h-12 shadow-[0_5px_0_hsl(25_100%_35%)] gap-2"
+                onClick={() => { navigate('/auth'); setMobileMenuOpen(false); }}
+              >
+                <LogIn className="w-5 h-5" />
+                Connexion
+              </Button>
+            )}
           </nav>
         </div>
       )}
