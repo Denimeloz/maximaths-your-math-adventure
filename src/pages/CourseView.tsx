@@ -6,6 +6,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { LessonComments } from '@/components/LessonComments';
+import { useLessonProgress } from '@/hooks/useLessonProgress';
 import { 
   BookOpen, 
   FileText, 
@@ -18,7 +20,8 @@ import {
   FileQuestion,
   Upload,
   Clock,
-  Star
+  Star,
+  Circle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -87,6 +90,7 @@ const CourseView = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { isLessonRead, markAsRead, markAsUnread, getReadCount } = useLessonProgress(courseId);
   
   const [course, setCourse] = useState<Course | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
@@ -338,20 +342,61 @@ const CourseView = () => {
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    {lessons.map((lesson, index) => (
-                      <div key={lesson.id} className="border border-border rounded-xl p-6">
-                        <div className="flex items-center gap-3 mb-4">
-                          <span className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
-                            {index + 1}
-                          </span>
-                          <h3 className="font-display text-lg text-foreground">{lesson.title}</h3>
-                        </div>
+                    {/* Progress indicator */}
+                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
+                      <span className="text-sm text-muted-foreground">
+                        Progression: {getReadCount()} / {lessons.length} leçons lues
+                      </span>
+                      <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
                         <div 
-                          className="prose prose-sm max-w-none text-muted-foreground font-body"
-                          dangerouslySetInnerHTML={{ __html: lesson.content }}
+                          className="h-full bg-rainbow-green transition-all"
+                          style={{ width: `${lessons.length > 0 ? (getReadCount() / lessons.length) * 100 : 0}%` }}
                         />
                       </div>
-                    ))}
+                    </div>
+
+                    {lessons.map((lesson, index) => {
+                      const isRead = isLessonRead(lesson.id);
+                      return (
+                        <div key={lesson.id} className={`border rounded-xl p-6 ${isRead ? 'border-rainbow-green/50 bg-rainbow-green/5' : 'border-border'}`}>
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+                                isRead ? 'bg-rainbow-green/20 text-rainbow-green' : 'bg-primary/10 text-primary'
+                              }`}>
+                                {isRead ? <CheckCircle className="w-4 h-4" /> : index + 1}
+                              </span>
+                              <h3 className="font-display text-lg text-foreground">{lesson.title}</h3>
+                            </div>
+                            <Button
+                              variant={isRead ? "outline" : "default"}
+                              size="sm"
+                              onClick={() => isRead ? markAsUnread(lesson.id) : markAsRead(lesson.id)}
+                              className="rounded-xl"
+                            >
+                              {isRead ? (
+                                <>
+                                  <Circle className="w-4 h-4 mr-1" />
+                                  Non lu
+                                </>
+                              ) : (
+                                <>
+                                  <CheckCircle className="w-4 h-4 mr-1" />
+                                  Marquer lu
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                          <div 
+                            className="prose prose-sm max-w-none text-muted-foreground font-body"
+                            dangerouslySetInnerHTML={{ __html: lesson.content }}
+                          />
+                          
+                          {/* Comments section */}
+                          <LessonComments lessonId={lesson.id} />
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </TabsContent>
