@@ -312,6 +312,32 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
               </div>
             </div>
 
+            {/* Correction Upload */}
+            <div>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Corrigé (PDF)</label>
+              <div className="flex items-center gap-4">
+                {form.correction_url ? (
+                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl flex-1">
+                    <BookCheck className="w-6 h-6 text-rainbow-green" />
+                    <a href={form.correction_url} target="_blank" rel="noopener noreferrer" className="text-sm text-rainbow-green hover:underline truncate">
+                      Voir le corrigé
+                    </a>
+                    <button onClick={() => setForm(prev => ({ ...prev, correction_url: '' }))} className="ml-auto">
+                      <X className="w-4 h-4 text-destructive" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <input type="file" ref={correctionInputRef} onChange={handleCorrectionUpload} className="hidden" accept=".pdf,.doc,.docx" />
+                    <Button type="button" variant="outline" onClick={() => correctionInputRef.current?.click()} disabled={isUploadingCorrection} className="rounded-xl">
+                      {isUploadingCorrection ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <BookCheck className="w-4 h-4 mr-2" />}
+                      {isUploadingCorrection ? 'Upload...' : 'Ajouter le corrigé'}
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-body text-muted-foreground mb-1 block">Points max</label>
