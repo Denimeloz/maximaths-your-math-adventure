@@ -38,8 +38,8 @@ const Header = () => {
           </span>
         </div>
 
-        {/* Search bar - show only when logged in */}
-        {user && isDashboard && (
+        {/* Search bar - show on dashboard/course pages or public course listing pages */}
+        {(isDashboard || location.pathname === '/college' || location.pathname === '/lycee') && (
           <div className="hidden lg:block flex-1 max-w-md">
             <GlobalSearch />
           </div>
@@ -149,7 +149,8 @@ const Header = () => {
       {mobileMenuOpen && (
         <div className="md:hidden bg-sky-cloud/98 border-t-2 border-border animate-slide-up">
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
-            {user && (
+            {/* Show search on mobile for course pages too */}
+            {(isDashboard || location.pathname === '/college' || location.pathname === '/lycee') && (
               <div className="mb-4">
                 <GlobalSearch onClose={() => setMobileMenuOpen(false)} />
               </div>
