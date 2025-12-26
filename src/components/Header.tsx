@@ -1,19 +1,87 @@
-import { Book, GraduationCap, Info, Menu, X, Home, LogIn, User, LayoutDashboard, Shield } from "lucide-react";
+import { Menu, X, Home, Info, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { GlobalSearch } from "@/components/GlobalSearch";
-import { NotificationBell } from "@/components/NotificationBell";
 import newLogo from "@/assets/new-logo.png";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+
+const levels = [
+  { 
+    id: '6eme', 
+    label: '6ème', 
+    color: 'bg-rainbow-blue',
+    hoverColor: 'hover:bg-rainbow-blue/20',
+    textColor: 'text-rainbow-blue'
+  },
+  { 
+    id: '5eme', 
+    label: '5ème', 
+    color: 'bg-rainbow-green',
+    hoverColor: 'hover:bg-rainbow-green/20',
+    textColor: 'text-rainbow-green'
+  },
+  { 
+    id: '4eme', 
+    label: '4ème', 
+    color: 'bg-rainbow-orange',
+    hoverColor: 'hover:bg-rainbow-orange/20',
+    textColor: 'text-rainbow-orange'
+  },
+  { 
+    id: '3eme', 
+    label: '3ème', 
+    color: 'bg-rainbow-coral',
+    hoverColor: 'hover:bg-rainbow-coral/20',
+    textColor: 'text-rainbow-coral'
+  },
+  { 
+    id: 'seconde', 
+    label: 'Seconde', 
+    color: 'bg-rainbow-pink',
+    hoverColor: 'hover:bg-rainbow-pink/20',
+    textColor: 'text-rainbow-pink'
+  },
+  { 
+    id: 'premiere', 
+    label: 'Première', 
+    color: 'bg-rainbow-purple',
+    hoverColor: 'hover:bg-rainbow-purple/20',
+    textColor: 'text-rainbow-purple'
+  },
+  { 
+    id: 'terminale', 
+    label: 'Terminale', 
+    color: 'bg-rainbow-yellow',
+    hoverColor: 'hover:bg-rainbow-yellow/20',
+    textColor: 'text-rainbow-yellow'
+  },
+];
+
+const subMenuItems = [
+  { id: 'cours', label: 'Cours', description: 'Leçons et chapitres' },
+  { id: 'devoirs', label: 'Devoirs', description: 'Exercices à rendre' },
+  { id: 'evaluations', label: 'Évaluations', description: 'Tests et examens' },
+];
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [expandedLevel, setExpandedLevel] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAdmin } = useAuth();
   const isHomePage = location.pathname === '/';
-  const isDashboard = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/course') || location.pathname.startsWith('/admin');
+
+  const handleSubMenuClick = (levelId: string, subMenuId: string) => {
+    navigate(`/niveau/${levelId}/${subMenuId}`);
+    setMobileMenuOpen(false);
+    setExpandedLevel(null);
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-sky-cloud/95 backdrop-blur-md border-b-4 border-rainbow-blue/30">
@@ -38,46 +106,53 @@ const Header = () => {
           </span>
         </div>
 
-        {/* Search bar - show on dashboard/course pages or public course listing pages */}
-        {(isDashboard || location.pathname === '/college' || location.pathname === '/lycee') && (
-          <div className="hidden lg:block flex-1 max-w-md">
-            <GlobalSearch />
-          </div>
-        )}
-
-        {/* Navigation Desktop */}
-        <nav className="hidden md:flex items-center gap-2">
-          {!isHomePage && !isDashboard && (
-            <Button 
-              variant="nav" 
-              size="sm" 
-              className="gap-2 rounded-full hover:bg-rainbow-green/20 hover:scale-105 transition-all"
-              onClick={() => navigate('/')}
-            >
-              <Home className="w-4 h-4 text-rainbow-green" />
-              Accueil
-            </Button>
-          )}
-          {!isDashboard && (
-            <>
-              <Button 
-                variant="nav" 
-                size="sm" 
-                className="gap-2 rounded-full hover:bg-rainbow-blue/20 hover:scale-105 transition-all"
-                onClick={() => navigate('/college')}
-              >
-                <Book className="w-4 h-4 text-rainbow-blue" />
-                Collège
-              </Button>
-              <Button 
-                variant="nav" 
-                size="sm" 
-                className="gap-2 rounded-full hover:bg-rainbow-purple/20 hover:scale-105 transition-all"
-                onClick={() => navigate('/lycee')}
-              >
-                <GraduationCap className="w-4 h-4 text-rainbow-purple" />
-                Lycée
-              </Button>
+        {/* Navigation Desktop - Niveaux avec sous-menus */}
+        <NavigationMenu className="hidden lg:flex">
+          <NavigationMenuList className="gap-1">
+            {!isHomePage && (
+              <NavigationMenuItem>
+                <Button 
+                  variant="nav" 
+                  size="sm" 
+                  className="gap-2 rounded-full hover:bg-rainbow-green/20 hover:scale-105 transition-all"
+                  onClick={() => navigate('/')}
+                >
+                  <Home className="w-4 h-4 text-rainbow-green" />
+                  Accueil
+                </Button>
+              </NavigationMenuItem>
+            )}
+            
+            {levels.map((level) => (
+              <NavigationMenuItem key={level.id}>
+                <NavigationMenuTrigger 
+                  className={`rounded-full px-4 py-2 font-body font-semibold ${level.hoverColor} transition-all data-[state=open]:${level.color}/20`}
+                >
+                  {level.label}
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-48 gap-1 p-2">
+                    {subMenuItems.map((item) => (
+                      <li key={item.id}>
+                        <NavigationMenuLink asChild>
+                          <button
+                            onClick={() => handleSubMenuClick(level.id, item.id)}
+                            className={`block w-full text-left select-none rounded-lg p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground`}
+                          >
+                            <div className="text-sm font-semibold font-body">{item.label}</div>
+                            <p className="text-xs text-muted-foreground font-body mt-1">
+                              {item.description}
+                            </p>
+                          </button>
+                        </NavigationMenuLink>
+                      </li>
+                    ))}
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            ))}
+            
+            <NavigationMenuItem>
               <Button 
                 variant="nav" 
                 size="sm" 
@@ -87,74 +162,23 @@ const Header = () => {
                 <Info className="w-4 h-4 text-rainbow-pink" />
                 À propos
               </Button>
-            </>
-          )}
-        </nav>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
 
-        {/* CTA Button & Mobile Menu */}
-        <div className="flex items-center gap-2">
-          {user ? (
-            <>
-              <NotificationBell />
-              {isAdmin && (
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  className="rounded-xl hidden sm:flex"
-                  onClick={() => navigate('/admin')}
-                >
-                  <Shield className="w-5 h-5 text-rainbow-purple" />
-                </Button>
-              )}
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="rounded-xl hidden sm:flex"
-                onClick={() => navigate('/dashboard')}
-              >
-                <LayoutDashboard className="w-5 h-5 text-rainbow-blue" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="rounded-xl hidden sm:flex"
-                onClick={() => navigate('/profile')}
-              >
-                <User className="w-5 h-5 text-rainbow-green" />
-              </Button>
-            </>
-          ) : (
-            <Button 
-              variant="orange" 
-              size="sm" 
-              className="hidden sm:flex shadow-[0_5px_0_hsl(25_100%_35%)] text-sm font-bold gap-2"
-              onClick={() => navigate('/auth')}
-            >
-              <LogIn className="w-4 h-4" />
-              Connexion
-            </Button>
-          )}
-          
-          {/* Mobile menu button */}
-          <button 
-            className="md:hidden p-2 rounded-xl bg-muted hover:bg-rainbow-blue/20 transition-colors"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-        </div>
+        {/* Mobile menu button */}
+        <button 
+          className="lg:hidden p-2 rounded-xl bg-muted hover:bg-rainbow-blue/20 transition-colors"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
       </div>
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-sky-cloud/98 border-t-2 border-border animate-slide-up">
+        <div className="lg:hidden bg-sky-cloud/98 border-t-2 border-border animate-slide-up max-h-[80vh] overflow-y-auto">
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
-            {/* Show search on mobile for course pages too */}
-            {(isDashboard || location.pathname === '/college' || location.pathname === '/lycee') && (
-              <div className="mb-4">
-                <GlobalSearch onClose={() => setMobileMenuOpen(false)} />
-              </div>
-            )}
             {!isHomePage && (
               <Button 
                 variant="ghost" 
@@ -165,71 +189,49 @@ const Header = () => {
                 Accueil
               </Button>
             )}
+            
+            {/* Niveaux avec accordéon */}
+            {levels.map((level) => (
+              <div key={level.id} className="border-b border-border/50 last:border-b-0">
+                <button
+                  onClick={() => setExpandedLevel(expandedLevel === level.id ? null : level.id)}
+                  className={`w-full flex items-center justify-between p-3 rounded-xl ${level.hoverColor} transition-colors`}
+                >
+                  <span className={`font-body font-semibold ${level.textColor}`}>
+                    {level.label}
+                  </span>
+                  <ChevronDown 
+                    className={`w-5 h-5 transition-transform ${expandedLevel === level.id ? 'rotate-180' : ''}`} 
+                  />
+                </button>
+                
+                {expandedLevel === level.id && (
+                  <div className="pl-4 pb-2 space-y-1">
+                    {subMenuItems.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => handleSubMenuClick(level.id, item.id)}
+                        className="w-full text-left p-3 rounded-lg hover:bg-muted transition-colors"
+                      >
+                        <div className="font-body font-medium text-foreground">{item.label}</div>
+                        <p className="text-xs text-muted-foreground font-body">
+                          {item.description}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+            
             <Button 
               variant="ghost" 
-              className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-blue/20"
-              onClick={() => { navigate('/college'); setMobileMenuOpen(false); }}
-            >
-              <Book className="w-5 h-5 text-rainbow-blue" />
-              Collège
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-purple/20"
-              onClick={() => { navigate('/lycee'); setMobileMenuOpen(false); }}
-            >
-              <GraduationCap className="w-5 h-5 text-rainbow-purple" />
-              Lycée
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-pink/20"
+              className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-pink/20 mt-2"
               onClick={() => { navigate('/about'); setMobileMenuOpen(false); }}
             >
               <Info className="w-5 h-5 text-rainbow-pink" />
               À propos
             </Button>
-            
-            {user ? (
-              <>
-                <div className="border-t border-border my-2" />
-                <Button 
-                  variant="ghost" 
-                  className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-blue/20"
-                  onClick={() => { navigate('/dashboard'); setMobileMenuOpen(false); }}
-                >
-                  <LayoutDashboard className="w-5 h-5 text-rainbow-blue" />
-                  Tableau de bord
-                </Button>
-                {isAdmin && (
-                  <Button 
-                    variant="ghost" 
-                    className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-purple/20"
-                    onClick={() => { navigate('/admin'); setMobileMenuOpen(false); }}
-                  >
-                    <Shield className="w-5 h-5 text-rainbow-purple" />
-                    Administration
-                  </Button>
-                )}
-                <Button 
-                  variant="ghost" 
-                  className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-green/20"
-                  onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }}
-                >
-                  <User className="w-5 h-5 text-rainbow-green" />
-                  Mon profil
-                </Button>
-              </>
-            ) : (
-              <Button 
-                variant="orange" 
-                className="mt-2 h-12 shadow-[0_5px_0_hsl(25_100%_35%)] gap-2"
-                onClick={() => { navigate('/auth'); setMobileMenuOpen(false); }}
-              >
-                <LogIn className="w-5 h-5" />
-                Connexion
-              </Button>
-            )}
           </nav>
         </div>
       )}
