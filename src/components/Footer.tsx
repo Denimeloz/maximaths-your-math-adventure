@@ -26,10 +26,11 @@ const Footer = () => {
 
           {/* Links */}
           <nav className="flex flex-wrap justify-center gap-8 font-body font-bold text-lg">
-            <Link to="/college" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block">Collège</Link>
-            <Link to="/lycee" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block">Lycée</Link>
+            <Link to="/6eme/cours" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block">Collège</Link>
+            <Link to="/seconde/cours" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block">Lycée</Link>
             <Link to="/about" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block">À propos</Link>
             <a href="mailto:maximathsclasse@gmail.com" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block">Contact</a>
+            <Link to="/admin-login" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block opacity-50 text-sm">Admin</Link>
           </nav>
 
           {/* Contact */}
