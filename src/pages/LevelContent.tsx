@@ -13,7 +13,7 @@ import {
   Star
 } from 'lucide-react';
 
-type ContentType = 'cours' | 'devoirs' | 'evaluations';
+type ContentType = 'cours' | 'devoirs' | 'evaluations' | 'prepa-dnb';
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
 const levelLabels: Record<CourseLevel, string> = {
@@ -51,6 +51,11 @@ const contentConfig: Record<ContentType, { icon: React.ElementType; title: strin
     icon: ClipboardCheck,
     title: 'Évaluations',
     description: 'Tests et examens'
+  },
+  'prepa-dnb': {
+    icon: Star,
+    title: 'Prépa DNB',
+    description: 'Préparation au Diplôme National du Brevet'
   }
 };
 
@@ -80,12 +85,23 @@ interface Evaluation {
   course_id: string | null;
 }
 
+interface DnbContent {
+  id: string;
+  title: string;
+  description: string | null;
+  file_url: string | null;
+  correction_url: string | null;
+  category: string;
+  year: number | null;
+}
+
 const LevelContent = () => {
   const { levelId, contentType } = useParams<{ levelId: string; contentType: string }>();
   const navigate = useNavigate();
   const [courses, setCourses] = useState<Course[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+  const [dnbContent, setDnbContent] = useState<DnbContent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const level = levelId as CourseLevel;
@@ -114,7 +130,6 @@ const LevelContent = () => {
       if (data) setCourses(data as Course[]);
     } 
     else if (type === 'devoirs') {
-      // Récupérer les cours du niveau d'abord
       const { data: levelCourses } = await supabase
         .from('courses')
         .select('id')
@@ -151,6 +166,15 @@ const LevelContent = () => {
         
         if (data) setEvaluations(data);
       }
+    }
+    else if (type === 'prepa-dnb') {
+      const { data } = await supabase
+        .from('dnb_content')
+        .select('*')
+        .eq('is_published', true)
+        .order('order_index', { ascending: true });
+      
+      if (data) setDnbContent(data as DnbContent[]);
     }
     
     setIsLoading(false);
@@ -267,6 +291,60 @@ const LevelContent = () => {
     </div>
   );
 
+  const renderDnbContent = () => (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {dnbContent.map((item) => (
+        <div 
+          key={item.id}
+          className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 group`}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Star className={`w-5 h-5 text-${color}`} />
+            <span className="text-xs font-body text-muted-foreground capitalize">
+              {item.category}
+              {item.year && ` • ${item.year}`}
+            </span>
+          </div>
+          
+          <h3 className={`text-xl font-display text-foreground mb-2`}>
+            {item.title}
+          </h3>
+          
+          {item.description && (
+            <p className="text-muted-foreground font-body text-sm line-clamp-3 mb-4">
+              {item.description}
+            </p>
+          )}
+          
+          <div className="flex gap-2 pt-4 border-t border-border">
+            {item.file_url && (
+              <a 
+                href={item.file_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-rainbow-blue hover:underline flex items-center gap-1"
+              >
+                <FileText className="w-4 h-4" />
+                Sujet
+              </a>
+            )}
+            {item.correction_url && (
+              <a 
+                href={item.correction_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-rainbow-green hover:underline flex items-center gap-1"
+              >
+                <BookOpen className="w-4 h-4" />
+                Corrigé
+              </a>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   const getContent = () => {
     if (isLoading) {
       return (
@@ -282,6 +360,8 @@ const LevelContent = () => {
       return assignments.length > 0 ? renderAssignments() : renderEmptyState();
     } else if (type === 'evaluations') {
       return evaluations.length > 0 ? renderEvaluations() : renderEmptyState();
+    } else if (type === 'prepa-dnb') {
+      return dnbContent.length > 0 ? renderDnbContent() : renderEmptyState();
     }
     
     return renderEmptyState();
