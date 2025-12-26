@@ -5,6 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import PDFViewer from '@/components/PDFViewer';
+import { SortableItem } from './SortableItem';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, Upload, FileText, Video, Loader2, File } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -71,6 +74,13 @@ export const FileVideoManager: React.FC<FileVideoManagerProps> = ({ courses }) =
     video_url: '',
     duration_seconds: 0,
   });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     fetchData();
@@ -283,8 +293,72 @@ export const FileVideoManager: React.FC<FileVideoManagerProps> = ({ courses }) =
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const filteredFiles = selectedCourse ? files.filter(f => f.course_id === selectedCourse) : files;
-  const filteredVideos = selectedCourse ? videos.filter(v => v.course_id === selectedCourse) : videos;
+  const filteredFiles = (selectedCourse ? files.filter(f => f.course_id === selectedCourse) : files).sort((a, b) => a.order_index - b.order_index);
+  const filteredVideos = (selectedCourse ? videos.filter(v => v.course_id === selectedCourse) : videos).sort((a, b) => a.order_index - b.order_index);
+
+  const handleFileDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (!over || active.id === over.id) return;
+    
+    const oldIndex = filteredFiles.findIndex(f => f.id === active.id);
+    const newIndex = filteredFiles.findIndex(f => f.id === over.id);
+    
+    if (oldIndex === -1 || newIndex === -1) return;
+    
+    const newOrder = arrayMove(filteredFiles, oldIndex, newIndex);
+    
+    // Optimistic update
+    setFiles(prev => {
+      const otherFiles = prev.filter(f => !filteredFiles.find(ff => ff.id === f.id));
+      return [...otherFiles, ...newOrder.map((f, i) => ({ ...f, order_index: i }))];
+    });
+    
+    // Update in database
+    try {
+      await Promise.all(
+        newOrder.map((file, index) =>
+          supabase.from('course_files').update({ order_index: index }).eq('id', file.id)
+        )
+      );
+      toast({ title: "Ordre mis à jour" });
+    } catch (error) {
+      toast({ title: "Erreur", description: "Impossible de mettre à jour l'ordre", variant: "destructive" });
+      fetchData();
+    }
+  };
+
+  const handleVideoDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (!over || active.id === over.id) return;
+    
+    const oldIndex = filteredVideos.findIndex(v => v.id === active.id);
+    const newIndex = filteredVideos.findIndex(v => v.id === over.id);
+    
+    if (oldIndex === -1 || newIndex === -1) return;
+    
+    const newOrder = arrayMove(filteredVideos, oldIndex, newIndex);
+    
+    // Optimistic update
+    setVideos(prev => {
+      const otherVideos = prev.filter(v => !filteredVideos.find(fv => fv.id === v.id));
+      return [...otherVideos, ...newOrder.map((v, i) => ({ ...v, order_index: i }))];
+    });
+    
+    // Update in database
+    try {
+      await Promise.all(
+        newOrder.map((video, index) =>
+          supabase.from('videos').update({ order_index: index }).eq('id', video.id)
+        )
+      );
+      toast({ title: "Ordre mis à jour" });
+    } catch (error) {
+      toast({ title: "Erreur", description: "Impossible de mettre à jour l'ordre", variant: "destructive" });
+      fetchData();
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -419,38 +493,44 @@ export const FileVideoManager: React.FC<FileVideoManagerProps> = ({ courses }) =
             </div>
           )}
 
-          <div className="space-y-3">
-            {filteredFiles.map(file => (
-              <div key={file.id} className="card-cartoon bg-card border-border p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-10 h-10 rounded-xl bg-rainbow-blue/20 flex items-center justify-center">
-                      <FileText className="w-5 h-5 text-rainbow-blue" />
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleFileDragEnd}>
+            <SortableContext items={filteredFiles.map(f => f.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-3">
+                {filteredFiles.map(file => (
+                  <SortableItem key={file.id} id={file.id}>
+                    <div className="card-cartoon bg-card border-border p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="w-10 h-10 rounded-xl bg-rainbow-blue/20 flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-rainbow-blue" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-display text-foreground truncate">{file.title}</p>
+                            <p className="text-sm text-muted-foreground">{getCourseName(file.course_id)}</p>
+                            <p className="text-xs text-muted-foreground">{file.file_type} • {formatFileSize(file.file_size)}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="ghost" size="icon" onClick={() => handleToggleFilePublish(file)} className="rounded-xl">
+                            {file.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleEditFile(file)} className="rounded-xl">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDeleteFile(file.id)} className="rounded-xl text-destructive">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-display text-foreground truncate">{file.title}</p>
-                      <p className="text-sm text-muted-foreground">{getCourseName(file.course_id)}</p>
-                      <p className="text-xs text-muted-foreground">{file.file_type} • {formatFileSize(file.file_size)}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleToggleFilePublish(file)} className="rounded-xl">
-                      {file.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleEditFile(file)} className="rounded-xl">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDeleteFile(file.id)} className="rounded-xl text-destructive">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
+                  </SortableItem>
+                ))}
+                {filteredFiles.length === 0 && (
+                  <p className="text-muted-foreground text-center py-8">Aucun fichier</p>
+                )}
               </div>
-            ))}
-            {filteredFiles.length === 0 && (
-              <p className="text-muted-foreground text-center py-8">Aucun fichier</p>
-            )}
-          </div>
+            </SortableContext>
+          </DndContext>
         </TabsContent>
 
         <TabsContent value="videos" className="mt-4 space-y-4">
@@ -542,40 +622,46 @@ export const FileVideoManager: React.FC<FileVideoManagerProps> = ({ courses }) =
             </div>
           )}
 
-          <div className="space-y-3">
-            {filteredVideos.map(video => (
-              <div key={video.id} className="card-cartoon bg-card border-border p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-10 h-10 rounded-xl bg-rainbow-purple/20 flex items-center justify-center">
-                      <Video className="w-5 h-5 text-rainbow-purple" />
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleVideoDragEnd}>
+            <SortableContext items={filteredVideos.map(v => v.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-3">
+                {filteredVideos.map(video => (
+                  <SortableItem key={video.id} id={video.id}>
+                    <div className="card-cartoon bg-card border-border p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="w-10 h-10 rounded-xl bg-rainbow-purple/20 flex items-center justify-center">
+                            <Video className="w-5 h-5 text-rainbow-purple" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-display text-foreground truncate">{video.title}</p>
+                            <p className="text-sm text-muted-foreground">{getCourseName(video.course_id)}</p>
+                            {video.duration_seconds && (
+                              <p className="text-xs text-muted-foreground">{formatDuration(video.duration_seconds)}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="ghost" size="icon" onClick={() => handleToggleVideoPublish(video)} className="rounded-xl">
+                            {video.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleEditVideo(video)} className="rounded-xl">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDeleteVideo(video.id)} className="rounded-xl text-destructive">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-display text-foreground truncate">{video.title}</p>
-                      <p className="text-sm text-muted-foreground">{getCourseName(video.course_id)}</p>
-                      {video.duration_seconds && (
-                        <p className="text-xs text-muted-foreground">{formatDuration(video.duration_seconds)}</p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleToggleVideoPublish(video)} className="rounded-xl">
-                      {video.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleEditVideo(video)} className="rounded-xl">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDeleteVideo(video.id)} className="rounded-xl text-destructive">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
+                  </SortableItem>
+                ))}
+                {filteredVideos.length === 0 && (
+                  <p className="text-muted-foreground text-center py-8">Aucune vidéo</p>
+                )}
               </div>
-            ))}
-            {filteredVideos.length === 0 && (
-              <p className="text-muted-foreground text-center py-8">Aucune vidéo</p>
-            )}
-          </div>
+            </SortableContext>
+          </DndContext>
         </TabsContent>
       </Tabs>
     </div>
