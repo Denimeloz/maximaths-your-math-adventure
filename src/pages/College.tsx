@@ -9,9 +9,7 @@ import {
   BookOpen, 
   GraduationCap, 
   Star, 
-  ArrowRight,
-  Lock,
-  CheckCircle
+  ArrowRight
 } from 'lucide-react';
 
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme';
@@ -148,19 +146,12 @@ const College = () => {
               <div 
                 key={course.id}
                 className={`card-sticker bg-card ${getLevelColor(course.level)} p-6 cursor-pointer group`}
-                onClick={() => {
-                  if (user) {
-                    navigate(`/course/${course.id}`);
-                  } else {
-                    navigate('/auth');
-                  }
-                }}
+                onClick={() => navigate(`/course/${course.id}`)}
               >
                 <div className="flex items-start justify-between mb-4">
                   <span className="px-3 py-1 bg-muted rounded-full text-xs font-body text-muted-foreground">
                     {getLevelLabel(course.level)}
                   </span>
-                  {!user && <Lock className="w-5 h-5 text-muted-foreground" />}
                 </div>
                 
                 <h3 className="text-xl font-display text-foreground mb-2 group-hover:text-rainbow-blue transition-colors">
@@ -189,10 +180,10 @@ const College = () => {
           <div className="mt-16 text-center">
             <div className="card-sticker bg-gradient-to-r from-rainbow-blue/10 to-rainbow-purple/10 border-rainbow-blue/30 p-8 max-w-2xl mx-auto">
               <h2 className="text-2xl font-display text-foreground mb-4">
-                Prêt à commencer ?
+                Crée ton compte pour suivre ta progression !
               </h2>
               <p className="text-muted-foreground font-body mb-6">
-                Crée ton compte gratuit pour accéder à tous les cours et exercices !
+                Inscris-toi gratuitement pour débloquer les quizs, devoirs et suivi de progression !
               </p>
               <Button onClick={() => navigate('/auth')} className="btn-3d bg-primary rounded-xl text-lg px-8 py-6">
                 Créer mon compte
