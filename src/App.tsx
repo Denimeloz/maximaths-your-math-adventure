@@ -13,13 +13,13 @@ import DashboardCalendar from "./pages/DashboardCalendar";
 import DashboardSettings from "./pages/DashboardSettings";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
-import College from "./pages/College";
-import Lycee from "./pages/Lycee";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import CourseView from "./pages/CourseView";
 import QuizPage from "./pages/QuizPage";
 import AssignmentSubmit from "./pages/AssignmentSubmit";
+import LevelContent from "./pages/LevelContent";
+import AdminLogin from "./pages/AdminLogin";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +33,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/profile" element={<Profile />} />
             <Route path="/dashboard/badges" element={<DashboardBadges />} />
@@ -45,9 +46,8 @@ const App = () => (
             <Route path="/admin/stats" element={<Admin />} />
             <Route path="/admin/settings" element={<Admin />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/college" element={<College />} />
-            <Route path="/lycee" element={<Lycee />} />
             <Route path="/about" element={<About />} />
+            <Route path="/niveau/:levelId/:contentType" element={<LevelContent />} />
             <Route path="/course/:courseId" element={<CourseView />} />
             <Route path="/quiz/:quizId" element={<QuizPage />} />
             <Route path="/assignment/:assignmentId" element={<AssignmentSubmit />} />
