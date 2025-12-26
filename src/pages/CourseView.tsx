@@ -432,30 +432,40 @@ const CourseView = () => {
                           <p className="font-body text-foreground whitespace-pre-wrap">{exercise.question}</p>
                         </div>
                         
-                        <Button 
-                          variant="outline"
-                          onClick={() => toggleAnswer(exercise.id)}
-                          className="mb-4"
-                        >
-                          {showAnswer[exercise.id] ? 'Masquer' : 'Voir'} le corrigé
-                        </Button>
-                        
-                        {showAnswer[exercise.id] && (
-                          <div className="space-y-4 animate-fade-in">
-                            <div className="bg-rainbow-green/10 border border-rainbow-green/30 p-4 rounded-lg">
-                              <h4 className="font-semibold text-rainbow-green mb-2 flex items-center gap-2">
-                                <CheckCircle className="w-4 h-4" />
-                                Réponse
-                              </h4>
-                              <p className="font-body text-foreground whitespace-pre-wrap">{exercise.answer}</p>
-                            </div>
+                        {user ? (
+                          <>
+                            <Button 
+                              variant="outline"
+                              onClick={() => toggleAnswer(exercise.id)}
+                              className="mb-4"
+                            >
+                              {showAnswer[exercise.id] ? 'Masquer' : 'Voir'} le corrigé
+                            </Button>
                             
-                            {exercise.explanation && (
-                              <div className="bg-rainbow-blue/10 border border-rainbow-blue/30 p-4 rounded-lg">
-                                <h4 className="font-semibold text-rainbow-blue mb-2">Explication</h4>
-                                <p className="font-body text-foreground whitespace-pre-wrap">{exercise.explanation}</p>
+                            {showAnswer[exercise.id] && (
+                              <div className="space-y-4 animate-fade-in">
+                                <div className="bg-rainbow-green/10 border border-rainbow-green/30 p-4 rounded-lg">
+                                  <h4 className="font-semibold text-rainbow-green mb-2 flex items-center gap-2">
+                                    <CheckCircle className="w-4 h-4" />
+                                    Réponse
+                                  </h4>
+                                  <p className="font-body text-foreground whitespace-pre-wrap">{exercise.answer}</p>
+                                </div>
+                                
+                                {exercise.explanation && (
+                                  <div className="bg-rainbow-blue/10 border border-rainbow-blue/30 p-4 rounded-lg">
+                                    <h4 className="font-semibold text-rainbow-blue mb-2">Explication</h4>
+                                    <p className="font-body text-foreground whitespace-pre-wrap">{exercise.explanation}</p>
+                                  </div>
+                                )}
                               </div>
                             )}
+                          </>
+                        ) : (
+                          <div className="bg-rainbow-orange/10 border border-rainbow-orange/30 rounded-lg p-3 mt-2">
+                            <p className="text-sm text-rainbow-orange">
+                              🔐 <a href="/auth" className="underline hover:no-underline">Connecte-toi</a> pour voir le corrigé
+                            </p>
                           </div>
                         )}
                       </div>
@@ -472,50 +482,35 @@ const CourseView = () => {
                     <p className="text-muted-foreground">Aucun quiz disponible</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {!user && (
-                      <div className="bg-rainbow-orange/10 border border-rainbow-orange/30 rounded-xl p-4 mb-4">
-                        <p className="text-sm text-rainbow-orange">
-                          🔐 Connecte-toi pour accéder aux quiz !
-                        </p>
-                      </div>
-                    )}
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      {quizzes.map(quiz => (
-                        <div 
-                          key={quiz.id} 
-                          className={`border border-border rounded-xl p-6 transition-colors ${user ? 'hover:border-primary/50 cursor-pointer group' : 'opacity-75'}`}
-                          onClick={() => user && navigate(`/quiz/${quiz.id}`)}
-                        >
-                          <h3 className="font-display text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
-                            {quiz.title}
-                          </h3>
-                          {quiz.description && (
-                            <p className="text-sm text-muted-foreground mb-4">{quiz.description}</p>
-                          )}
-                          <div className="flex items-center justify-between text-sm mb-4">
-                            {quiz.time_limit_minutes && (
-                              <span className="text-muted-foreground flex items-center gap-1">
-                                <Clock className="w-4 h-4" /> {quiz.time_limit_minutes} min
-                              </span>
-                            )}
-                            <span className="text-rainbow-purple font-semibold">
-                              Score min: {quiz.passing_score}%
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {quizzes.map(quiz => (
+                      <div 
+                        key={quiz.id} 
+                        className="border border-border rounded-xl p-6 transition-colors hover:border-primary/50 cursor-pointer group"
+                        onClick={() => navigate(`/quiz/${quiz.id}`)}
+                      >
+                        <h3 className="font-display text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
+                          {quiz.title}
+                        </h3>
+                        {quiz.description && (
+                          <p className="text-sm text-muted-foreground mb-4">{quiz.description}</p>
+                        )}
+                        <div className="flex items-center justify-between text-sm mb-4">
+                          {quiz.time_limit_minutes && (
+                            <span className="text-muted-foreground flex items-center gap-1">
+                              <Clock className="w-4 h-4" /> {quiz.time_limit_minutes} min
                             </span>
-                          </div>
-                          {user ? (
-                            <Button className="w-full btn-3d bg-primary">
-                              <Play className="w-4 h-4 mr-2" />
-                              Commencer le quiz
-                            </Button>
-                          ) : (
-                            <Button variant="outline" className="w-full" onClick={() => navigate('/auth')}>
-                              Connexion requise
-                            </Button>
                           )}
+                          <span className="text-rainbow-purple font-semibold">
+                            Score min: {quiz.passing_score}%
+                          </span>
                         </div>
-                      ))}
-                    </div>
+                        <Button className="w-full btn-3d bg-primary">
+                          <Play className="w-4 h-4 mr-2" />
+                          Commencer le quiz
+                        </Button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </TabsContent>
@@ -600,13 +595,6 @@ const CourseView = () => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {!user && (
-                      <div className="bg-rainbow-orange/10 border border-rainbow-orange/30 rounded-xl p-4 mb-4">
-                        <p className="text-sm text-rainbow-orange">
-                          🔐 Connecte-toi pour rendre les devoirs !
-                        </p>
-                      </div>
-                    )}
                     {assignments.map(assignment => (
                       <div key={assignment.id} className="border border-border rounded-xl p-6 hover:border-primary/30 transition-colors">
                         <div className="flex items-start justify-between mb-4">
@@ -647,7 +635,7 @@ const CourseView = () => {
                           </Button>
                         ) : (
                           <Button variant="outline" onClick={() => navigate('/auth')}>
-                            Connexion requise
+                            <a href="/auth">Connexion pour rendre</a>
                           </Button>
                         )}
                       </div>
