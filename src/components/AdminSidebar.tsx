@@ -17,15 +17,14 @@ import {
   BookOpen, 
   Users, 
   User, 
-  Settings, 
   LogOut,
   Shield,
   PenTool,
-  HelpCircle,
   ClipboardList,
   FileCheck,
   CheckSquare,
-  Home
+  Home,
+  Star
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -33,9 +32,9 @@ const menuItems = [
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard, tab: 'dashboard' },
   { title: 'Cours', url: '/admin/courses', icon: BookOpen, tab: 'courses' },
   { title: 'Exercices', url: '/admin', icon: PenTool, tab: 'exercises' },
-  { title: 'Quiz', url: '/admin', icon: HelpCircle, tab: 'quizzes' },
   { title: 'Devoirs', url: '/admin', icon: ClipboardList, tab: 'assignments' },
   { title: 'Évaluations', url: '/admin', icon: FileCheck, tab: 'evaluations' },
+  { title: 'Prépa DNB', url: '/admin', icon: Star, tab: 'dnb' },
   { title: 'Correction', url: '/admin', icon: CheckSquare, tab: 'grading' },
   { title: 'Utilisateurs', url: '/admin/users', icon: Users, tab: 'users' },
 ];

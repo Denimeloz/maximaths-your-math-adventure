@@ -1,0 +1,379 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, Star, Upload, FileText, Loader2, BookCheck } from 'lucide-react';
+
+interface DnbContent {
+  id: string;
+  title: string;
+  description: string | null;
+  content: string | null;
+  file_url: string | null;
+  correction_url: string | null;
+  category: string;
+  year: number | null;
+  is_published: boolean;
+  order_index: number;
+}
+
+export const DnbManager: React.FC = () => {
+  const { toast } = useToast();
+  const [items, setItems] = useState<DnbContent[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingItem, setEditingItem] = useState<DnbContent | null>(null);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
+  const [isUploadingCorrection, setIsUploadingCorrection] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const correctionInputRef = useRef<HTMLInputElement>(null);
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    content: '',
+    file_url: '',
+    correction_url: '',
+    category: 'exercice',
+    year: new Date().getFullYear(),
+  });
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    const { data } = await supabase
+      .from('dnb_content')
+      .select('*')
+      .order('order_index', { ascending: true });
+    if (data) setItems(data);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: "Erreur", description: "Le fichier ne doit pas dépasser 20MB", variant: "destructive" });
+      return;
+    }
+
+    setIsUploadingFile(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `dnb/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('course-files').upload(fileName, file);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from('course-files').getPublicUrl(fileName);
+      setForm(prev => ({ ...prev, file_url: publicUrl }));
+      toast({ title: "Succès", description: "Fichier téléchargé" });
+    } catch (error) {
+      toast({ title: "Erreur", description: "Impossible de télécharger le fichier", variant: "destructive" });
+    } finally {
+      setIsUploadingFile(false);
+    }
+  };
+
+  const handleCorrectionUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: "Erreur", description: "Le fichier ne doit pas dépasser 20MB", variant: "destructive" });
+      return;
+    }
+
+    setIsUploadingCorrection(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `dnb/corrections/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('course-files').upload(fileName, file);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from('course-files').getPublicUrl(fileName);
+      setForm(prev => ({ ...prev, correction_url: publicUrl }));
+      toast({ title: "Succès", description: "Corrigé téléchargé" });
+    } catch (error) {
+      toast({ title: "Erreur", description: "Impossible de télécharger le corrigé", variant: "destructive" });
+    } finally {
+      setIsUploadingCorrection(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!form.title.trim()) {
+      toast({ title: "Erreur", description: "Le titre est requis", variant: "destructive" });
+      return;
+    }
+
+    const data = {
+      title: form.title,
+      description: form.description || null,
+      content: form.content || null,
+      file_url: form.file_url || null,
+      correction_url: form.correction_url || null,
+      category: form.category,
+      year: form.year || null,
+    };
+
+    if (editingItem) {
+      const { error } = await supabase
+        .from('dnb_content')
+        .update(data)
+        .eq('id', editingItem.id);
+
+      if (!error) {
+        toast({ title: "Succès", description: "Contenu modifié" });
+        fetchData();
+        resetForm();
+      }
+    } else {
+      const { error } = await supabase
+        .from('dnb_content')
+        .insert({
+          ...data,
+          order_index: items.length,
+        });
+
+      if (!error) {
+        toast({ title: "Succès", description: "Contenu créé" });
+        fetchData();
+        resetForm();
+      }
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Supprimer ce contenu ?")) return;
+    await supabase.from('dnb_content').delete().eq('id', id);
+    toast({ title: "Supprimé" });
+    fetchData();
+  };
+
+  const handleTogglePublish = async (item: DnbContent) => {
+    await supabase.from('dnb_content').update({ is_published: !item.is_published }).eq('id', item.id);
+    fetchData();
+  };
+
+  const handleEdit = (item: DnbContent) => {
+    setEditingItem(item);
+    setForm({
+      title: item.title,
+      description: item.description || '',
+      content: item.content || '',
+      file_url: item.file_url || '',
+      correction_url: item.correction_url || '',
+      category: item.category,
+      year: item.year || new Date().getFullYear(),
+    });
+    setShowForm(true);
+  };
+
+  const resetForm = () => {
+    setShowForm(false);
+    setEditingItem(null);
+    setForm({
+      title: '',
+      description: '',
+      content: '',
+      file_url: '',
+      correction_url: '',
+      category: 'exercice',
+      year: new Date().getFullYear(),
+    });
+  };
+
+  const getCategoryLabel = (category: string) => {
+    const labels: Record<string, string> = {
+      'exercice': 'Exercice type',
+      'annale': 'Annale',
+      'cours': 'Fiche de révision',
+      'methode': 'Méthodologie',
+    };
+    return labels[category] || category;
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-display text-foreground">Gestion Prépa DNB</h2>
+        <Button onClick={() => setShowForm(true)} className="btn-3d bg-primary rounded-xl">
+          <Plus className="w-4 h-4 mr-2" />
+          Nouveau contenu
+        </Button>
+      </div>
+
+      {showForm && (
+        <div className="card-sticker bg-card border-rainbow-coral/30 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-display text-foreground">
+              {editingItem ? 'Modifier le contenu' : 'Nouveau contenu DNB'}
+            </h3>
+            <Button variant="ghost" size="icon" onClick={resetForm}>
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+
+          <div className="grid gap-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-body text-muted-foreground mb-1 block">Catégorie *</label>
+                <select
+                  value={form.category}
+                  onChange={(e) => setForm(prev => ({ ...prev, category: e.target.value }))}
+                  className="w-full p-2 rounded-xl border border-input bg-background"
+                >
+                  <option value="exercice">Exercice type</option>
+                  <option value="annale">Annale</option>
+                  <option value="cours">Fiche de révision</option>
+                  <option value="methode">Méthodologie</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-body text-muted-foreground mb-1 block">Année</label>
+                <Input
+                  type="number"
+                  min={2000}
+                  max={2100}
+                  value={form.year}
+                  onChange={(e) => setForm(prev => ({ ...prev, year: parseInt(e.target.value) || new Date().getFullYear() }))}
+                  className="rounded-xl"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Titre *</label>
+              <Input
+                value={form.title}
+                onChange={(e) => setForm(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Titre du contenu"
+                className="rounded-xl"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Description</label>
+              <Textarea
+                value={form.description}
+                onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Description"
+                className="rounded-xl"
+                rows={2}
+              />
+            </div>
+
+            {/* File Upload */}
+            <div>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Sujet (PDF)</label>
+              <div className="flex items-center gap-4">
+                {form.file_url ? (
+                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl flex-1">
+                    <FileText className="w-6 h-6 text-rainbow-blue" />
+                    <a href={form.file_url} target="_blank" rel="noopener noreferrer" className="text-sm text-rainbow-blue hover:underline truncate">
+                      Voir le sujet
+                    </a>
+                    <button onClick={() => setForm(prev => ({ ...prev, file_url: '' }))} className="ml-auto">
+                      <X className="w-4 h-4 text-destructive" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".pdf,.doc,.docx" />
+                    <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isUploadingFile} className="rounded-xl">
+                      {isUploadingFile ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                      {isUploadingFile ? 'Upload...' : 'Ajouter le sujet'}
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Correction Upload */}
+            <div>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Corrigé (PDF)</label>
+              <div className="flex items-center gap-4">
+                {form.correction_url ? (
+                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl flex-1">
+                    <BookCheck className="w-6 h-6 text-rainbow-green" />
+                    <a href={form.correction_url} target="_blank" rel="noopener noreferrer" className="text-sm text-rainbow-green hover:underline truncate">
+                      Voir le corrigé
+                    </a>
+                    <button onClick={() => setForm(prev => ({ ...prev, correction_url: '' }))} className="ml-auto">
+                      <X className="w-4 h-4 text-destructive" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <input type="file" ref={correctionInputRef} onChange={handleCorrectionUpload} className="hidden" accept=".pdf,.doc,.docx" />
+                    <Button type="button" variant="outline" onClick={() => correctionInputRef.current?.click()} disabled={isUploadingCorrection} className="rounded-xl">
+                      {isUploadingCorrection ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <BookCheck className="w-4 h-4 mr-2" />}
+                      {isUploadingCorrection ? 'Upload...' : 'Ajouter le corrigé'}
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button onClick={handleSave} className="btn-3d bg-primary rounded-xl">
+                <Save className="w-4 h-4 mr-2" />
+                Enregistrer
+              </Button>
+              <Button onClick={resetForm} variant="outline" className="rounded-xl">
+                Annuler
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-4">
+        {items.map(item => (
+          <div key={item.id} className="card-cartoon bg-card border-border p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-rainbow-coral/20 flex items-center justify-center">
+                  <Star className="w-5 h-5 text-rainbow-coral" />
+                </div>
+                <div>
+                  <p className="font-display text-foreground">{item.title}</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">{getCategoryLabel(item.category)}</span>
+                    {item.year && (
+                      <span className="text-xs text-muted-foreground">• {item.year}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {item.file_url && (
+                  <span className="px-2 py-1 rounded-full bg-rainbow-blue/20 text-rainbow-blue text-xs">
+                    Sujet
+                  </span>
+                )}
+                {item.correction_url && (
+                  <span className="px-2 py-1 rounded-full bg-rainbow-green/20 text-rainbow-green text-xs">
+                    Corrigé
+                  </span>
+                )}
+                <Button variant="ghost" size="icon" onClick={() => handleTogglePublish(item)} className="rounded-xl">
+                  {item.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => handleEdit(item)} className="rounded-xl">
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} className="rounded-xl text-destructive">
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
+        {items.length === 0 && (
+          <p className="text-muted-foreground text-center py-8">Aucun contenu DNB créé</p>
+        )}
+      </div>
+    </div>
+  );
+};
