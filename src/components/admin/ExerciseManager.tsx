@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import PDFViewer from '@/components/PDFViewer';
 import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, Upload, FileText, Loader2 } from 'lucide-react';
 
 interface Exercise {
@@ -273,6 +274,12 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
                   </>
                 )}
               </div>
+              {/* PDF Preview */}
+              {form.file_url && form.file_url.toLowerCase().includes('pdf') && (
+                <div className="mt-3">
+                  <PDFViewer url={form.file_url} title="Aperçu du fichier" />
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">

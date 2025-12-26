@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import PDFViewer from '@/components/PDFViewer';
 import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, Upload, FileText, Video, Loader2, File } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -376,6 +377,12 @@ export const FileVideoManager: React.FC<FileVideoManagerProps> = ({ courses }) =
                       </>
                     )}
                   </div>
+                  {/* PDF Preview */}
+                  {fileForm.file_url && fileForm.file_type?.toLowerCase() === 'pdf' && (
+                    <div className="mt-3">
+                      <PDFViewer url={fileForm.file_url} title="Aperçu du fichier" />
+                    </div>
+                  )}
                 </div>
 
                 <div>

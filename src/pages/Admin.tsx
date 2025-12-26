@@ -16,6 +16,7 @@ import { EvaluationManager } from '@/components/admin/EvaluationManager';
 import { SubmissionGrader } from '@/components/admin/SubmissionGrader';
 import { FileVideoManager } from '@/components/admin/FileVideoManager';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
+import PDFViewer from '@/components/PDFViewer';
 import { 
   Users, 
   BookOpen, 
@@ -745,6 +746,12 @@ const Admin = () => {
                         </Button>
                         <p className="text-xs text-muted-foreground mt-1">Max 20MB, PDF uniquement</p>
                       </div>
+                      {/* PDF Preview */}
+                      {courseForm.pdf_url && (
+                        <div className="mt-4">
+                          <PDFViewer url={courseForm.pdf_url} title="Aperçu du PDF du cours" />
+                        </div>
+                      )}
                     </div>
                     
                     <div className="flex gap-3 pt-4">
