@@ -5,6 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import PDFViewer from '@/components/PDFViewer';
+import { SortableItem } from './SortableItem';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, Upload, FileText, Loader2 } from 'lucide-react';
 
 interface Exercise {
@@ -44,6 +47,13 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
     points: 10,
     file_url: '',
   });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     fetchExercises();
@@ -170,12 +180,44 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
   };
 
   const filteredExercises = selectedCourse
-    ? exercises.filter(e => e.course_id === selectedCourse)
-    : exercises;
+    ? exercises.filter(e => e.course_id === selectedCourse).sort((a, b) => a.order_index - b.order_index)
+    : exercises.sort((a, b) => a.order_index - b.order_index);
 
   const getCourseName = (courseId: string | null) => {
     if (!courseId) return 'Non assigné';
     return courses.find(c => c.id === courseId)?.title || 'Inconnu';
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (!over || active.id === over.id) return;
+    
+    const oldIndex = filteredExercises.findIndex(e => e.id === active.id);
+    const newIndex = filteredExercises.findIndex(e => e.id === over.id);
+    
+    if (oldIndex === -1 || newIndex === -1) return;
+    
+    const newOrder = arrayMove(filteredExercises, oldIndex, newIndex);
+    
+    // Optimistic update
+    setExercises(prev => {
+      const otherExercises = prev.filter(e => !filteredExercises.find(f => f.id === e.id));
+      return [...otherExercises, ...newOrder.map((e, i) => ({ ...e, order_index: i }))];
+    });
+    
+    // Update in database
+    try {
+      await Promise.all(
+        newOrder.map((exercise, index) =>
+          supabase.from('exercises').update({ order_index: index }).eq('id', exercise.id)
+        )
+      );
+      toast({ title: "Ordre mis à jour" });
+    } catch (error) {
+      toast({ title: "Erreur", description: "Impossible de mettre à jour l'ordre", variant: "destructive" });
+      fetchExercises();
+    }
   };
 
   return (
@@ -319,46 +361,52 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
         </div>
       )}
 
-      <div className="space-y-3">
-        {filteredExercises.map(exercise => (
-          <div key={exercise.id} className="card-cartoon bg-card border-border p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="font-display text-foreground">{exercise.title}</p>
-                <p className="text-sm text-muted-foreground">{getCourseName(exercise.course_id)}</p>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                  <span>Difficulté: {exercise.difficulty}/5</span>
-                  <span>•</span>
-                  <span>{exercise.points} pts</span>
-                  {exercise.file_url && (
-                    <>
-                      <span>•</span>
-                      <a href={exercise.file_url} target="_blank" rel="noopener noreferrer" className="text-rainbow-blue hover:underline flex items-center gap-1">
-                        <FileText className="w-3 h-3" />
-                        Fichier
-                      </a>
-                    </>
-                  )}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={filteredExercises.map(e => e.id)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-3">
+            {filteredExercises.map(exercise => (
+              <SortableItem key={exercise.id} id={exercise.id}>
+                <div className="card-cartoon bg-card border-border p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="font-display text-foreground">{exercise.title}</p>
+                      <p className="text-sm text-muted-foreground">{getCourseName(exercise.course_id)}</p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                        <span>Difficulté: {exercise.difficulty}/5</span>
+                        <span>•</span>
+                        <span>{exercise.points} pts</span>
+                        {exercise.file_url && (
+                          <>
+                            <span>•</span>
+                            <a href={exercise.file_url} target="_blank" rel="noopener noreferrer" className="text-rainbow-blue hover:underline flex items-center gap-1">
+                              <FileText className="w-3 h-3" />
+                              Fichier
+                            </a>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="icon" onClick={() => handleTogglePublish(exercise)} className="rounded-xl">
+                        {exercise.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleEdit(exercise)} className="rounded-xl">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(exercise.id)} className="rounded-xl text-destructive">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" onClick={() => handleTogglePublish(exercise)} className="rounded-xl">
-                  {exercise.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => handleEdit(exercise)} className="rounded-xl">
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => handleDelete(exercise.id)} className="rounded-xl text-destructive">
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
+              </SortableItem>
+            ))}
+            {filteredExercises.length === 0 && (
+              <p className="text-muted-foreground text-center py-8">Aucun exercice</p>
+            )}
           </div>
-        ))}
-        {filteredExercises.length === 0 && (
-          <p className="text-muted-foreground text-center py-8">Aucun exercice</p>
-        )}
-      </div>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 };
