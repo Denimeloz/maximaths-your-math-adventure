@@ -50,6 +50,7 @@ interface Exercise {
   explanation: string | null;
   difficulty: number;
   points: number;
+  file_url: string | null;
 }
 
 interface Quiz {
@@ -431,6 +432,19 @@ const CourseView = () => {
                         <div className="bg-muted/50 p-4 rounded-lg mb-4">
                           <p className="font-body text-foreground whitespace-pre-wrap">{exercise.question}</p>
                         </div>
+
+                        {/* File download - accessible to everyone */}
+                        {exercise.file_url && (
+                          <a
+                            href={exercise.file_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2 rounded-lg mb-4 transition-colors"
+                          >
+                            <Download className="w-4 h-4" />
+                            Télécharger l'exercice
+                          </a>
+                        )}
                         
                         {user ? (
                           <>
