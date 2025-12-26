@@ -70,6 +70,17 @@ const subMenuItems = [
   { id: 'evaluations', label: 'Évaluations', description: 'Tests et examens' },
 ];
 
+const subMenuItems3eme = [
+  { id: 'cours', label: 'Cours', description: 'Leçons et chapitres' },
+  { id: 'devoirs', label: 'Devoirs de niveau', description: 'Exercices à rendre' },
+  { id: 'evaluations', label: 'Évaluation', description: 'Tests et examens' },
+  { id: 'prepa-dnb', label: 'Prepa DNB', description: 'Préparation au brevet' },
+];
+
+const getSubMenuForLevel = (levelId: string) => {
+  return levelId === '3eme' ? subMenuItems3eme : subMenuItems;
+};
+
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedLevel, setExpandedLevel] = useState<string | null>(null);
@@ -131,8 +142,8 @@ const Header = () => {
                   {level.label}
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-48 gap-1 p-2">
-                    {subMenuItems.map((item) => (
+                  <ul className="grid w-52 gap-1 p-2">
+                    {getSubMenuForLevel(level.id).map((item) => (
                       <li key={item.id}>
                         <NavigationMenuLink asChild>
                           <button
@@ -207,7 +218,7 @@ const Header = () => {
                 
                 {expandedLevel === level.id && (
                   <div className="pl-4 pb-2 space-y-1">
-                    {subMenuItems.map((item) => (
+                    {getSubMenuForLevel(level.id).map((item) => (
                       <button
                         key={item.id}
                         onClick={() => handleSubMenuClick(level.id, item.id)}
