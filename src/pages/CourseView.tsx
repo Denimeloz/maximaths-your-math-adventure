@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import PDFViewer from '@/components/PDFViewer';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LessonComments } from '@/components/LessonComments';
@@ -265,13 +266,9 @@ const CourseView = () => {
                   </div>
 
                   {course.pdf_url && (
-                    <Button 
-                      variant="outline" 
-                      onClick={() => window.open(course.pdf_url!, '_blank')}
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      Télécharger le PDF du cours
-                    </Button>
+                    <div className="mt-4">
+                      <PDFViewer url={course.pdf_url} title={`PDF - ${course.title}`} />
+                    </div>
                   )}
                 </div>
               </div>
@@ -433,17 +430,11 @@ const CourseView = () => {
                           <p className="font-body text-foreground whitespace-pre-wrap">{exercise.question}</p>
                         </div>
 
-                        {/* File download - accessible to everyone */}
+                        {/* File viewer - accessible to everyone */}
                         {exercise.file_url && (
-                          <a
-                            href={exercise.file_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2 rounded-lg mb-4 transition-colors"
-                          >
-                            <Download className="w-4 h-4" />
-                            Télécharger l'exercice
-                          </a>
+                          <div className="mb-4">
+                            <PDFViewer url={exercise.file_url} title={`Exercice - ${exercise.title}`} />
+                          </div>
                         )}
                         
                         {user ? (
@@ -574,26 +565,22 @@ const CourseView = () => {
                     <p className="text-muted-foreground">Aucun fichier disponible</p>
                   </div>
                 ) : (
-                  <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-6">
                     {courseFiles.map(file => (
-                      <div key={file.id} className="border border-border rounded-xl p-4 flex items-center gap-4 hover:border-primary/30 transition-colors">
-                        <div className="w-12 h-12 bg-rainbow-blue/20 rounded-xl flex items-center justify-center">
-                          <FileText className="w-6 h-6 text-rainbow-blue" />
+                      <div key={file.id} className="border border-border rounded-xl p-4">
+                        <div className="flex items-center gap-4 mb-4">
+                          <div className="w-12 h-12 bg-rainbow-blue/20 rounded-xl flex items-center justify-center">
+                            <FileText className="w-6 h-6 text-rainbow-blue" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-body font-semibold text-foreground truncate">{file.title}</h4>
+                            {file.description && (
+                              <p className="text-sm text-muted-foreground">{file.description}</p>
+                            )}
+                            <span className="text-xs text-muted-foreground uppercase">{file.file_type}</span>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-body font-semibold text-foreground truncate">{file.title}</h4>
-                          {file.description && (
-                            <p className="text-xs text-muted-foreground truncate">{file.description}</p>
-                          )}
-                          <span className="text-xs text-muted-foreground uppercase">{file.file_type}</span>
-                        </div>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => window.open(file.file_url, '_blank')}
-                        >
-                          <Download className="w-4 h-4" />
-                        </Button>
+                        <PDFViewer url={file.file_url} title={file.title} />
                       </div>
                     ))}
                   </div>
