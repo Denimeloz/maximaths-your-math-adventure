@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, ClipboardList, Calendar, Upload, FileText, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, ClipboardList, Calendar, Upload, FileText, Loader2, BookCheck } from 'lucide-react';
 
 interface Assignment {
   id: string;
@@ -17,6 +17,7 @@ interface Assignment {
   allow_late_submission: boolean;
   is_published: boolean;
   order_index: number;
+  correction_url: string | null;
 }
 
 interface Course {
@@ -35,7 +36,9 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
   const [showForm, setShowForm] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
+  const [isUploadingCorrection, setIsUploadingCorrection] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const correctionInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     course_id: '',
     title: '',
@@ -45,6 +48,7 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
     due_date: '',
     allow_late_submission: false,
     file_url: '',
+    correction_url: '',
   });
 
   useEffect(() => {
@@ -81,6 +85,31 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
     }
   };
 
+  const handleCorrectionUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: "Erreur", description: "Le fichier ne doit pas dépasser 20MB", variant: "destructive" });
+      return;
+    }
+
+    setIsUploadingCorrection(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `corrections/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('course-files').upload(fileName, file);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from('course-files').getPublicUrl(fileName);
+      setForm(prev => ({ ...prev, correction_url: publicUrl }));
+      toast({ title: "Succès", description: "Corrigé téléchargé" });
+    } catch (error) {
+      toast({ title: "Erreur", description: "Impossible de télécharger le corrigé", variant: "destructive" });
+    } finally {
+      setIsUploadingCorrection(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!form.title.trim() || !form.course_id) {
       toast({ title: "Erreur", description: "Titre et cours requis", variant: "destructive" });
@@ -94,6 +123,7 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
       max_points: form.max_points,
       due_date: form.due_date || null,
       allow_late_submission: form.allow_late_submission,
+      correction_url: form.correction_url || null,
     };
 
     if (editingAssignment) {
@@ -148,6 +178,7 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
       due_date: assignment.due_date ? assignment.due_date.split('T')[0] : '',
       allow_late_submission: assignment.allow_late_submission,
       file_url: '',
+      correction_url: assignment.correction_url || '',
     });
     setShowForm(true);
   };
@@ -164,6 +195,7 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
       due_date: '',
       allow_late_submission: false,
       file_url: '',
+      correction_url: '',
     });
   };
 
@@ -279,6 +311,32 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
                     <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isUploadingFile} className="rounded-xl">
                       {isUploadingFile ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
                       {isUploadingFile ? 'Upload...' : 'Ajouter un fichier'}
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Correction Upload */}
+            <div>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Corrigé (PDF, Word, etc.)</label>
+              <div className="flex items-center gap-4">
+                {form.correction_url ? (
+                  <div className="flex items-center gap-3 p-3 bg-rainbow-green/10 rounded-xl flex-1">
+                    <BookCheck className="w-6 h-6 text-rainbow-green" />
+                    <a href={form.correction_url} target="_blank" rel="noopener noreferrer" className="text-sm text-rainbow-green hover:underline truncate">
+                      Voir le corrigé
+                    </a>
+                    <button onClick={() => setForm(prev => ({ ...prev, correction_url: '' }))} className="ml-auto">
+                      <X className="w-4 h-4 text-destructive" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <input type="file" ref={correctionInputRef} onChange={handleCorrectionUpload} className="hidden" accept=".pdf,.doc,.docx,.ppt,.pptx" />
+                    <Button type="button" variant="outline" onClick={() => correctionInputRef.current?.click()} disabled={isUploadingCorrection} className="rounded-xl border-rainbow-green/50 text-rainbow-green hover:bg-rainbow-green/10">
+                      {isUploadingCorrection ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <BookCheck className="w-4 h-4 mr-2" />}
+                      {isUploadingCorrection ? 'Upload...' : 'Ajouter le corrigé'}
                     </Button>
                   </>
                 )}

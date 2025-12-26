@@ -65,6 +65,7 @@ export type Database = {
         Row: {
           allow_late_submission: boolean
           chapter_id: string | null
+          correction_url: string | null
           course_id: string | null
           created_at: string
           description: string | null
@@ -80,6 +81,7 @@ export type Database = {
         Insert: {
           allow_late_submission?: boolean
           chapter_id?: string | null
+          correction_url?: string | null
           course_id?: string | null
           created_at?: string
           description?: string | null
@@ -95,6 +97,7 @@ export type Database = {
         Update: {
           allow_late_submission?: boolean
           chapter_id?: string | null
+          correction_url?: string | null
           course_id?: string | null
           created_at?: string
           description?: string | null
@@ -350,6 +353,7 @@ export type Database = {
       evaluations: {
         Row: {
           chapter_id: string | null
+          correction_url: string | null
           course_id: string | null
           created_at: string
           description: string | null
@@ -364,6 +368,7 @@ export type Database = {
         }
         Insert: {
           chapter_id?: string | null
+          correction_url?: string | null
           course_id?: string | null
           created_at?: string
           description?: string | null
@@ -378,6 +383,7 @@ export type Database = {
         }
         Update: {
           chapter_id?: string | null
+          correction_url?: string | null
           course_id?: string | null
           created_at?: string
           description?: string | null
@@ -411,6 +417,7 @@ export type Database = {
         Row: {
           answer: string | null
           chapter_id: string | null
+          correction_url: string | null
           course_id: string | null
           created_at: string
           difficulty: number
@@ -427,6 +434,7 @@ export type Database = {
         Insert: {
           answer?: string | null
           chapter_id?: string | null
+          correction_url?: string | null
           course_id?: string | null
           created_at?: string
           difficulty?: number
@@ -443,6 +451,7 @@ export type Database = {
         Update: {
           answer?: string | null
           chapter_id?: string | null
+          correction_url?: string | null
           course_id?: string | null
           created_at?: string
           difficulty?: number

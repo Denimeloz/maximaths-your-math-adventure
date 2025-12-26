@@ -10,7 +10,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { ExerciseManager } from '@/components/admin/ExerciseManager';
-import { QuizManager } from '@/components/admin/QuizManager';
 import { AssignmentManager } from '@/components/admin/AssignmentManager';
 import { EvaluationManager } from '@/components/admin/EvaluationManager';
 import { SubmissionGrader } from '@/components/admin/SubmissionGrader';
@@ -38,7 +37,6 @@ import {
   Loader2,
   Layers,
   PenTool,
-  HelpCircle,
   ClipboardList,
   FileCheck,
   CheckSquare
@@ -90,7 +88,7 @@ const Admin = () => {
     return 'dashboard';
   };
   
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'courses' | 'exercises' | 'quizzes' | 'assignments' | 'evaluations' | 'grading' | 'files' | 'users'>(getActiveTabFromPath);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'courses' | 'exercises' | 'assignments' | 'evaluations' | 'grading' | 'files' | 'users'>(getActiveTabFromPath);
   const [courses, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<(Profile & { role?: string })[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
@@ -517,7 +515,6 @@ const Admin = () => {
               { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
               { id: 'courses', label: 'Cours', icon: BookOpen },
               { id: 'exercises', label: 'Exercices', icon: PenTool },
-              { id: 'quizzes', label: 'Quiz', icon: HelpCircle },
               { id: 'assignments', label: 'Devoirs', icon: ClipboardList },
               { id: 'evaluations', label: 'Évaluations', icon: FileCheck },
               { id: 'grading', label: 'Correction', icon: CheckSquare },
@@ -842,11 +839,6 @@ const Admin = () => {
           {/* Exercises Tab */}
           {activeTab === 'exercises' && (
             <ExerciseManager courses={courses.map(c => ({ id: c.id, title: c.title }))} />
-          )}
-
-          {/* Quizzes Tab */}
-          {activeTab === 'quizzes' && (
-            <QuizManager courses={courses.map(c => ({ id: c.id, title: c.title }))} />
           )}
 
           {/* Assignments Tab */}

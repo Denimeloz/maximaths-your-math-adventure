@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, FileCheck, Clock, Upload, FileText, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, FileCheck, Clock, Upload, FileText, Loader2, BookCheck } from 'lucide-react';
 
 interface Evaluation {
   id: string;
@@ -16,6 +16,7 @@ interface Evaluation {
   duration_minutes: number | null;
   is_published: boolean;
   order_index: number;
+  correction_url: string | null;
 }
 
 interface Course {
@@ -34,7 +35,9 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
   const [showForm, setShowForm] = useState(false);
   const [editingEvaluation, setEditingEvaluation] = useState<Evaluation | null>(null);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
+  const [isUploadingCorrection, setIsUploadingCorrection] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const correctionInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     course_id: '',
     title: '',
@@ -43,6 +46,7 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
     max_points: 100,
     duration_minutes: 60,
     file_url: '',
+    correction_url: '',
   });
 
   useEffect(() => {
@@ -79,6 +83,31 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
     }
   };
 
+  const handleCorrectionUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: "Erreur", description: "Le fichier ne doit pas dépasser 20MB", variant: "destructive" });
+      return;
+    }
+
+    setIsUploadingCorrection(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `corrections/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('course-files').upload(fileName, file);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from('course-files').getPublicUrl(fileName);
+      setForm(prev => ({ ...prev, correction_url: publicUrl }));
+      toast({ title: "Succès", description: "Corrigé téléchargé" });
+    } catch (error) {
+      toast({ title: "Erreur", description: "Impossible de télécharger le corrigé", variant: "destructive" });
+    } finally {
+      setIsUploadingCorrection(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!form.title.trim() || !form.course_id) {
       toast({ title: "Erreur", description: "Titre et cours requis", variant: "destructive" });
@@ -91,6 +120,7 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
       instructions: form.instructions || null,
       max_points: form.max_points,
       duration_minutes: form.duration_minutes || null,
+      correction_url: form.correction_url || null,
     };
 
     if (editingEvaluation) {
@@ -144,6 +174,7 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
       max_points: evaluation.max_points,
       duration_minutes: evaluation.duration_minutes || 60,
       file_url: '',
+      correction_url: evaluation.correction_url || '',
     });
     setShowForm(true);
   };
@@ -159,6 +190,7 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
       max_points: 100,
       duration_minutes: 60,
       file_url: '',
+      correction_url: '',
     });
   };
 
