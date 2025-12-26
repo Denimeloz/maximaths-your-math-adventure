@@ -15,6 +15,7 @@ import { EvaluationManager } from '@/components/admin/EvaluationManager';
 import { SubmissionGrader } from '@/components/admin/SubmissionGrader';
 import { FileVideoManager } from '@/components/admin/FileVideoManager';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
+import { DnbManager } from '@/components/admin/DnbManager';
 import PDFViewer from '@/components/PDFViewer';
 import { 
   Users, 
@@ -88,7 +89,7 @@ const Admin = () => {
     return 'dashboard';
   };
   
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'courses' | 'exercises' | 'assignments' | 'evaluations' | 'grading' | 'files' | 'users'>(getActiveTabFromPath);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'courses' | 'exercises' | 'assignments' | 'evaluations' | 'dnb' | 'grading' | 'files' | 'users'>(getActiveTabFromPath);
   const [courses, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<(Profile & { role?: string })[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
@@ -517,6 +518,7 @@ const Admin = () => {
               { id: 'exercises', label: 'Exercices', icon: PenTool },
               { id: 'assignments', label: 'Devoirs', icon: ClipboardList },
               { id: 'evaluations', label: 'Évaluations', icon: FileCheck },
+              { id: 'dnb', label: 'Prépa DNB', icon: Award },
               { id: 'grading', label: 'Correction', icon: CheckSquare },
               { id: 'files', label: 'Fichiers', icon: FileText },
               { id: 'users', label: 'Utilisateurs', icon: Users },
@@ -849,6 +851,11 @@ const Admin = () => {
           {/* Evaluations Tab */}
           {activeTab === 'evaluations' && (
             <EvaluationManager courses={courses.map(c => ({ id: c.id, title: c.title }))} />
+          )}
+
+          {/* DNB Tab */}
+          {activeTab === 'dnb' && (
+            <DnbManager />
           )}
 
           {/* Grading Tab */}
