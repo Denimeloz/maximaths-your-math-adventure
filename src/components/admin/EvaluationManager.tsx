@@ -16,7 +16,9 @@ interface Evaluation {
   duration_minutes: number | null;
   is_published: boolean;
   order_index: number;
+  file_url: string | null;
   correction_url: string | null;
+  level: string | null;
 }
 
 interface Course {
@@ -173,7 +175,7 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
       instructions: evaluation.instructions || '',
       max_points: evaluation.max_points,
       duration_minutes: evaluation.duration_minutes || 60,
-      file_url: (evaluation as any).file_url || '',
+      file_url: evaluation.file_url || '',
       correction_url: evaluation.correction_url || '',
     });
     setShowForm(true);
@@ -347,12 +349,36 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
                 </div>
                 <div>
                   <p className="font-display text-foreground">{evaluation.title}</p>
-                  {evaluation.duration_minutes && (
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Clock className="w-3 h-3" />
-                      {evaluation.duration_minutes} min
-                    </div>
-                  )}
+                  <div className="flex items-center gap-3 mt-1">
+                    {evaluation.duration_minutes && (
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Clock className="w-3 h-3" />
+                        {evaluation.duration_minutes} min
+                      </div>
+                    )}
+                    {evaluation.file_url && (
+                      <a 
+                        href={evaluation.file_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs text-rainbow-blue hover:underline"
+                      >
+                        <FileText className="w-3 h-3" />
+                        Fichier
+                      </a>
+                    )}
+                    {evaluation.correction_url && (
+                      <a 
+                        href={evaluation.correction_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs text-rainbow-green hover:underline"
+                      >
+                        <BookCheck className="w-3 h-3" />
+                        Corrigé
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
