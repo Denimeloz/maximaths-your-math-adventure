@@ -1,11 +1,47 @@
 import { Button } from "@/components/ui/button";
-import { Sparkles, Star, Zap } from "lucide-react";
+import { Sparkles, Star, Zap, ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import heroImage from "@/assets/maximaths-hero.jpeg";
 import brainIcon from "@/assets/brain-icon.png";
 
+const levels = [
+  { id: '6eme', label: '6ème', color: 'bg-rainbow-blue', textColor: 'text-rainbow-blue', borderColor: 'border-rainbow-blue' },
+  { id: '5eme', label: '5ème', color: 'bg-rainbow-green', textColor: 'text-rainbow-green', borderColor: 'border-rainbow-green' },
+  { id: '4eme', label: '4ème', color: 'bg-rainbow-orange', textColor: 'text-rainbow-orange', borderColor: 'border-rainbow-orange' },
+  { id: '3eme', label: '3ème', color: 'bg-rainbow-coral', textColor: 'text-rainbow-coral', borderColor: 'border-rainbow-coral' },
+  { id: 'seconde', label: 'Seconde', color: 'bg-rainbow-pink', textColor: 'text-rainbow-pink', borderColor: 'border-rainbow-pink' },
+  { id: 'premiere', label: 'Première', color: 'bg-rainbow-purple', textColor: 'text-rainbow-purple', borderColor: 'border-rainbow-purple' },
+  { id: 'terminale', label: 'Terminale', color: 'bg-rainbow-yellow', textColor: 'text-rainbow-yellow', borderColor: 'border-rainbow-yellow' },
+];
+
+const subMenuItems = [
+  { id: 'cours', label: 'Cours', description: 'Leçons et chapitres', icon: BookOpen },
+  { id: 'activites', label: 'Activités', description: 'Découverte et exploration', icon: Lightbulb },
+  { id: 'devoirs', label: 'Devoirs', description: 'Exercices à rendre', icon: ClipboardList },
+  { id: 'evaluations', label: 'Évaluations', description: 'Tests et examens', icon: FileCheck },
+];
+
+const subMenuItems3eme = [
+  ...subMenuItems,
+  { id: 'prepa-dnb', label: 'Prépa DNB', description: 'Préparation au brevet', icon: GraduationCap },
+];
+
+const getSubMenuForLevel = (levelId: string) => {
+  return levelId === '3eme' ? subMenuItems3eme : subMenuItems;
+};
+
 const HeroSection = () => {
   const navigate = useNavigate();
+  const [expandedLevel, setExpandedLevel] = useState<string | null>(null);
+
+  const handleLevelClick = (levelId: string) => {
+    setExpandedLevel(expandedLevel === levelId ? null : levelId);
+  };
+
+  const handleSubMenuClick = (levelId: string, subMenuId: string) => {
+    navigate(`/niveau/${levelId}/${subMenuId}`);
+  };
 
   return (
     <section className="relative min-h-screen bg-hero-gradient overflow-hidden pt-20">
@@ -78,25 +114,57 @@ const HeroSection = () => {
           La plateforme de mathématiques pour les élèves du <span className="text-rainbow-blue font-bold">Collège</span> et du <span className="text-rainbow-purple font-bold">Lycée</span>
         </p>
 
-        {/* Platform description */}
-        <div className="max-w-4xl mx-auto mb-12 animate-slide-up" style={{ animationDelay: "0.5s" }}>
-          <div className="grid sm:grid-cols-3 gap-4 text-center">
-            <div className="p-4 rounded-2xl bg-card/80 backdrop-blur-sm border border-border">
-              <span className="text-2xl mb-2 block">📖</span>
-              <p className="text-sm font-body text-foreground font-medium">Cours complets</p>
-              <p className="text-xs text-muted-foreground">De la 6ème à la Terminale</p>
-            </div>
-            <div className="p-4 rounded-2xl bg-card/80 backdrop-blur-sm border border-border">
-              <span className="text-2xl mb-2 block">✏️</span>
-              <p className="text-sm font-body text-foreground font-medium">Exercices progressifs</p>
-              <p className="text-xs text-muted-foreground">Avec corrections détaillées</p>
-            </div>
-            <div className="p-4 rounded-2xl bg-card/80 backdrop-blur-sm border border-border">
-              <span className="text-2xl mb-2 block">🎯</span>
-              <p className="text-sm font-body text-foreground font-medium">Préparation examens</p>
-              <p className="text-xs text-muted-foreground">Brevet, Bac et plus</p>
-            </div>
+        {/* Class Selection - Click to expand */}
+        <div className="w-full max-w-4xl mx-auto mb-12 animate-slide-up" style={{ animationDelay: "0.5s" }}>
+          <h3 className="text-xl md:text-2xl font-display text-center mb-6 text-foreground">
+            Choisis ta classe 👇
+          </h3>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+            {levels.map((level) => (
+              <div key={level.id} className="relative">
+                <button
+                  onClick={() => handleLevelClick(level.id)}
+                  className={`w-full p-3 rounded-xl font-display font-bold text-sm md:text-base transition-all border-2 ${
+                    expandedLevel === level.id 
+                      ? `${level.color} text-white ${level.borderColor} scale-105 shadow-lg` 
+                      : `bg-card ${level.textColor} ${level.borderColor} hover:scale-105 hover:shadow-md`
+                  }`}
+                >
+                  <span className="flex items-center justify-center gap-1">
+                    {level.label}
+                    {expandedLevel === level.id ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                  </span>
+                </button>
+              </div>
+            ))}
           </div>
+
+          {/* Expanded submenu */}
+          {expandedLevel && (
+            <div className="mt-6 p-4 bg-card/95 backdrop-blur-sm rounded-2xl border-2 border-border animate-slide-up shadow-xl">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                {getSubMenuForLevel(expandedLevel).map((item) => {
+                  const level = levels.find(l => l.id === expandedLevel);
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleSubMenuClick(expandedLevel, item.id)}
+                      className={`p-4 rounded-xl bg-muted/50 hover:bg-muted transition-all hover:scale-105 text-left group border border-transparent hover:${level?.borderColor || 'border-border'}`}
+                    >
+                      <item.icon className={`w-6 h-6 mb-2 ${level?.textColor || 'text-foreground'} group-hover:scale-110 transition-transform`} />
+                      <div className="font-display text-sm text-foreground">{item.label}</div>
+                      <p className="text-xs text-muted-foreground font-body mt-1">{item.description}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>
