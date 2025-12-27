@@ -120,6 +120,7 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
       instructions: form.instructions || null,
       max_points: form.max_points,
       duration_minutes: form.duration_minutes || null,
+      file_url: form.file_url || null,
       correction_url: form.correction_url || null,
     };
 
@@ -172,7 +173,7 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
       instructions: evaluation.instructions || '',
       max_points: evaluation.max_points,
       duration_minutes: evaluation.duration_minutes || 60,
-      file_url: '',
+      file_url: (evaluation as any).file_url || '',
       correction_url: evaluation.correction_url || '',
     });
     setShowForm(true);

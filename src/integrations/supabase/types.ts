@@ -70,6 +70,7 @@ export type Database = {
           created_at: string
           description: string | null
           due_date: string | null
+          file_url: string | null
           id: string
           instructions: string | null
           is_published: boolean
@@ -87,6 +88,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           due_date?: string | null
+          file_url?: string | null
           id?: string
           instructions?: string | null
           is_published?: boolean
@@ -104,6 +106,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           due_date?: string | null
+          file_url?: string | null
           id?: string
           instructions?: string | null
           is_published?: boolean
@@ -406,6 +409,7 @@ export type Database = {
           created_at: string
           description: string | null
           duration_minutes: number | null
+          file_url: string | null
           id: string
           instructions: string | null
           is_published: boolean
@@ -422,6 +426,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_minutes?: number | null
+          file_url?: string | null
           id?: string
           instructions?: string | null
           is_published?: boolean
@@ -438,6 +443,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_minutes?: number | null
+          file_url?: string | null
           id?: string
           instructions?: string | null
           is_published?: boolean
