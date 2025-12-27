@@ -78,7 +78,9 @@ interface Assignment {
   description: string | null;
   due_date: string | null;
   max_points: number;
-  course_id: string | null;
+  level: string | null;
+  file_url: string | null;
+  correction_url: string | null;
 }
 
 interface Evaluation {
@@ -87,7 +89,9 @@ interface Evaluation {
   description: string | null;
   duration_minutes: number | null;
   max_points: number;
-  course_id: string | null;
+  level: string | null;
+  file_url: string | null;
+  correction_url: string | null;
 }
 
 interface DnbContent {
@@ -143,42 +147,24 @@ const LevelContent = () => {
       if (data) setCourses(data as Course[]);
     } 
     else if (type === 'devoirs') {
-      const { data: levelCourses } = await supabase
-        .from('courses')
-        .select('id')
+      const { data } = await supabase
+        .from('assignments')
+        .select('*')
         .eq('level', level)
-        .eq('is_published', true);
+        .eq('is_published', true)
+        .order('order_index', { ascending: true });
       
-      if (levelCourses && levelCourses.length > 0) {
-        const courseIds = levelCourses.map(c => c.id);
-        const { data } = await supabase
-          .from('assignments')
-          .select('*')
-          .in('course_id', courseIds)
-          .eq('is_published', true)
-          .order('due_date', { ascending: false });
-        
-        if (data) setAssignments(data);
-      }
+      if (data) setAssignments(data);
     } 
     else if (type === 'evaluations') {
-      const { data: levelCourses } = await supabase
-        .from('courses')
-        .select('id')
+      const { data } = await supabase
+        .from('evaluations')
+        .select('*')
         .eq('level', level)
-        .eq('is_published', true);
+        .eq('is_published', true)
+        .order('order_index', { ascending: true });
       
-      if (levelCourses && levelCourses.length > 0) {
-        const courseIds = levelCourses.map(c => c.id);
-        const { data } = await supabase
-          .from('evaluations')
-          .select('*')
-          .in('course_id', courseIds)
-          .eq('is_published', true)
-          .order('created_at', { ascending: false });
-        
-        if (data) setEvaluations(data);
-      }
+      if (data) setEvaluations(data);
     }
     else if (type === 'prepa-dnb') {
       const { data } = await supabase
@@ -243,8 +229,7 @@ const LevelContent = () => {
       {assignments.map((assignment) => (
         <div 
           key={assignment.id}
-          className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 cursor-pointer group`}
-          onClick={() => navigate(`/assignment/${assignment.id}`)}
+          className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 group`}
         >
           <div className="flex items-center gap-2 mb-3">
             <FileText className={`w-5 h-5 text-${color}`} />
@@ -253,7 +238,7 @@ const LevelContent = () => {
             </span>
           </div>
           
-          <h3 className={`text-xl font-display text-foreground mb-2 group-hover:text-${color} transition-colors`}>
+          <h3 className={`text-xl font-display text-foreground mb-2`}>
             {assignment.title}
           </h3>
           
@@ -263,13 +248,35 @@ const LevelContent = () => {
             </p>
           )}
           
-          {assignment.due_date && (
-            <div className="pt-4 border-t border-border">
-              <span className="text-sm text-muted-foreground font-body">
+          <div className="flex flex-wrap gap-2 pt-4 border-t border-border">
+            {assignment.due_date && (
+              <span className="text-xs text-muted-foreground font-body">
                 Date limite: {new Date(assignment.due_date).toLocaleDateString('fr-FR')}
               </span>
-            </div>
-          )}
+            )}
+            {assignment.file_url && (
+              <a 
+                href={assignment.file_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-rainbow-blue hover:underline flex items-center gap-1"
+              >
+                <FileText className="w-4 h-4" />
+                Sujet
+              </a>
+            )}
+            {assignment.correction_url && (
+              <a 
+                href={assignment.correction_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-rainbow-green hover:underline flex items-center gap-1"
+              >
+                <BookOpen className="w-4 h-4" />
+                Corrigé
+              </a>
+            )}
+          </div>
         </div>
       ))}
     </div>
@@ -295,10 +302,35 @@ const LevelContent = () => {
           </h3>
           
           {evaluation.description && (
-            <p className="text-muted-foreground font-body text-sm line-clamp-3">
+            <p className="text-muted-foreground font-body text-sm line-clamp-3 mb-4">
               {evaluation.description}
             </p>
           )}
+
+          <div className="flex gap-2 pt-4 border-t border-border">
+            {evaluation.file_url && (
+              <a 
+                href={evaluation.file_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-rainbow-blue hover:underline flex items-center gap-1"
+              >
+                <FileText className="w-4 h-4" />
+                Sujet
+              </a>
+            )}
+            {evaluation.correction_url && (
+              <a 
+                href={evaluation.correction_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-rainbow-green hover:underline flex items-center gap-1"
+              >
+                <BookOpen className="w-4 h-4" />
+                Corrigé
+              </a>
+            )}
+          </div>
         </div>
       ))}
     </div>
