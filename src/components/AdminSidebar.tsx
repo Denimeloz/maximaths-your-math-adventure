@@ -51,8 +51,8 @@ const levels: LevelConfig[] = [
 
 const getSubSections = (level: AdminCourseLevel) => {
   const baseSections = [
-    { id: 'cours', label: 'Cours', icon: BookOpen },
     { id: 'activites', label: 'Activité de découverte', icon: Lightbulb },
+    { id: 'cours', label: 'Cours', icon: BookOpen },
     { id: 'devoirs', label: 'Devoirs de niveaux', icon: ClipboardList },
     { id: 'evaluations', label: 'Évaluations', icon: FileCheck },
   ];

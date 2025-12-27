@@ -24,14 +24,15 @@ interface Course {
   title: string;
 }
 
+type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
+
 interface EvaluationManagerProps {
-  courses: Course[];
+  filterLevel: CourseLevel;
 }
 
-export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses }) => {
+export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLevel }) => {
   const { toast } = useToast();
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
-  const [selectedCourse, setSelectedCourse] = useState<string>('');
   const [showForm, setShowForm] = useState(false);
   const [editingEvaluation, setEditingEvaluation] = useState<Evaluation | null>(null);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
@@ -39,7 +40,6 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
   const fileInputRef = useRef<HTMLInputElement>(null);
   const correctionInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
-    course_id: '',
     title: '',
     description: '',
     instructions: '',
@@ -109,8 +109,8 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
   };
 
   const handleSave = async () => {
-    if (!form.title.trim() || !form.course_id) {
-      toast({ title: "Erreur", description: "Titre et cours requis", variant: "destructive" });
+    if (!form.title.trim()) {
+      toast({ title: "Erreur", description: "Le titre est requis", variant: "destructive" });
       return;
     }
 
@@ -135,13 +135,13 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
         resetForm();
       }
     } else {
-      const evaluationsForCourse = evaluations.filter(e => e.course_id === form.course_id);
+      const evaluationsForLevel = evaluations.filter(e => (e as any).level === filterLevel);
       const { error } = await supabase
         .from('evaluations')
         .insert({
           ...data,
-          course_id: form.course_id,
-          order_index: evaluationsForCourse.length,
+          level: filterLevel,
+          order_index: evaluationsForLevel.length,
         });
 
       if (!error) {
@@ -167,7 +167,6 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
   const handleEdit = (evaluation: Evaluation) => {
     setEditingEvaluation(evaluation);
     setForm({
-      course_id: evaluation.course_id || '',
       title: evaluation.title,
       description: evaluation.description || '',
       instructions: evaluation.instructions || '',
@@ -183,7 +182,6 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
     setShowForm(false);
     setEditingEvaluation(null);
     setForm({
-      course_id: '',
       title: '',
       description: '',
       instructions: '',
@@ -194,14 +192,7 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
     });
   };
 
-  const filteredEvaluations = selectedCourse
-    ? evaluations.filter(e => e.course_id === selectedCourse)
-    : evaluations;
-
-  const getCourseName = (courseId: string | null) => {
-    if (!courseId) return 'Non assigné';
-    return courses.find(c => c.id === courseId)?.title || 'Inconnu';
-  };
+  const filteredEvaluations = evaluations.filter(e => (e as any).level === filterLevel);
 
   return (
     <div className="space-y-6">
@@ -211,20 +202,6 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
           <Plus className="w-4 h-4 mr-2" />
           Nouvelle évaluation
         </Button>
-      </div>
-
-      <div>
-        <label className="text-sm font-body text-muted-foreground mb-1 block">Filtrer par cours</label>
-        <select
-          value={selectedCourse}
-          onChange={(e) => setSelectedCourse(e.target.value)}
-          className="p-2 rounded-xl border border-input bg-background"
-        >
-          <option value="">Tous les cours</option>
-          {courses.map(course => (
-            <option key={course.id} value={course.id}>{course.title}</option>
-          ))}
-        </select>
       </div>
 
       {showForm && (
@@ -239,21 +216,6 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
           </div>
 
           <div className="grid gap-4">
-            <div>
-              <label className="text-sm font-body text-muted-foreground mb-1 block">Cours *</label>
-              <select
-                value={form.course_id}
-                onChange={(e) => setForm(prev => ({ ...prev, course_id: e.target.value }))}
-                className="w-full p-2 rounded-xl border border-input bg-background"
-                disabled={!!editingEvaluation}
-              >
-                <option value="">Sélectionner un cours</option>
-                {courses.map(course => (
-                  <option key={course.id} value={course.id}>{course.title}</option>
-                ))}
-              </select>
-            </div>
-
             <div>
               <label className="text-sm font-body text-muted-foreground mb-1 block">Titre *</label>
               <Input
@@ -384,7 +346,6 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ courses })
                 </div>
                 <div>
                   <p className="font-display text-foreground">{evaluation.title}</p>
-                  <p className="text-sm text-muted-foreground">{getCourseName(evaluation.course_id)}</p>
                   {evaluation.duration_minutes && (
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Clock className="w-3 h-3" />

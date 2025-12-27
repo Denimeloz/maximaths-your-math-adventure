@@ -73,6 +73,7 @@ export type Database = {
           id: string
           instructions: string | null
           is_published: boolean
+          level: string | null
           max_points: number
           order_index: number
           title: string
@@ -89,6 +90,7 @@ export type Database = {
           id?: string
           instructions?: string | null
           is_published?: boolean
+          level?: string | null
           max_points?: number
           order_index?: number
           title: string
@@ -105,6 +107,7 @@ export type Database = {
           id?: string
           instructions?: string | null
           is_published?: boolean
+          level?: string | null
           max_points?: number
           order_index?: number
           title?: string
@@ -406,6 +409,7 @@ export type Database = {
           id: string
           instructions: string | null
           is_published: boolean
+          level: string | null
           max_points: number
           order_index: number
           title: string
@@ -421,6 +425,7 @@ export type Database = {
           id?: string
           instructions?: string | null
           is_published?: boolean
+          level?: string | null
           max_points?: number
           order_index?: number
           title: string
@@ -436,6 +441,7 @@ export type Database = {
           id?: string
           instructions?: string | null
           is_published?: boolean
+          level?: string | null
           max_points?: number
           order_index?: number
           title?: string

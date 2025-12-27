@@ -37,15 +37,15 @@ const levelColors: Record<CourseLevel, string> = {
 };
 
 const contentConfig: Record<ContentType, { icon: React.ElementType; title: string; description: string }> = {
-  cours: {
-    icon: BookOpen,
-    title: 'Cours',
-    description: 'Tous les chapitres et leçons'
-  },
   activites: {
     icon: BookOpen,
     title: 'Activité de découverte',
     description: 'Exploration et découverte de nouvelles notions'
+  },
+  cours: {
+    icon: BookOpen,
+    title: 'Cours',
+    description: 'Tous les chapitres et leçons'
   },
   devoirs: {
     icon: FileText,
