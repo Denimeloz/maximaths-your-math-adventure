@@ -25,14 +25,15 @@ interface Course {
   title: string;
 }
 
+type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
+
 interface AssignmentManagerProps {
-  courses: Course[];
+  filterLevel: CourseLevel;
 }
 
-export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses }) => {
+export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLevel }) => {
   const { toast } = useToast();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [selectedCourse, setSelectedCourse] = useState<string>('');
   const [showForm, setShowForm] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
@@ -40,7 +41,6 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
   const fileInputRef = useRef<HTMLInputElement>(null);
   const correctionInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
-    course_id: '',
     title: '',
     description: '',
     instructions: '',
@@ -111,8 +111,8 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
   };
 
   const handleSave = async () => {
-    if (!form.title.trim() || !form.course_id) {
-      toast({ title: "Erreur", description: "Titre et cours requis", variant: "destructive" });
+    if (!form.title.trim()) {
+      toast({ title: "Erreur", description: "Le titre est requis", variant: "destructive" });
       return;
     }
 
@@ -138,13 +138,13 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
         resetForm();
       }
     } else {
-      const assignmentsForCourse = assignments.filter(a => a.course_id === form.course_id);
+      const assignmentsForLevel = assignments.filter(a => (a as any).level === filterLevel);
       const { error } = await supabase
         .from('assignments')
         .insert({
           ...data,
-          course_id: form.course_id,
-          order_index: assignmentsForCourse.length,
+          level: filterLevel,
+          order_index: assignmentsForLevel.length,
         });
 
       if (!error) {
@@ -170,7 +170,6 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
   const handleEdit = (assignment: Assignment) => {
     setEditingAssignment(assignment);
     setForm({
-      course_id: assignment.course_id || '',
       title: assignment.title,
       description: assignment.description || '',
       instructions: assignment.instructions || '',
@@ -187,7 +186,6 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
     setShowForm(false);
     setEditingAssignment(null);
     setForm({
-      course_id: '',
       title: '',
       description: '',
       instructions: '',
@@ -199,14 +197,8 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
     });
   };
 
-  const filteredAssignments = selectedCourse
-    ? assignments.filter(a => a.course_id === selectedCourse)
-    : assignments;
+  const filteredAssignments = assignments.filter(a => (a as any).level === filterLevel);
 
-  const getCourseName = (courseId: string | null) => {
-    if (!courseId) return 'Non assigné';
-    return courses.find(c => c.id === courseId)?.title || 'Inconnu';
-  };
 
   return (
     <div className="space-y-6">
@@ -216,20 +208,6 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
           <Plus className="w-4 h-4 mr-2" />
           Nouveau devoir
         </Button>
-      </div>
-
-      <div>
-        <label className="text-sm font-body text-muted-foreground mb-1 block">Filtrer par cours</label>
-        <select
-          value={selectedCourse}
-          onChange={(e) => setSelectedCourse(e.target.value)}
-          className="p-2 rounded-xl border border-input bg-background"
-        >
-          <option value="">Tous les cours</option>
-          {courses.map(course => (
-            <option key={course.id} value={course.id}>{course.title}</option>
-          ))}
-        </select>
       </div>
 
       {showForm && (
@@ -244,20 +222,6 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
           </div>
 
           <div className="grid gap-4">
-            <div>
-              <label className="text-sm font-body text-muted-foreground mb-1 block">Cours *</label>
-              <select
-                value={form.course_id}
-                onChange={(e) => setForm(prev => ({ ...prev, course_id: e.target.value }))}
-                className="w-full p-2 rounded-xl border border-input bg-background"
-                disabled={!!editingAssignment}
-              >
-                <option value="">Sélectionner un cours</option>
-                {courses.map(course => (
-                  <option key={course.id} value={course.id}>{course.title}</option>
-                ))}
-              </select>
-            </div>
 
             <div>
               <label className="text-sm font-body text-muted-foreground mb-1 block">Titre *</label>
@@ -398,7 +362,6 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ courses })
                 </div>
                 <div>
                   <p className="font-display text-foreground">{assignment.title}</p>
-                  <p className="text-sm text-muted-foreground">{getCourseName(assignment.course_id)}</p>
                   {assignment.due_date && (
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Calendar className="w-3 h-3" />

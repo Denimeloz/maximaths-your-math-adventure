@@ -74,12 +74,30 @@ const HeroSection = () => {
         </h1>
 
         {/* Subtitle - enhanced */}
-        <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground text-center max-w-3xl mb-12 animate-slide-up font-body font-semibold leading-relaxed" style={{ animationDelay: "0.4s" }}>
-          Cours, exercices et suivi pour le <span className="text-rainbow-blue font-bold">Collège</span> et le <span className="text-rainbow-purple font-bold">Lycée</span>. 
-          <br />Apprends dans la bonne humeur ! 🎉
+        <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground text-center max-w-3xl mb-8 animate-slide-up font-body font-semibold leading-relaxed" style={{ animationDelay: "0.4s" }}>
+          La plateforme de mathématiques pour les élèves du <span className="text-rainbow-blue font-bold">Collège</span> et du <span className="text-rainbow-purple font-bold">Lycée</span>
         </p>
 
-        {/* Removed CTA Button - Public signup disabled */}
+        {/* Platform description */}
+        <div className="max-w-4xl mx-auto mb-12 animate-slide-up" style={{ animationDelay: "0.5s" }}>
+          <div className="grid sm:grid-cols-3 gap-4 text-center">
+            <div className="p-4 rounded-2xl bg-card/80 backdrop-blur-sm border border-border">
+              <span className="text-2xl mb-2 block">📖</span>
+              <p className="text-sm font-body text-foreground font-medium">Cours complets</p>
+              <p className="text-xs text-muted-foreground">De la 6ème à la Terminale</p>
+            </div>
+            <div className="p-4 rounded-2xl bg-card/80 backdrop-blur-sm border border-border">
+              <span className="text-2xl mb-2 block">✏️</span>
+              <p className="text-sm font-body text-foreground font-medium">Exercices progressifs</p>
+              <p className="text-xs text-muted-foreground">Avec corrections détaillées</p>
+            </div>
+            <div className="p-4 rounded-2xl bg-card/80 backdrop-blur-sm border border-border">
+              <span className="text-2xl mb-2 block">🎯</span>
+              <p className="text-sm font-body text-foreground font-medium">Préparation examens</p>
+              <p className="text-xs text-muted-foreground">Brevet, Bac et plus</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

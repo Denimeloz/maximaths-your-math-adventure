@@ -849,16 +849,12 @@ const Admin = () => {
 
           {/* Assignments Tab - filtered by level */}
           {activeTab === 'devoirs' && activeLevel && (
-            <AssignmentManager 
-              courses={courses.filter(c => c.level === activeLevel).map(c => ({ id: c.id, title: c.title }))} 
-            />
+            <AssignmentManager filterLevel={activeLevel} />
           )}
 
           {/* Evaluations Tab - filtered by level */}
           {activeTab === 'evaluations' && activeLevel && (
-            <EvaluationManager 
-              courses={courses.filter(c => c.level === activeLevel).map(c => ({ id: c.id, title: c.title }))} 
-            />
+            <EvaluationManager filterLevel={activeLevel} />
           )}
 
           {/* DNB Tab - only for 3eme */}
