@@ -89,7 +89,8 @@ const Admin = () => {
     return 'dashboard';
   };
   
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'courses' | 'exercises' | 'assignments' | 'evaluations' | 'dnb' | 'grading' | 'files' | 'users'>(getActiveTabFromPath);
+  const [activeTab, setActiveTab] = useState<string>(getActiveTabFromPath);
+  const [activeLevel, setActiveLevel] = useState<'6eme' | '5eme' | '4eme' | '3eme' | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<(Profile & { role?: string })[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
@@ -496,7 +497,14 @@ const Admin = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-hero-gradient">
-        <AdminSidebar activeTab={activeTab} onTabChange={(tab) => setActiveTab(tab as typeof activeTab)} />
+        <AdminSidebar 
+          activeTab={activeTab} 
+          activeLevel={activeLevel}
+          onTabChange={(tab, level) => {
+            setActiveTab(tab);
+            setActiveLevel(level || null);
+          }} 
+        />
         
         <main className="flex-1 p-6 lg:p-8 overflow-auto">
           {/* Header */}
@@ -516,7 +524,7 @@ const Admin = () => {
               { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
               { id: 'courses', label: 'Cours', icon: BookOpen },
               { id: 'exercises', label: 'Exercices', icon: PenTool },
-              { id: 'assignments', label: 'Devoirs', icon: ClipboardList },
+              { id: 'assignments', label: 'Devoirs de niveaux', icon: ClipboardList },
               { id: 'evaluations', label: 'Évaluations', icon: FileCheck },
               { id: 'dnb', label: 'Prépa DNB', icon: Award },
               { id: 'grading', label: 'Correction', icon: CheckSquare },
@@ -679,6 +687,8 @@ const Admin = () => {
                             <SelectItem value="analyse">Analyse</SelectItem>
                             <SelectItem value="probabilites">Probabilités</SelectItem>
                             <SelectItem value="statistiques">Statistiques</SelectItem>
+                            <SelectItem value="automatismes">Automatismes</SelectItem>
+                            <SelectItem value="activite">Activité de découverte</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>

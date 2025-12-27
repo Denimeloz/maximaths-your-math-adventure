@@ -146,7 +146,7 @@ export const AdminDashboard: React.FC = () => {
   const contentStats = [
     { icon: FileText, label: 'Exercices', value: stats.totalExercises, color: 'text-rainbow-pink' },
     { icon: HelpCircle, label: 'Quiz', value: stats.totalQuizzes, color: 'text-rainbow-blue' },
-    { icon: ClipboardList, label: 'Devoirs', value: stats.totalAssignments, color: 'text-rainbow-green' },
+    { icon: ClipboardList, label: 'Devoirs de niveaux', value: stats.totalAssignments, color: 'text-rainbow-green' },
     { icon: Video, label: 'Vidéos', value: stats.totalVideos, color: 'text-rainbow-purple' },
     { icon: FileText, label: 'Fichiers', value: stats.totalFiles, color: 'text-rainbow-orange' },
   ];
@@ -191,7 +191,7 @@ export const AdminDashboard: React.FC = () => {
         <div className="card-cartoon bg-card border-border p-6">
           <h3 className="font-display text-lg text-foreground mb-4 flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-rainbow-green" />
-            Soumissions de devoirs
+            Soumissions de devoirs de niveaux
           </h3>
           <div className="space-y-4">
             <div className="flex justify-between items-center">

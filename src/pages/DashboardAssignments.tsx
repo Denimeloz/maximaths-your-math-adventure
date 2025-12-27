@@ -140,7 +140,7 @@ const DashboardAssignments = () => {
               <div>
                 <h1 className="text-lg font-display text-foreground flex items-center gap-2">
                   <FileText className="w-5 h-5 text-rainbow-blue" />
-                  Mes Devoirs
+                  Mes Devoirs de niveaux
                 </h1>
                 <p className="text-xs text-muted-foreground font-body">
                   {pendingCount} en attente • {submittedCount} soumis • {gradedCount} noté(s)

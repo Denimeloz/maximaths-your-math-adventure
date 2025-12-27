@@ -13,7 +13,7 @@ import {
   Star
 } from 'lucide-react';
 
-type ContentType = 'cours' | 'devoirs' | 'evaluations' | 'prepa-dnb';
+type ContentType = 'cours' | 'activites' | 'devoirs' | 'evaluations' | 'prepa-dnb';
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
 const levelLabels: Record<CourseLevel, string> = {
@@ -42,9 +42,14 @@ const contentConfig: Record<ContentType, { icon: React.ElementType; title: strin
     title: 'Cours',
     description: 'Tous les chapitres et leçons'
   },
+  activites: {
+    icon: BookOpen,
+    title: 'Activité de découverte',
+    description: 'Exploration et découverte de nouvelles notions'
+  },
   devoirs: {
     icon: FileText,
-    title: 'Devoirs',
+    title: 'Devoirs de niveaux',
     description: 'Exercices et travaux à rendre'
   },
   evaluations: {
@@ -119,14 +124,22 @@ const LevelContent = () => {
   const fetchContent = async () => {
     setIsLoading(true);
     
-    if (type === 'cours') {
-      const { data } = await supabase
+    if (type === 'cours' || type === 'activites') {
+      // For activites, we filter by category 'activite'
+      const query = supabase
         .from('courses')
         .select('*')
         .eq('level', level)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       
+      if (type === 'activites') {
+        query.eq('category', 'activite');
+      } else {
+        query.neq('category', 'activite');
+      }
+      
+      const { data } = await query;
       if (data) setCourses(data as Course[]);
     } 
     else if (type === 'devoirs') {
@@ -354,7 +367,7 @@ const LevelContent = () => {
       );
     }
 
-    if (type === 'cours') {
+    if (type === 'cours' || type === 'activites') {
       return courses.length > 0 ? renderCourses() : renderEmptyState();
     } else if (type === 'devoirs') {
       return assignments.length > 0 ? renderAssignments() : renderEmptyState();

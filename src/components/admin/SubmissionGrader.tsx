@@ -91,7 +91,7 @@ export const SubmissionGrader: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-display text-foreground">Correction des Devoirs</h2>
+        <h2 className="text-2xl font-display text-foreground">Correction des Devoirs de niveaux</h2>
         <div className="flex gap-2">
           {(['pending', 'graded', 'all'] as const).map(f => (
             <Button

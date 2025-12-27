@@ -34,7 +34,7 @@ const menuItems = [
   { title: 'Tableau de bord', url: '/dashboard', icon: LayoutDashboard },
   { title: 'Mon profil', url: '/profile', icon: User },
   { title: 'Mes badges', url: '/dashboard/badges', icon: Trophy },
-  { title: 'Mes devoirs', url: '/dashboard/assignments', icon: FileText },
+  { title: 'Mes devoirs de niveaux', url: '/dashboard/assignments', icon: FileText },
 ];
 
 const courseItems = [
