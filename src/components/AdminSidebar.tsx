@@ -31,7 +31,7 @@ import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useState } from 'react';
 
-export type AdminCourseLevel = '6eme' | '5eme' | '4eme' | '3eme';
+export type AdminCourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
 interface LevelConfig {
   id: AdminCourseLevel;
@@ -44,6 +44,9 @@ const levels: LevelConfig[] = [
   { id: '5eme', label: '5ème', color: 'rainbow-green' },
   { id: '4eme', label: '4ème', color: 'rainbow-orange' },
   { id: '3eme', label: '3ème', color: 'rainbow-coral' },
+  { id: 'seconde', label: 'Seconde', color: 'rainbow-purple' },
+  { id: 'premiere', label: 'Première', color: 'rainbow-pink' },
+  { id: 'terminale', label: 'Terminale', color: 'rainbow-blue' },
 ];
 
 const getSubSections = (level: AdminCourseLevel) => {

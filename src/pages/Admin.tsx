@@ -43,6 +43,8 @@ import {
   CheckSquare
 } from 'lucide-react';
 
+import { AdminCourseLevel } from '@/components/AdminSidebar';
+
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
 interface Course {
@@ -90,7 +92,7 @@ const Admin = () => {
   };
   
   const [activeTab, setActiveTab] = useState<string>(getActiveTabFromPath);
-  const [activeLevel, setActiveLevel] = useState<'6eme' | '5eme' | '4eme' | '3eme' | null>(null);
+  const [activeLevel, setActiveLevel] = useState<AdminCourseLevel | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<(Profile & { role?: string })[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
@@ -518,42 +520,56 @@ const Admin = () => {
             </p>
           </div>
 
-          {/* Tabs */}
-          <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
-            {[
-              { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-              { id: 'courses', label: 'Cours', icon: BookOpen },
-              { id: 'exercises', label: 'Exercices', icon: PenTool },
-              { id: 'assignments', label: 'Devoirs de niveaux', icon: ClipboardList },
-              { id: 'evaluations', label: 'Évaluations', icon: FileCheck },
-              { id: 'dnb', label: 'Prépa DNB', icon: Award },
-              { id: 'grading', label: 'Correction', icon: CheckSquare },
-              { id: 'files', label: 'Fichiers', icon: FileText },
-              { id: 'users', label: 'Utilisateurs', icon: Users },
-            ].map((tab) => (
-              <Button
-                key={tab.id}
-                variant={activeTab === tab.id ? 'default' : 'outline'}
-                onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className="rounded-xl flex items-center gap-2 whitespace-nowrap"
-                size="sm"
-              >
-                <tab.icon className="w-4 h-4" />
-                {tab.label}
-              </Button>
-            ))}
-          </div>
+          {/* Level-specific header */}
+          {activeLevel && (
+            <div className="mb-6 p-4 rounded-xl bg-card border border-border">
+              <h2 className="text-xl font-display text-foreground flex items-center gap-2">
+                {getLevelLabel(activeLevel)} - {
+                  activeTab === 'cours' ? 'Cours' :
+                  activeTab === 'activites' ? 'Activité de découverte' :
+                  activeTab === 'devoirs' ? 'Devoirs de niveaux' :
+                  activeTab === 'evaluations' ? 'Évaluations' :
+                  activeTab === 'prepa-dnb' ? 'Prépa DNB' : ''
+                }
+              </h2>
+            </div>
+          )}
+
+          {/* Tabs - Only show when no level selected */}
+          {!activeLevel && (
+            <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
+              {[
+                { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+                { id: 'grading', label: 'Correction', icon: CheckSquare },
+                { id: 'users', label: 'Utilisateurs', icon: Users },
+              ].map((tab) => (
+                <Button
+                  key={tab.id}
+                  variant={activeTab === tab.id ? 'default' : 'outline'}
+                  onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                  className="rounded-xl flex items-center gap-2 whitespace-nowrap"
+                  size="sm"
+                >
+                  <tab.icon className="w-4 h-4" />
+                  {tab.label}
+                </Button>
+              ))}
+            </div>
+          )}
 
           {/* Dashboard Tab */}
-          {activeTab === 'dashboard' && <AdminDashboard />}
+          {activeTab === 'dashboard' && !activeLevel && <AdminDashboard />}
 
-          {/* Courses Tab */}
-          {activeTab === 'courses' && (
+          {/* Courses Tab - filtered by level */}
+          {activeTab === 'cours' && activeLevel && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-display text-foreground">Gestion des Cours</h2>
+                <h2 className="text-2xl font-display text-foreground">Cours - {getLevelLabel(activeLevel)}</h2>
                 <Button 
-                  onClick={() => setShowCourseForm(true)} 
+                  onClick={() => {
+                    setCourseForm(prev => ({ ...prev, level: activeLevel }));
+                    setShowCourseForm(true);
+                  }} 
                   className="btn-3d bg-primary rounded-xl"
                 >
                   <Plus className="w-4 h-4 mr-2" />
@@ -650,48 +666,25 @@ const Admin = () => {
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-body text-muted-foreground mb-1 block">Niveau</label>
-                        <Select 
-                          value={courseForm.level} 
-                          onValueChange={(v) => setCourseForm(prev => ({ ...prev, level: v as CourseLevel }))}
-                        >
-                          <SelectTrigger className="rounded-xl">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="6eme">6ème</SelectItem>
-                            <SelectItem value="5eme">5ème</SelectItem>
-                            <SelectItem value="4eme">4ème</SelectItem>
-                            <SelectItem value="3eme">3ème</SelectItem>
-                            <SelectItem value="seconde">Seconde</SelectItem>
-                            <SelectItem value="premiere">Première</SelectItem>
-                            <SelectItem value="terminale">Terminale</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div>
-                        <label className="text-sm font-body text-muted-foreground mb-1 block">Catégorie</label>
-                        <Select 
-                          value={courseForm.category} 
-                          onValueChange={(v) => setCourseForm(prev => ({ ...prev, category: v }))}
-                        >
-                          <SelectTrigger className="rounded-xl">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="algebre">Algèbre</SelectItem>
-                            <SelectItem value="geometrie">Géométrie</SelectItem>
-                            <SelectItem value="analyse">Analyse</SelectItem>
-                            <SelectItem value="probabilites">Probabilités</SelectItem>
-                            <SelectItem value="statistiques">Statistiques</SelectItem>
-                            <SelectItem value="automatismes">Automatismes</SelectItem>
-                            <SelectItem value="activite">Activité de découverte</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                    <div>
+                      <label className="text-sm font-body text-muted-foreground mb-1 block">Catégorie</label>
+                      <Select 
+                        value={courseForm.category} 
+                        onValueChange={(v) => setCourseForm(prev => ({ ...prev, category: v }))}
+                      >
+                        <SelectTrigger className="rounded-xl">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="algebre">Algèbre</SelectItem>
+                          <SelectItem value="geometrie">Géométrie</SelectItem>
+                          <SelectItem value="analyse">Analyse</SelectItem>
+                          <SelectItem value="probabilites">Probabilités</SelectItem>
+                          <SelectItem value="statistiques">Statistiques</SelectItem>
+                          <SelectItem value="automatismes">Automatismes</SelectItem>
+                          <SelectItem value="activite">Activité de découverte</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     {/* PDF Upload */}
@@ -776,15 +769,15 @@ const Admin = () => {
                 </div>
               )}
 
-              {/* Courses List */}
+              {/* Courses List filtered by level */}
               <div className="space-y-4">
-                {courses.length === 0 ? (
+                {courses.filter(c => c.level === activeLevel).length === 0 ? (
                   <div className="card-cartoon bg-card border-border p-12 text-center">
                     <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                    <p className="text-muted-foreground font-body">Aucun cours créé</p>
+                    <p className="text-muted-foreground font-body">Aucun cours pour ce niveau</p>
                   </div>
                 ) : (
-                  courses.map((course) => (
+                  courses.filter(c => c.level === activeLevel).map((course) => (
                     <div 
                       key={course.id}
                       className="card-cartoon bg-card border-border p-6 flex items-center justify-between"
@@ -809,7 +802,7 @@ const Admin = () => {
                             </span>
                           </div>
                           <p className="text-sm text-muted-foreground font-body">
-                            {getLevelLabel(course.level)} • {course.category}
+                            {course.category}
                           </p>
                         </div>
                       </div>
@@ -847,29 +840,34 @@ const Admin = () => {
             </div>
           )}
 
-
-          {/* Exercises Tab */}
-          {activeTab === 'exercises' && (
-            <ExerciseManager courses={courses.map(c => ({ id: c.id, title: c.title }))} />
+          {/* Activites Tab - filtered by level */}
+          {activeTab === 'activites' && activeLevel && (
+            <ExerciseManager 
+              courses={courses.filter(c => c.level === activeLevel).map(c => ({ id: c.id, title: c.title }))} 
+            />
           )}
 
-          {/* Assignments Tab */}
-          {activeTab === 'assignments' && (
-            <AssignmentManager courses={courses.map(c => ({ id: c.id, title: c.title }))} />
+          {/* Assignments Tab - filtered by level */}
+          {activeTab === 'devoirs' && activeLevel && (
+            <AssignmentManager 
+              courses={courses.filter(c => c.level === activeLevel).map(c => ({ id: c.id, title: c.title }))} 
+            />
           )}
 
-          {/* Evaluations Tab */}
-          {activeTab === 'evaluations' && (
-            <EvaluationManager courses={courses.map(c => ({ id: c.id, title: c.title }))} />
+          {/* Evaluations Tab - filtered by level */}
+          {activeTab === 'evaluations' && activeLevel && (
+            <EvaluationManager 
+              courses={courses.filter(c => c.level === activeLevel).map(c => ({ id: c.id, title: c.title }))} 
+            />
           )}
 
-          {/* DNB Tab */}
-          {activeTab === 'dnb' && (
+          {/* DNB Tab - only for 3eme */}
+          {activeTab === 'prepa-dnb' && activeLevel === '3eme' && (
             <DnbManager />
           )}
 
           {/* Grading Tab */}
-          {activeTab === 'grading' && (
+          {activeTab === 'grading' && !activeLevel && (
             <SubmissionGrader />
           )}
 
