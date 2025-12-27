@@ -16,6 +16,7 @@ import { SubmissionGrader } from '@/components/admin/SubmissionGrader';
 import { FileVideoManager } from '@/components/admin/FileVideoManager';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { DnbManager } from '@/components/admin/DnbManager';
+import ActivityManager from '@/components/admin/ActivityManager';
 import PDFViewer from '@/components/PDFViewer';
 import { 
   Users, 
@@ -842,9 +843,7 @@ const Admin = () => {
 
           {/* Activites Tab - filtered by level */}
           {activeTab === 'activites' && activeLevel && (
-            <ExerciseManager 
-              courses={courses.filter(c => c.level === activeLevel).map(c => ({ id: c.id, title: c.title }))} 
-            />
+            <ActivityManager selectedLevel={activeLevel} />
           )}
 
           {/* Assignments Tab - filtered by level */}

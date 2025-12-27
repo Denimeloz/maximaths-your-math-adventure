@@ -1,16 +1,8 @@
-import { Menu, X, Home, Info, ChevronDown } from "lucide-react";
+import { Menu, X, Home, Info, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import newLogo from "@/assets/new-logo.png";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
 
 const levels = [
   { 
@@ -18,49 +10,56 @@ const levels = [
     label: '6ème', 
     color: 'bg-rainbow-blue',
     hoverColor: 'hover:bg-rainbow-blue/20',
-    textColor: 'text-rainbow-blue'
+    textColor: 'text-rainbow-blue',
+    borderColor: 'border-rainbow-blue'
   },
   { 
     id: '5eme', 
     label: '5ème', 
     color: 'bg-rainbow-green',
     hoverColor: 'hover:bg-rainbow-green/20',
-    textColor: 'text-rainbow-green'
+    textColor: 'text-rainbow-green',
+    borderColor: 'border-rainbow-green'
   },
   { 
     id: '4eme', 
     label: '4ème', 
     color: 'bg-rainbow-orange',
     hoverColor: 'hover:bg-rainbow-orange/20',
-    textColor: 'text-rainbow-orange'
+    textColor: 'text-rainbow-orange',
+    borderColor: 'border-rainbow-orange'
   },
   { 
     id: '3eme', 
     label: '3ème', 
     color: 'bg-rainbow-coral',
     hoverColor: 'hover:bg-rainbow-coral/20',
-    textColor: 'text-rainbow-coral'
+    textColor: 'text-rainbow-coral',
+    borderColor: 'border-rainbow-coral'
   },
   { 
     id: 'seconde', 
     label: 'Seconde', 
     color: 'bg-rainbow-pink',
     hoverColor: 'hover:bg-rainbow-pink/20',
-    textColor: 'text-rainbow-pink'
+    textColor: 'text-rainbow-pink',
+    borderColor: 'border-rainbow-pink'
   },
   { 
     id: 'premiere', 
     label: 'Première', 
     color: 'bg-rainbow-purple',
     hoverColor: 'hover:bg-rainbow-purple/20',
-    textColor: 'text-rainbow-purple'
+    textColor: 'text-rainbow-purple',
+    borderColor: 'border-rainbow-purple'
   },
   { 
     id: 'terminale', 
     label: 'Terminale', 
     color: 'bg-rainbow-yellow',
     hoverColor: 'hover:bg-rainbow-yellow/20',
-    textColor: 'text-rainbow-yellow'
+    textColor: 'text-rainbow-yellow',
+    borderColor: 'border-rainbow-yellow'
   },
 ];
 
@@ -86,9 +85,26 @@ const getSubMenuForLevel = (levelId: string) => {
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedLevel, setExpandedLevel] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setExpandedLevel(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLevelClick = (levelId: string) => {
+    setExpandedLevel(expandedLevel === levelId ? null : levelId);
+  };
 
   const handleSubMenuClick = (levelId: string, subMenuId: string) => {
     navigate(`/niveau/${levelId}/${subMenuId}`);
@@ -119,65 +135,65 @@ const Header = () => {
           </span>
         </div>
 
-        {/* Navigation Desktop - Niveaux avec sous-menus */}
-        <NavigationMenu className="hidden lg:flex">
-          <NavigationMenuList className="gap-1">
-            {!isHomePage && (
-              <NavigationMenuItem>
-                <Button 
-                  variant="nav" 
-                  size="sm" 
-                  className="gap-2 rounded-full hover:bg-rainbow-green/20 hover:scale-105 transition-all"
-                  onClick={() => navigate('/')}
-                >
-                  <Home className="w-4 h-4 text-rainbow-green" />
-                  Accueil
-                </Button>
-              </NavigationMenuItem>
-            )}
-            
-            {levels.map((level) => (
-              <NavigationMenuItem key={level.id}>
-                <NavigationMenuTrigger 
-                  className={`rounded-full px-4 py-2 font-body font-semibold ${level.hoverColor} transition-all data-[state=open]:${level.color}/20`}
-                >
-                  {level.label}
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid w-52 gap-1 p-2">
-                    {getSubMenuForLevel(level.id).map((item) => (
-                      <li key={item.id}>
-                        <NavigationMenuLink asChild>
-                          <button
-                            onClick={() => handleSubMenuClick(level.id, item.id)}
-                            className={`block w-full text-left select-none rounded-lg p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground`}
-                          >
-                            <div className="text-sm font-semibold font-body">{item.label}</div>
-                            <p className="text-xs text-muted-foreground font-body mt-1">
-                              {item.description}
-                            </p>
-                          </button>
-                        </NavigationMenuLink>
-                      </li>
-                    ))}
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-            ))}
-            
-            <NavigationMenuItem>
-              <Button 
-                variant="nav" 
-                size="sm" 
-                className="gap-2 rounded-full hover:bg-rainbow-pink/20 hover:scale-105 transition-all"
-                onClick={() => navigate('/about')}
+        {/* Navigation Desktop - Niveaux avec menus cliquables */}
+        <nav ref={menuRef} className="hidden lg:flex items-center gap-1">
+          {!isHomePage && (
+            <Button 
+              variant="nav" 
+              size="sm" 
+              className="gap-2 rounded-full hover:bg-rainbow-green/20 hover:scale-105 transition-all"
+              onClick={() => navigate('/')}
+            >
+              <Home className="w-4 h-4 text-rainbow-green" />
+              Accueil
+            </Button>
+          )}
+          
+          {levels.map((level) => (
+            <div key={level.id} className="relative">
+              <button
+                onClick={() => handleLevelClick(level.id)}
+                className={`flex items-center gap-1 px-4 py-2 rounded-full font-body font-semibold transition-all ${level.hoverColor} ${
+                  expandedLevel === level.id ? `${level.color}/20` : ''
+                }`}
               >
-                <Info className="w-4 h-4 text-rainbow-pink" />
-                À propos
-              </Button>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
+                {level.label}
+                {expandedLevel === level.id ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
+              </button>
+              
+              {expandedLevel === level.id && (
+                <div className="absolute top-full left-0 mt-2 w-56 bg-card rounded-xl shadow-xl border border-border p-2 z-50 animate-slide-up">
+                  {getSubMenuForLevel(level.id).map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => handleSubMenuClick(level.id, item.id)}
+                      className="block w-full text-left select-none rounded-lg p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                    >
+                      <div className="text-sm font-semibold font-body">{item.label}</div>
+                      <p className="text-xs text-muted-foreground font-body mt-1">
+                        {item.description}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+          
+          <Button 
+            variant="nav" 
+            size="sm" 
+            className="gap-2 rounded-full hover:bg-rainbow-pink/20 hover:scale-105 transition-all"
+            onClick={() => navigate('/about')}
+          >
+            <Info className="w-4 h-4 text-rainbow-pink" />
+            À propos
+          </Button>
+        </nav>
 
         {/* Mobile menu button */}
         <button 
