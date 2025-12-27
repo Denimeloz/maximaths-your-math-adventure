@@ -17,7 +17,9 @@ interface Assignment {
   allow_late_submission: boolean;
   is_published: boolean;
   order_index: number;
+  file_url: string | null;
   correction_url: string | null;
+  level: string | null;
 }
 
 interface Course {
@@ -123,6 +125,7 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
       max_points: form.max_points,
       due_date: form.due_date || null,
       allow_late_submission: form.allow_late_submission,
+      file_url: form.file_url || null,
       correction_url: form.correction_url || null,
     };
 
@@ -176,7 +179,7 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
       max_points: assignment.max_points,
       due_date: assignment.due_date ? assignment.due_date.split('T')[0] : '',
       allow_late_submission: assignment.allow_late_submission,
-      file_url: '',
+      file_url: assignment.file_url || '',
       correction_url: assignment.correction_url || '',
     });
     setShowForm(true);
@@ -362,12 +365,36 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
                 </div>
                 <div>
                   <p className="font-display text-foreground">{assignment.title}</p>
-                  {assignment.due_date && (
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Calendar className="w-3 h-3" />
-                      {new Date(assignment.due_date).toLocaleDateString('fr-FR')}
-                    </div>
-                  )}
+                  <div className="flex items-center gap-3 mt-1">
+                    {assignment.due_date && (
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Calendar className="w-3 h-3" />
+                        {new Date(assignment.due_date).toLocaleDateString('fr-FR')}
+                      </div>
+                    )}
+                    {assignment.file_url && (
+                      <a 
+                        href={assignment.file_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs text-rainbow-blue hover:underline"
+                      >
+                        <FileText className="w-3 h-3" />
+                        Fichier
+                      </a>
+                    )}
+                    {assignment.correction_url && (
+                      <a 
+                        href={assignment.correction_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs text-rainbow-green hover:underline"
+                      >
+                        <BookCheck className="w-3 h-3" />
+                        Corrigé
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
