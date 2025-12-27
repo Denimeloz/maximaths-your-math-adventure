@@ -169,7 +169,7 @@ const DashboardSettings = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-foreground font-medium">Rappels de devoirs</p>
+                      <p className="text-foreground font-medium">Rappels de devoirs de niveaux</p>
                       <p className="text-sm text-muted-foreground">Recevoir un rappel avant la date limite</p>
                     </div>
                     <Switch 

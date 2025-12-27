@@ -79,18 +79,7 @@ const HeroSection = () => {
           <br />Apprends dans la bonne humeur ! 🎉
         </p>
 
-        {/* CTA Button - enhanced bounce effect */}
-        <div className="animate-slide-up" style={{ animationDelay: "0.6s" }}>
-          <Button 
-            variant="hero" 
-            size="xl" 
-            className="gap-3 text-xl group"
-            onClick={() => navigate('/auth')}
-          >
-            <Sparkles className="w-7 h-7 group-hover:animate-wiggle" />
-            Commencer l'aventure
-          </Button>
-        </div>
+        {/* Removed CTA Button - Public signup disabled */}
       </div>
     </section>
   );

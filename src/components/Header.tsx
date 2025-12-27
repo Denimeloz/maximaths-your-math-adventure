@@ -66,15 +66,17 @@ const levels = [
 
 const subMenuItems = [
   { id: 'cours', label: 'Cours', description: 'Leçons et chapitres' },
-  { id: 'devoirs', label: 'Devoirs', description: 'Exercices à rendre' },
+  { id: 'activites', label: 'Activité de découverte', description: 'Découverte et exploration' },
+  { id: 'devoirs', label: 'Devoirs de niveaux', description: 'Exercices à rendre' },
   { id: 'evaluations', label: 'Évaluations', description: 'Tests et examens' },
 ];
 
 const subMenuItems3eme = [
   { id: 'cours', label: 'Cours', description: 'Leçons et chapitres' },
-  { id: 'devoirs', label: 'Devoirs de niveau', description: 'Exercices à rendre' },
-  { id: 'evaluations', label: 'Évaluation', description: 'Tests et examens' },
-  { id: 'prepa-dnb', label: 'Prepa DNB', description: 'Préparation au brevet' },
+  { id: 'activites', label: 'Activité de découverte', description: 'Découverte et exploration' },
+  { id: 'devoirs', label: 'Devoirs de niveaux', description: 'Exercices à rendre' },
+  { id: 'evaluations', label: 'Évaluations', description: 'Tests et examens' },
+  { id: 'prepa-dnb', label: 'Prépa DNB', description: 'Préparation au brevet' },
 ];
 
 const getSubMenuForLevel = (levelId: string) => {

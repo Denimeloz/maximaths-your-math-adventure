@@ -19,25 +19,47 @@ import {
   User, 
   LogOut,
   Shield,
-  PenTool,
   ClipboardList,
   FileCheck,
   CheckSquare,
   Home,
-  Star
+  Star,
+  ChevronDown,
+  Lightbulb
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useState } from 'react';
 
-const menuItems = [
-  { title: 'Dashboard', url: '/admin', icon: LayoutDashboard, tab: 'dashboard' },
-  { title: 'Cours', url: '/admin/courses', icon: BookOpen, tab: 'courses' },
-  { title: 'Exercices', url: '/admin', icon: PenTool, tab: 'exercises' },
-  { title: 'Devoirs', url: '/admin', icon: ClipboardList, tab: 'assignments' },
-  { title: 'Évaluations', url: '/admin', icon: FileCheck, tab: 'evaluations' },
-  { title: 'Prépa DNB', url: '/admin', icon: Star, tab: 'dnb' },
-  { title: 'Correction', url: '/admin', icon: CheckSquare, tab: 'grading' },
-  { title: 'Utilisateurs', url: '/admin/users', icon: Users, tab: 'users' },
+export type AdminCourseLevel = '6eme' | '5eme' | '4eme' | '3eme';
+
+interface LevelConfig {
+  id: AdminCourseLevel;
+  label: string;
+  color: string;
+}
+
+const levels: LevelConfig[] = [
+  { id: '6eme', label: '6ème', color: 'rainbow-blue' },
+  { id: '5eme', label: '5ème', color: 'rainbow-green' },
+  { id: '4eme', label: '4ème', color: 'rainbow-orange' },
+  { id: '3eme', label: '3ème', color: 'rainbow-coral' },
 ];
+
+const getSubSections = (level: AdminCourseLevel) => {
+  const baseSections = [
+    { id: 'cours', label: 'Cours', icon: BookOpen },
+    { id: 'activites', label: 'Activité de découverte', icon: Lightbulb },
+    { id: 'devoirs', label: 'Devoirs de niveaux', icon: ClipboardList },
+    { id: 'evaluations', label: 'Évaluations', icon: FileCheck },
+  ];
+  
+  if (level === '3eme') {
+    baseSections.push({ id: 'prepa-dnb', label: 'Prépa DNB', icon: Star });
+  }
+  
+  return baseSections;
+};
 
 const accountItems = [
   { title: 'Accueil', url: '/', icon: Home },
@@ -46,28 +68,36 @@ const accountItems = [
 
 interface AdminSidebarProps {
   activeTab?: string;
-  onTabChange?: (tab: string) => void;
+  activeLevel?: AdminCourseLevel | null;
+  onTabChange?: (tab: string, level?: AdminCourseLevel) => void;
 }
 
-export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
+export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { profile, signOut } = useAuth();
+  const [openLevels, setOpenLevels] = useState<Record<string, boolean>>({ 
+    [activeLevel || '']: true 
+  });
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
   };
 
-  const handleMenuClick = (item: typeof menuItems[0]) => {
-    if (onTabChange && item.tab) {
-      onTabChange(item.tab);
-    } else {
-      navigate(item.url);
+  const handleSubSectionClick = (level: AdminCourseLevel, sectionId: string) => {
+    if (onTabChange) {
+      onTabChange(sectionId, level);
     }
   };
 
-  const isActive = (tab: string) => activeTab === tab;
+  const toggleLevel = (levelId: string) => {
+    setOpenLevels(prev => ({ ...prev, [levelId]: !prev[levelId] }));
+  };
+
+  const isActiveSection = (level: AdminCourseLevel, sectionId: string) => {
+    return activeLevel === level && activeTab === sectionId;
+  };
 
   return (
     <Sidebar className="border-r border-border bg-card">
@@ -87,26 +117,102 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="overflow-y-auto">
+        {/* Dashboard */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  onClick={() => onTabChange?.('dashboard')}
+                  className={`cursor-pointer transition-colors ${
+                    activeTab === 'dashboard' && !activeLevel
+                      ? 'bg-rainbow-purple/10 text-rainbow-purple font-medium' 
+                      : 'hover:bg-muted/50'
+                  }`}
+                >
+                  <LayoutDashboard className="w-4 h-4 mr-2" />
+                  <span>Dashboard</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Niveaux */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="font-display text-muted-foreground">Niveaux</SidebarGroupLabel>
+          <SidebarGroupContent>
+            {levels.map((level) => (
+              <Collapsible 
+                key={level.id} 
+                open={openLevels[level.id]} 
+                onOpenChange={() => toggleLevel(level.id)}
+              >
+                <CollapsibleTrigger className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-muted/50 ${
+                  activeLevel === level.id ? `text-${level.color}` : 'text-foreground'
+                }`}>
+                  <span className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full bg-${level.color}`} />
+                    {level.label}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${openLevels[level.id] ? 'rotate-180' : ''}`} />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenu className="ml-4 mt-1 border-l-2 border-muted pl-2">
+                    {getSubSections(level.id).map((section) => (
+                      <SidebarMenuItem key={section.id}>
+                        <SidebarMenuButton 
+                          onClick={() => handleSubSectionClick(level.id, section.id)}
+                          className={`cursor-pointer transition-colors text-sm ${
+                            isActiveSection(level.id, section.id)
+                              ? `bg-${level.color}/10 text-${level.color} font-medium` 
+                              : 'hover:bg-muted/50'
+                          }`}
+                        >
+                          <section.icon className="w-4 h-4 mr-2" />
+                          <span className="truncate">{section.label}</span>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </CollapsibleContent>
+              </Collapsible>
+            ))}
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Gestion */}
         <SidebarGroup>
           <SidebarGroupLabel className="font-display text-muted-foreground">Gestion</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    onClick={() => handleMenuClick(item)}
-                    className={`cursor-pointer transition-colors ${
-                      isActive(item.tab) 
-                        ? 'bg-rainbow-purple/10 text-rainbow-purple font-medium' 
-                        : 'hover:bg-muted/50'
-                    }`}
-                  >
-                    <item.icon className="w-4 h-4 mr-2" />
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  onClick={() => onTabChange?.('grading')}
+                  className={`cursor-pointer transition-colors ${
+                    activeTab === 'grading' && !activeLevel
+                      ? 'bg-rainbow-purple/10 text-rainbow-purple font-medium' 
+                      : 'hover:bg-muted/50'
+                  }`}
+                >
+                  <CheckSquare className="w-4 h-4 mr-2" />
+                  <span>Correction</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  onClick={() => onTabChange?.('users')}
+                  className={`cursor-pointer transition-colors ${
+                    activeTab === 'users' && !activeLevel
+                      ? 'bg-rainbow-purple/10 text-rainbow-purple font-medium' 
+                      : 'hover:bg-muted/50'
+                  }`}
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  <span>Utilisateurs</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
