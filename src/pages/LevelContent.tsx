@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,11 @@ import {
   ClipboardCheck,
   ArrowRight,
   ArrowLeft,
-  Star
+  Star,
+  Lightbulb,
+  Calendar,
+  Upload,
+  Clock
 } from 'lucide-react';
 
 type ContentType = 'cours' | 'activites' | 'devoirs' | 'evaluations' | 'prepa-dnb';
@@ -38,7 +43,7 @@ const levelColors: Record<CourseLevel, string> = {
 
 const contentConfig: Record<ContentType, { icon: React.ElementType; title: string; description: string }> = {
   activites: {
-    icon: BookOpen,
+    icon: Lightbulb,
     title: 'Activité de découverte',
     description: 'Exploration et découverte de nouvelles notions'
   },
@@ -72,6 +77,15 @@ interface Course {
   category: string;
 }
 
+interface Activity {
+  id: string;
+  title: string;
+  description: string | null;
+  level: string;
+  file_url: string | null;
+  correction_url: string | null;
+}
+
 interface Assignment {
   id: string;
   title: string;
@@ -81,6 +95,7 @@ interface Assignment {
   level: string | null;
   file_url: string | null;
   correction_url: string | null;
+  allow_late_submission: boolean;
 }
 
 interface Evaluation {
@@ -107,7 +122,9 @@ interface DnbContent {
 const LevelContent = () => {
   const { levelId, contentType } = useParams<{ levelId: string; contentType: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [courses, setCourses] = useState<Course[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [dnbContent, setDnbContent] = useState<DnbContent[]>([]);
@@ -128,23 +145,27 @@ const LevelContent = () => {
   const fetchContent = async () => {
     setIsLoading(true);
     
-    if (type === 'cours' || type === 'activites') {
-      // For activites, we filter by category 'activite'
-      const query = supabase
+    if (type === 'cours') {
+      const { data } = await supabase
         .from('courses')
+        .select('*')
+        .eq('level', level)
+        .eq('is_published', true)
+        .neq('category', 'activite')
+        .order('order_index', { ascending: true });
+      
+      if (data) setCourses(data as Course[]);
+    }
+    else if (type === 'activites') {
+      // Activities from dedicated table
+      const { data } = await supabase
+        .from('activities')
         .select('*')
         .eq('level', level)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       
-      if (type === 'activites') {
-        query.eq('category', 'activite');
-      } else {
-        query.neq('category', 'activite');
-      }
-      
-      const { data } = await query;
-      if (data) setCourses(data as Course[]);
+      if (data) setActivities(data as Activity[]);
     } 
     else if (type === 'devoirs') {
       const { data } = await supabase
@@ -224,39 +245,34 @@ const LevelContent = () => {
     </div>
   );
 
-  const renderAssignments = () => (
+  const renderActivities = () => (
     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {assignments.map((assignment) => (
+      {activities.map((activity) => (
         <div 
-          key={assignment.id}
+          key={activity.id}
           className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 group`}
         >
           <div className="flex items-center gap-2 mb-3">
-            <FileText className={`w-5 h-5 text-${color}`} />
+            <Lightbulb className={`w-5 h-5 text-${color}`} />
             <span className="text-xs font-body text-muted-foreground">
-              {assignment.max_points} points
+              Activité de découverte
             </span>
           </div>
           
           <h3 className={`text-xl font-display text-foreground mb-2`}>
-            {assignment.title}
+            {activity.title}
           </h3>
           
-          {assignment.description && (
+          {activity.description && (
             <p className="text-muted-foreground font-body text-sm mb-4 line-clamp-2">
-              {assignment.description}
+              {activity.description}
             </p>
           )}
           
-          <div className="flex flex-wrap gap-2 pt-4 border-t border-border">
-            {assignment.due_date && (
-              <span className="text-xs text-muted-foreground font-body">
-                Date limite: {new Date(assignment.due_date).toLocaleDateString('fr-FR')}
-              </span>
-            )}
-            {assignment.file_url && (
+          <div className="flex gap-3 pt-4 border-t border-border">
+            {activity.file_url && (
               <a 
-                href={assignment.file_url} 
+                href={activity.file_url} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-sm text-rainbow-blue hover:underline flex items-center gap-1"
@@ -265,9 +281,9 @@ const LevelContent = () => {
                 Sujet
               </a>
             )}
-            {assignment.correction_url && (
+            {activity.correction_url && (
               <a 
-                href={assignment.correction_url} 
+                href={activity.correction_url} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-sm text-rainbow-green hover:underline flex items-center gap-1"
@@ -279,6 +295,109 @@ const LevelContent = () => {
           </div>
         </div>
       ))}
+    </div>
+  );
+
+  const renderAssignments = () => (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {assignments.map((assignment) => {
+        const dueDate = assignment.due_date ? new Date(assignment.due_date) : null;
+        const isOverdue = dueDate && dueDate < new Date();
+        const canSubmit = !isOverdue || assignment.allow_late_submission;
+        
+        return (
+          <div 
+            key={assignment.id}
+            className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 group`}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <FileText className={`w-5 h-5 text-${color}`} />
+                <span className="text-xs font-body text-muted-foreground">
+                  {assignment.max_points} points
+                </span>
+              </div>
+              {dueDate && (
+                <div className={`flex items-center gap-1 text-xs font-body ${isOverdue ? 'text-destructive' : 'text-rainbow-orange'}`}>
+                  <Clock className="w-3 h-3" />
+                  À rendre
+                </div>
+              )}
+            </div>
+            
+            <h3 className={`text-xl font-display text-foreground mb-2`}>
+              {assignment.title}
+            </h3>
+            
+            {assignment.description && (
+              <p className="text-muted-foreground font-body text-sm mb-4 line-clamp-2">
+                {assignment.description}
+              </p>
+            )}
+
+            {dueDate && (
+              <div className={`flex items-center gap-2 mb-4 p-2 rounded-lg ${isOverdue ? 'bg-destructive/10' : 'bg-rainbow-orange/10'}`}>
+                <Calendar className={`w-4 h-4 ${isOverdue ? 'text-destructive' : 'text-rainbow-orange'}`} />
+                <span className={`text-sm font-body ${isOverdue ? 'text-destructive' : 'text-rainbow-orange'}`}>
+                  {isOverdue ? 'Date passée : ' : 'Date limite : '}
+                  {dueDate.toLocaleDateString('fr-FR', { 
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  })}
+                </span>
+              </div>
+            )}
+            
+            <div className="flex flex-wrap gap-2 pt-4 border-t border-border">
+              {assignment.file_url && (
+                <a 
+                  href={assignment.file_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-rainbow-blue hover:underline flex items-center gap-1"
+                >
+                  <FileText className="w-4 h-4" />
+                  Sujet
+                </a>
+              )}
+              {assignment.correction_url && (
+                <a 
+                  href={assignment.correction_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-rainbow-green hover:underline flex items-center gap-1"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  Corrigé
+                </a>
+              )}
+            </div>
+
+            {/* Submit button */}
+            {canSubmit && user && (
+              <Button 
+                className="w-full mt-4 gap-2"
+                onClick={() => navigate(`/submit/${assignment.id}`)}
+              >
+                <Upload className="w-4 h-4" />
+                Soumettre mon travail
+              </Button>
+            )}
+            {canSubmit && !user && (
+              <Button 
+                variant="outline"
+                className="w-full mt-4 gap-2"
+                onClick={() => navigate('/auth')}
+              >
+                <Upload className="w-4 h-4" />
+                Connectez-vous pour soumettre
+              </Button>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 
@@ -399,8 +518,10 @@ const LevelContent = () => {
       );
     }
 
-    if (type === 'cours' || type === 'activites') {
+    if (type === 'cours') {
       return courses.length > 0 ? renderCourses() : renderEmptyState();
+    } else if (type === 'activites') {
+      return activities.length > 0 ? renderActivities() : renderEmptyState();
     } else if (type === 'devoirs') {
       return assignments.length > 0 ? renderAssignments() : renderEmptyState();
     } else if (type === 'evaluations') {
