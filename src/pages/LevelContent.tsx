@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -13,12 +12,11 @@ import {
   ArrowLeft,
   Star,
   Lightbulb,
-  Calendar,
-  Upload,
-  Clock
+  Dumbbell,
+  Target
 } from 'lucide-react';
 
-type ContentType = 'cours' | 'activites' | 'devoirs' | 'evaluations' | 'prepa-dnb';
+type ContentType = 'cours' | 'activites' | 'exercices-entrainement' | 'tests-entrainement' | 'devoirs' | 'evaluations' | 'prepa-dnb';
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
 const levelLabels: Record<CourseLevel, string> = {
@@ -52,10 +50,20 @@ const contentConfig: Record<ContentType, { icon: React.ElementType; title: strin
     title: 'Cours',
     description: 'Tous les chapitres et leçons'
   },
+  'exercices-entrainement': {
+    icon: Dumbbell,
+    title: "Exercices d'entraînement",
+    description: 'Exercices pour pratiquer et renforcer vos compétences'
+  },
+  'tests-entrainement': {
+    icon: Target,
+    title: "Tests d'entraînement",
+    description: 'Tests pour évaluer vos connaissances'
+  },
   devoirs: {
     icon: FileText,
     title: 'Devoirs de niveaux',
-    description: 'Exercices et travaux à rendre'
+    description: 'Exercices et travaux pratiques'
   },
   evaluations: {
     icon: ClipboardCheck,
@@ -90,20 +98,15 @@ interface Assignment {
   id: string;
   title: string;
   description: string | null;
-  due_date: string | null;
-  max_points: number;
   level: string | null;
   file_url: string | null;
   correction_url: string | null;
-  allow_late_submission: boolean;
 }
 
 interface Evaluation {
   id: string;
   title: string;
   description: string | null;
-  duration_minutes: number | null;
-  max_points: number;
   level: string | null;
   file_url: string | null;
   correction_url: string | null;
@@ -119,15 +122,34 @@ interface DnbContent {
   year: number | null;
 }
 
+interface TrainingExercise {
+  id: string;
+  title: string;
+  description: string | null;
+  level: string;
+  file_url: string | null;
+  correction_url: string | null;
+}
+
+interface TrainingTest {
+  id: string;
+  title: string;
+  description: string | null;
+  level: string;
+  file_url: string | null;
+  correction_url: string | null;
+}
+
 const LevelContent = () => {
   const { levelId, contentType } = useParams<{ levelId: string; contentType: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [courses, setCourses] = useState<Course[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [dnbContent, setDnbContent] = useState<DnbContent[]>([]);
+  const [trainingExercises, setTrainingExercises] = useState<TrainingExercise[]>([]);
+  const [trainingTests, setTrainingTests] = useState<TrainingTest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const level = levelId as CourseLevel;
@@ -186,6 +208,26 @@ const LevelContent = () => {
         .order('order_index', { ascending: true });
       
       if (data) setEvaluations(data);
+    }
+    else if (type === 'exercices-entrainement') {
+      const { data } = await supabase
+        .from('training_exercises')
+        .select('*')
+        .eq('level', level)
+        .eq('is_published', true)
+        .order('order_index', { ascending: true });
+      
+      if (data) setTrainingExercises(data as TrainingExercise[]);
+    }
+    else if (type === 'tests-entrainement') {
+      const { data } = await supabase
+        .from('training_tests')
+        .select('*')
+        .eq('level', level)
+        .eq('is_published', true)
+        .order('order_index', { ascending: true });
+      
+      if (data) setTrainingTests(data as TrainingTest[]);
     }
     else if (type === 'prepa-dnb') {
       const { data } = await supabase
@@ -300,104 +342,160 @@ const LevelContent = () => {
 
   const renderAssignments = () => (
     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {assignments.map((assignment) => {
-        const dueDate = assignment.due_date ? new Date(assignment.due_date) : null;
-        const isOverdue = dueDate && dueDate < new Date();
-        const canSubmit = !isOverdue || assignment.allow_late_submission;
-        
-        return (
-          <div 
-            key={assignment.id}
-            className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 group`}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <FileText className={`w-5 h-5 text-${color}`} />
-                <span className="text-xs font-body text-muted-foreground">
-                  {assignment.max_points} points
-                </span>
-              </div>
-              {dueDate && (
-                <div className={`flex items-center gap-1 text-xs font-body ${isOverdue ? 'text-destructive' : 'text-rainbow-orange'}`}>
-                  <Clock className="w-3 h-3" />
-                  À rendre
-                </div>
-              )}
-            </div>
-            
-            <h3 className={`text-xl font-display text-foreground mb-2`}>
-              {assignment.title}
-            </h3>
-            
-            {assignment.description && (
-              <p className="text-muted-foreground font-body text-sm mb-4 line-clamp-2">
-                {assignment.description}
-              </p>
-            )}
-
-            {dueDate && (
-              <div className={`flex items-center gap-2 mb-4 p-2 rounded-lg ${isOverdue ? 'bg-destructive/10' : 'bg-rainbow-orange/10'}`}>
-                <Calendar className={`w-4 h-4 ${isOverdue ? 'text-destructive' : 'text-rainbow-orange'}`} />
-                <span className={`text-sm font-body ${isOverdue ? 'text-destructive' : 'text-rainbow-orange'}`}>
-                  {isOverdue ? 'Date passée : ' : 'Date limite : '}
-                  {dueDate.toLocaleDateString('fr-FR', { 
-                    weekday: 'long',
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                  })}
-                </span>
-              </div>
-            )}
-            
-            <div className="flex flex-wrap gap-2 pt-4 border-t border-border">
-              {assignment.file_url && (
-                <a 
-                  href={assignment.file_url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-sm text-rainbow-blue hover:underline flex items-center gap-1"
-                >
-                  <FileText className="w-4 h-4" />
-                  Sujet
-                </a>
-              )}
-              {assignment.correction_url && (
-                <a 
-                  href={assignment.correction_url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-sm text-rainbow-green hover:underline flex items-center gap-1"
-                >
-                  <BookOpen className="w-4 h-4" />
-                  Corrigé
-                </a>
-              )}
-            </div>
-
-            {/* Submit button */}
-            {canSubmit && user && (
-              <Button 
-                className="w-full mt-4 gap-2"
-                onClick={() => navigate(`/submit/${assignment.id}`)}
+      {assignments.map((assignment) => (
+        <div 
+          key={assignment.id}
+          className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 group`}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <FileText className={`w-5 h-5 text-${color}`} />
+            <span className="text-xs font-body text-muted-foreground">
+              Devoir de niveau
+            </span>
+          </div>
+          
+          <h3 className={`text-xl font-display text-foreground mb-2`}>
+            {assignment.title}
+          </h3>
+          
+          {assignment.description && (
+            <p className="text-muted-foreground font-body text-sm mb-4 line-clamp-2">
+              {assignment.description}
+            </p>
+          )}
+          
+          <div className="flex flex-wrap gap-2 pt-4 border-t border-border">
+            {assignment.file_url && (
+              <a 
+                href={assignment.file_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-rainbow-blue hover:underline flex items-center gap-1"
               >
-                <Upload className="w-4 h-4" />
-                Soumettre mon travail
-              </Button>
+                <FileText className="w-4 h-4" />
+                Sujet
+              </a>
             )}
-            {canSubmit && !user && (
-              <Button 
-                variant="outline"
-                className="w-full mt-4 gap-2"
-                onClick={() => navigate('/auth')}
+            {assignment.correction_url && (
+              <a 
+                href={assignment.correction_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-rainbow-green hover:underline flex items-center gap-1"
               >
-                <Upload className="w-4 h-4" />
-                Connectez-vous pour soumettre
-              </Button>
+                <BookOpen className="w-4 h-4" />
+                Corrigé
+              </a>
             )}
           </div>
-        );
-      })}
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderTrainingExercises = () => (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {trainingExercises.map((exercise) => (
+        <div 
+          key={exercise.id}
+          className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 group`}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Dumbbell className={`w-5 h-5 text-${color}`} />
+            <span className="text-xs font-body text-muted-foreground">
+              Exercice d'entraînement
+            </span>
+          </div>
+          
+          <h3 className={`text-xl font-display text-foreground mb-2`}>
+            {exercise.title}
+          </h3>
+          
+          {exercise.description && (
+            <p className="text-muted-foreground font-body text-sm mb-4 line-clamp-2">
+              {exercise.description}
+            </p>
+          )}
+          
+          <div className="flex gap-3 pt-4 border-t border-border">
+            {exercise.file_url && (
+              <a 
+                href={exercise.file_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-rainbow-blue hover:underline flex items-center gap-1"
+              >
+                <FileText className="w-4 h-4" />
+                Sujet
+              </a>
+            )}
+            {exercise.correction_url && (
+              <a 
+                href={exercise.correction_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-rainbow-green hover:underline flex items-center gap-1"
+              >
+                <BookOpen className="w-4 h-4" />
+                Corrigé
+              </a>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderTrainingTests = () => (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {trainingTests.map((test) => (
+        <div 
+          key={test.id}
+          className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 group`}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Target className={`w-5 h-5 text-${color}`} />
+            <span className="text-xs font-body text-muted-foreground">
+              Test d'entraînement
+            </span>
+          </div>
+          
+          <h3 className={`text-xl font-display text-foreground mb-2`}>
+            {test.title}
+          </h3>
+          
+          {test.description && (
+            <p className="text-muted-foreground font-body text-sm mb-4 line-clamp-2">
+              {test.description}
+            </p>
+          )}
+          
+          <div className="flex gap-3 pt-4 border-t border-border">
+            {test.file_url && (
+              <a 
+                href={test.file_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-rainbow-blue hover:underline flex items-center gap-1"
+              >
+                <FileText className="w-4 h-4" />
+                Sujet
+              </a>
+            )}
+            {test.correction_url && (
+              <a 
+                href={test.correction_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-rainbow-green hover:underline flex items-center gap-1"
+              >
+                <BookOpen className="w-4 h-4" />
+                Corrigé
+              </a>
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
 
@@ -411,8 +509,7 @@ const LevelContent = () => {
           <div className="flex items-center gap-2 mb-3">
             <ClipboardCheck className={`w-5 h-5 text-${color}`} />
             <span className="text-xs font-body text-muted-foreground">
-              {evaluation.max_points} points
-              {evaluation.duration_minutes && ` • ${evaluation.duration_minutes} min`}
+              Évaluation
             </span>
           </div>
           
@@ -522,6 +619,10 @@ const LevelContent = () => {
       return courses.length > 0 ? renderCourses() : renderEmptyState();
     } else if (type === 'activites') {
       return activities.length > 0 ? renderActivities() : renderEmptyState();
+    } else if (type === 'exercices-entrainement') {
+      return trainingExercises.length > 0 ? renderTrainingExercises() : renderEmptyState();
+    } else if (type === 'tests-entrainement') {
+      return trainingTests.length > 0 ? renderTrainingTests() : renderEmptyState();
     } else if (type === 'devoirs') {
       return assignments.length > 0 ? renderAssignments() : renderEmptyState();
     } else if (type === 'evaluations') {

@@ -12,11 +12,12 @@ import { useToast } from '@/hooks/use-toast';
 import { ExerciseManager } from '@/components/admin/ExerciseManager';
 import { AssignmentManager } from '@/components/admin/AssignmentManager';
 import { EvaluationManager } from '@/components/admin/EvaluationManager';
-import { SubmissionGrader } from '@/components/admin/SubmissionGrader';
 import { FileVideoManager } from '@/components/admin/FileVideoManager';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { DnbManager } from '@/components/admin/DnbManager';
 import ActivityManager from '@/components/admin/ActivityManager';
+import { TrainingExerciseManager } from '@/components/admin/TrainingExerciseManager';
+import { TrainingTestManager } from '@/components/admin/TrainingTestManager';
 import PDFViewer from '@/components/PDFViewer';
 import { 
   Users, 
@@ -524,10 +525,12 @@ const Admin = () => {
           {/* Level-specific header */}
           {activeLevel && (
             <div className="mb-6 p-4 rounded-xl bg-card border border-border">
-              <h2 className="text-xl font-display text-foreground flex items-center gap-2">
+            <h2 className="text-xl font-display text-foreground flex items-center gap-2">
                 {getLevelLabel(activeLevel)} - {
                   activeTab === 'cours' ? 'Cours' :
                   activeTab === 'activites' ? 'Activité de découverte' :
+                  activeTab === 'exercices-entrainement' ? "Exercices d'entraînement" :
+                  activeTab === 'tests-entrainement' ? "Tests d'entraînement" :
                   activeTab === 'devoirs' ? 'Devoirs de niveaux' :
                   activeTab === 'evaluations' ? 'Évaluations' :
                   activeTab === 'prepa-dnb' ? 'Prépa DNB' : ''
@@ -541,7 +544,6 @@ const Admin = () => {
             <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
               {[
                 { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-                { id: 'grading', label: 'Correction', icon: CheckSquare },
                 { id: 'users', label: 'Utilisateurs', icon: Users },
               ].map((tab) => (
                 <Button
@@ -846,6 +848,16 @@ const Admin = () => {
             <ActivityManager selectedLevel={activeLevel} />
           )}
 
+          {/* Training Exercises Tab - filtered by level */}
+          {activeTab === 'exercices-entrainement' && activeLevel && (
+            <TrainingExerciseManager filterLevel={activeLevel} />
+          )}
+
+          {/* Training Tests Tab - filtered by level */}
+          {activeTab === 'tests-entrainement' && activeLevel && (
+            <TrainingTestManager filterLevel={activeLevel} />
+          )}
+
           {/* Assignments Tab - filtered by level */}
           {activeTab === 'devoirs' && activeLevel && (
             <AssignmentManager filterLevel={activeLevel} />
@@ -859,11 +871,6 @@ const Admin = () => {
           {/* DNB Tab - only for 3eme */}
           {activeTab === 'prepa-dnb' && activeLevel === '3eme' && (
             <DnbManager />
-          )}
-
-          {/* Grading Tab */}
-          {activeTab === 'grading' && !activeLevel && (
-            <SubmissionGrader />
           )}
 
           {/* Files Tab */}
