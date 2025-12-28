@@ -4,27 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, ClipboardList, Calendar, Upload, FileText, Loader2, BookCheck } from 'lucide-react';
+import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, ClipboardList, Upload, FileText, Loader2, BookCheck } from 'lucide-react';
 
 interface Assignment {
   id: string;
-  course_id: string | null;
   title: string;
   description: string | null;
-  instructions: string | null;
-  max_points: number;
-  due_date: string | null;
-  allow_late_submission: boolean;
   is_published: boolean;
   order_index: number;
   file_url: string | null;
   correction_url: string | null;
   level: string | null;
-}
-
-interface Course {
-  id: string;
-  title: string;
 }
 
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
@@ -45,20 +35,20 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
   const [form, setForm] = useState({
     title: '',
     description: '',
-    instructions: '',
-    max_points: 100,
-    due_date: '',
-    allow_late_submission: false,
     file_url: '',
     correction_url: '',
   });
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [filterLevel]);
 
   const fetchData = async () => {
-    const { data } = await supabase.from('assignments').select('*').order('order_index');
+    const { data } = await supabase
+      .from('assignments')
+      .select('*')
+      .eq('level', filterLevel)
+      .order('order_index');
     if (data) setAssignments(data);
   };
 
@@ -121,10 +111,6 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
     const data = {
       title: form.title,
       description: form.description || null,
-      instructions: form.instructions || null,
-      max_points: form.max_points,
-      due_date: form.due_date || null,
-      allow_late_submission: form.allow_late_submission,
       file_url: form.file_url || null,
       correction_url: form.correction_url || null,
     };
@@ -141,13 +127,12 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
         resetForm();
       }
     } else {
-      const assignmentsForLevel = assignments.filter(a => (a as any).level === filterLevel);
       const { error } = await supabase
         .from('assignments')
         .insert({
           ...data,
           level: filterLevel,
-          order_index: assignmentsForLevel.length,
+          order_index: assignments.length,
         });
 
       if (!error) {
@@ -175,10 +160,6 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
     setForm({
       title: assignment.title,
       description: assignment.description || '',
-      instructions: assignment.instructions || '',
-      max_points: assignment.max_points,
-      due_date: assignment.due_date ? assignment.due_date.split('T')[0] : '',
-      allow_late_submission: assignment.allow_late_submission,
       file_url: assignment.file_url || '',
       correction_url: assignment.correction_url || '',
     });
@@ -191,22 +172,15 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
     setForm({
       title: '',
       description: '',
-      instructions: '',
-      max_points: 100,
-      due_date: '',
-      allow_late_submission: false,
       file_url: '',
       correction_url: '',
     });
   };
 
-  const filteredAssignments = assignments.filter(a => (a as any).level === filterLevel);
-
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-display text-foreground">Gestion des Devoirs de niveaux</h2>
+        <h2 className="text-2xl font-display text-foreground">Devoirs de niveaux</h2>
         <Button onClick={() => setShowForm(true)} className="btn-3d bg-primary rounded-xl">
           <Plus className="w-4 h-4 mr-2" />
           Nouveau devoir
@@ -225,7 +199,6 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
           </div>
 
           <div className="grid gap-4">
-
             <div>
               <label className="text-sm font-body text-muted-foreground mb-1 block">Titre *</label>
               <Input
@@ -247,20 +220,9 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
               />
             </div>
 
-            <div>
-              <label className="text-sm font-body text-muted-foreground mb-1 block">Instructions</label>
-              <Textarea
-                value={form.instructions}
-                onChange={(e) => setForm(prev => ({ ...prev, instructions: e.target.value }))}
-                placeholder="Instructions détaillées"
-                className="rounded-xl"
-                rows={4}
-              />
-            </div>
-
             {/* File Upload */}
             <div>
-              <label className="text-sm font-body text-muted-foreground mb-1 block">Fichier joint (PDF, Word, etc.)</label>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Fichier (sujet)</label>
               <div className="flex items-center gap-4">
                 {form.file_url ? (
                   <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl flex-1">
@@ -286,7 +248,7 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
 
             {/* Correction Upload */}
             <div>
-              <label className="text-sm font-body text-muted-foreground mb-1 block">Corrigé (PDF, Word, etc.)</label>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Corrigé</label>
               <div className="flex items-center gap-4">
                 {form.correction_url ? (
                   <div className="flex items-center gap-3 p-3 bg-rainbow-green/10 rounded-xl flex-1">
@@ -310,38 +272,6 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-body text-muted-foreground mb-1 block">Points max</label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={form.max_points}
-                  onChange={(e) => setForm(prev => ({ ...prev, max_points: parseInt(e.target.value) || 100 }))}
-                  className="rounded-xl"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-body text-muted-foreground mb-1 block">Date limite</label>
-                <Input
-                  type="date"
-                  value={form.due_date}
-                  onChange={(e) => setForm(prev => ({ ...prev, due_date: e.target.value }))}
-                  className="rounded-xl"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={form.allow_late_submission}
-                onChange={(e) => setForm(prev => ({ ...prev, allow_late_submission: e.target.checked }))}
-                className="w-4 h-4 rounded"
-              />
-              <label className="text-sm font-body text-foreground">Autoriser les soumissions tardives</label>
-            </div>
-
             <div className="flex gap-3 pt-4">
               <Button onClick={handleSave} className="btn-3d bg-primary rounded-xl">
                 <Save className="w-4 h-4 mr-2" />
@@ -356,7 +286,7 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
       )}
 
       <div className="space-y-4">
-        {filteredAssignments.map(assignment => (
+        {assignments.map(assignment => (
           <div key={assignment.id} className="card-cartoon bg-card border-border p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -366,30 +296,14 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
                 <div>
                   <p className="font-display text-foreground">{assignment.title}</p>
                   <div className="flex items-center gap-3 mt-1">
-                    {assignment.due_date && (
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Calendar className="w-3 h-3" />
-                        {new Date(assignment.due_date).toLocaleDateString('fr-FR')}
-                      </div>
-                    )}
                     {assignment.file_url && (
-                      <a 
-                        href={assignment.file_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-xs text-rainbow-blue hover:underline"
-                      >
+                      <a href={assignment.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-rainbow-blue hover:underline">
                         <FileText className="w-3 h-3" />
                         Fichier
                       </a>
                     )}
                     {assignment.correction_url && (
-                      <a 
-                        href={assignment.correction_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-xs text-rainbow-green hover:underline"
-                      >
+                      <a href={assignment.correction_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-rainbow-green hover:underline">
                         <BookCheck className="w-3 h-3" />
                         Corrigé
                       </a>
@@ -398,9 +312,6 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="px-2 py-1 rounded-full bg-rainbow-purple/20 text-rainbow-purple text-xs">
-                  {assignment.max_points} pts
-                </span>
                 <Button variant="ghost" size="icon" onClick={() => handleTogglePublish(assignment)} className="rounded-xl">
                   {assignment.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
                 </Button>
@@ -414,7 +325,7 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
             </div>
           </div>
         ))}
-        {filteredAssignments.length === 0 && (
+        {assignments.length === 0 && (
           <p className="text-muted-foreground text-center py-8">Aucun devoir</p>
         )}
       </div>

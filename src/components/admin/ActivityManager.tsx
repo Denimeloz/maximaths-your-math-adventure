@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Pencil, Trash2, FileText, BookOpen, Lightbulb } from 'lucide-react';
+import { Plus, Pencil, Trash2, FileText, BookOpen, Lightbulb, Upload, Loader2, X, BookCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -32,6 +31,10 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
+  const [isUploadingCorrection, setIsUploadingCorrection] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const correctionInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -67,6 +70,56 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
       setActivities(data || []);
     }
     setIsLoading(false);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error("Le fichier ne doit pas dépasser 20MB");
+      return;
+    }
+
+    setIsUploadingFile(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `activities/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('course-files').upload(fileName, file);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from('course-files').getPublicUrl(fileName);
+      setFormData(prev => ({ ...prev, file_url: publicUrl }));
+      toast.success("Fichier téléchargé");
+    } catch (error) {
+      toast.error("Impossible de télécharger le fichier");
+    } finally {
+      setIsUploadingFile(false);
+    }
+  };
+
+  const handleCorrectionUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error("Le fichier ne doit pas dépasser 20MB");
+      return;
+    }
+
+    setIsUploadingCorrection(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `corrections/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('course-files').upload(fileName, file);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from('course-files').getPublicUrl(fileName);
+      setFormData(prev => ({ ...prev, correction_url: publicUrl }));
+      toast.success("Corrigé téléchargé");
+    } catch (error) {
+      toast.error("Impossible de télécharger le corrigé");
+    } finally {
+      setIsUploadingCorrection(false);
+    }
   };
 
   const resetForm = () => {
@@ -181,35 +234,14 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Titre *</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="level">Niveau *</Label>
-                  <Select
-                    value={formData.level}
-                    onValueChange={(value) => setFormData({ ...formData, level: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {levels.map((level) => (
-                        <SelectItem key={level.id} value={level.id}>
-                          {level.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="title">Titre *</Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  required
+                />
               </div>
 
               <div className="space-y-2">
@@ -222,27 +254,55 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="file_url">URL du fichier (sujet)</Label>
-                  <Input
-                    id="file_url"
-                    type="url"
-                    value={formData.file_url}
-                    onChange={(e) => setFormData({ ...formData, file_url: e.target.value })}
-                    placeholder="https://..."
-                  />
+              {/* File Upload */}
+              <div className="space-y-2">
+                <Label>Fichier (sujet)</Label>
+                <div className="flex items-center gap-4">
+                  {formData.file_url ? (
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl flex-1">
+                      <FileText className="w-6 h-6 text-rainbow-blue" />
+                      <a href={formData.file_url} target="_blank" rel="noopener noreferrer" className="text-sm text-rainbow-blue hover:underline truncate">
+                        Voir le fichier
+                      </a>
+                      <button type="button" onClick={() => setFormData(prev => ({ ...prev, file_url: '' }))} className="ml-auto">
+                        <X className="w-4 h-4 text-destructive" />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".pdf,.doc,.docx,.ppt,.pptx" />
+                      <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isUploadingFile} className="rounded-xl">
+                        {isUploadingFile ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                        {isUploadingFile ? 'Upload...' : 'Ajouter un fichier'}
+                      </Button>
+                    </>
+                  )}
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="correction_url">URL du corrigé</Label>
-                  <Input
-                    id="correction_url"
-                    type="url"
-                    value={formData.correction_url}
-                    onChange={(e) => setFormData({ ...formData, correction_url: e.target.value })}
-                    placeholder="https://..."
-                  />
+              </div>
+
+              {/* Correction Upload */}
+              <div className="space-y-2">
+                <Label>Corrigé</Label>
+                <div className="flex items-center gap-4">
+                  {formData.correction_url ? (
+                    <div className="flex items-center gap-3 p-3 bg-rainbow-green/10 rounded-xl flex-1">
+                      <BookCheck className="w-6 h-6 text-rainbow-green" />
+                      <a href={formData.correction_url} target="_blank" rel="noopener noreferrer" className="text-sm text-rainbow-green hover:underline truncate">
+                        Voir le corrigé
+                      </a>
+                      <button type="button" onClick={() => setFormData(prev => ({ ...prev, correction_url: '' }))} className="ml-auto">
+                        <X className="w-4 h-4 text-destructive" />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <input type="file" ref={correctionInputRef} onChange={handleCorrectionUpload} className="hidden" accept=".pdf,.doc,.docx,.ppt,.pptx" />
+                      <Button type="button" variant="outline" onClick={() => correctionInputRef.current?.click()} disabled={isUploadingCorrection} className="rounded-xl border-rainbow-green/50 text-rainbow-green hover:bg-rainbow-green/10">
+                        {isUploadingCorrection ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <BookCheck className="w-4 h-4 mr-2" />}
+                        {isUploadingCorrection ? 'Upload...' : 'Ajouter le corrigé'}
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
 

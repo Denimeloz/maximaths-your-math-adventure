@@ -4,30 +4,30 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, FileCheck, Upload, FileText, Loader2, BookCheck } from 'lucide-react';
+import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, Dumbbell, Upload, FileText, Loader2, BookCheck } from 'lucide-react';
 
-interface Evaluation {
+interface TrainingExercise {
   id: string;
+  level: string;
   title: string;
   description: string | null;
-  is_published: boolean;
-  order_index: number;
   file_url: string | null;
   correction_url: string | null;
-  level: string | null;
+  is_published: boolean;
+  order_index: number;
 }
 
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
-interface EvaluationManagerProps {
+interface TrainingExerciseManagerProps {
   filterLevel: CourseLevel;
 }
 
-export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLevel }) => {
+export const TrainingExerciseManager: React.FC<TrainingExerciseManagerProps> = ({ filterLevel }) => {
   const { toast } = useToast();
-  const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+  const [items, setItems] = useState<TrainingExercise[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [editingEvaluation, setEditingEvaluation] = useState<Evaluation | null>(null);
+  const [editingItem, setEditingItem] = useState<TrainingExercise | null>(null);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
   const [isUploadingCorrection, setIsUploadingCorrection] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -45,11 +45,11 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
 
   const fetchData = async () => {
     const { data } = await supabase
-      .from('evaluations')
+      .from('training_exercises')
       .select('*')
       .eq('level', filterLevel)
       .order('order_index');
-    if (data) setEvaluations(data);
+    if (data) setItems(data);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,7 +64,7 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
     setIsUploadingFile(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `evaluations/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const fileName = `training-exercises/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const { error: uploadError } = await supabase.storage.from('course-files').upload(fileName, file);
       if (uploadError) throw uploadError;
       const { data: { publicUrl } } = supabase.storage.from('course-files').getPublicUrl(fileName);
@@ -115,28 +115,28 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
       correction_url: form.correction_url || null,
     };
 
-    if (editingEvaluation) {
+    if (editingItem) {
       const { error } = await supabase
-        .from('evaluations')
+        .from('training_exercises')
         .update(data)
-        .eq('id', editingEvaluation.id);
+        .eq('id', editingItem.id);
 
       if (!error) {
-        toast({ title: "Succès", description: "Évaluation modifiée" });
+        toast({ title: "Succès", description: "Exercice modifié" });
         fetchData();
         resetForm();
       }
     } else {
       const { error } = await supabase
-        .from('evaluations')
+        .from('training_exercises')
         .insert({
           ...data,
           level: filterLevel,
-          order_index: evaluations.length,
+          order_index: items.length,
         });
 
       if (!error) {
-        toast({ title: "Succès", description: "Évaluation créée" });
+        toast({ title: "Succès", description: "Exercice créé" });
         fetchData();
         resetForm();
       }
@@ -144,31 +144,31 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Supprimer cette évaluation ?")) return;
-    await supabase.from('evaluations').delete().eq('id', id);
-    toast({ title: "Supprimée" });
+    if (!confirm("Supprimer cet exercice ?")) return;
+    await supabase.from('training_exercises').delete().eq('id', id);
+    toast({ title: "Supprimé" });
     fetchData();
   };
 
-  const handleTogglePublish = async (evaluation: Evaluation) => {
-    await supabase.from('evaluations').update({ is_published: !evaluation.is_published }).eq('id', evaluation.id);
+  const handleTogglePublish = async (item: TrainingExercise) => {
+    await supabase.from('training_exercises').update({ is_published: !item.is_published }).eq('id', item.id);
     fetchData();
   };
 
-  const handleEdit = (evaluation: Evaluation) => {
-    setEditingEvaluation(evaluation);
+  const handleEdit = (item: TrainingExercise) => {
+    setEditingItem(item);
     setForm({
-      title: evaluation.title,
-      description: evaluation.description || '',
-      file_url: evaluation.file_url || '',
-      correction_url: evaluation.correction_url || '',
+      title: item.title,
+      description: item.description || '',
+      file_url: item.file_url || '',
+      correction_url: item.correction_url || '',
     });
     setShowForm(true);
   };
 
   const resetForm = () => {
     setShowForm(false);
-    setEditingEvaluation(null);
+    setEditingItem(null);
     setForm({
       title: '',
       description: '',
@@ -180,18 +180,18 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-display text-foreground">Évaluations</h2>
+        <h2 className="text-2xl font-display text-foreground">Exercices d'entraînement</h2>
         <Button onClick={() => setShowForm(true)} className="btn-3d bg-primary rounded-xl">
           <Plus className="w-4 h-4 mr-2" />
-          Nouvelle évaluation
+          Nouvel exercice
         </Button>
       </div>
 
       {showForm && (
-        <div className="card-sticker bg-card border-rainbow-coral/30 p-6">
+        <div className="card-sticker bg-card border-rainbow-orange/30 p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-display text-foreground">
-              {editingEvaluation ? 'Modifier l\'évaluation' : 'Nouvelle évaluation'}
+              {editingItem ? 'Modifier l\'exercice' : 'Nouvel exercice'}
             </h3>
             <Button variant="ghost" size="icon" onClick={resetForm}>
               <X className="w-5 h-5" />
@@ -204,7 +204,7 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
               <Input
                 value={form.title}
                 onChange={(e) => setForm(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Titre de l'évaluation"
+                placeholder="Titre de l'exercice"
                 className="rounded-xl"
               />
             </div>
@@ -286,24 +286,24 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
       )}
 
       <div className="space-y-4">
-        {evaluations.map(evaluation => (
-          <div key={evaluation.id} className="card-cartoon bg-card border-border p-4">
+        {items.map(item => (
+          <div key={item.id} className="card-cartoon bg-card border-border p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-rainbow-coral/20 flex items-center justify-center">
-                  <FileCheck className="w-5 h-5 text-rainbow-coral" />
+                <div className="w-10 h-10 rounded-xl bg-rainbow-orange/20 flex items-center justify-center">
+                  <Dumbbell className="w-5 h-5 text-rainbow-orange" />
                 </div>
                 <div>
-                  <p className="font-display text-foreground">{evaluation.title}</p>
+                  <p className="font-display text-foreground">{item.title}</p>
                   <div className="flex items-center gap-3 mt-1">
-                    {evaluation.file_url && (
-                      <a href={evaluation.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-rainbow-blue hover:underline">
+                    {item.file_url && (
+                      <a href={item.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-rainbow-blue hover:underline">
                         <FileText className="w-3 h-3" />
                         Fichier
                       </a>
                     )}
-                    {evaluation.correction_url && (
-                      <a href={evaluation.correction_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-rainbow-green hover:underline">
+                    {item.correction_url && (
+                      <a href={item.correction_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-rainbow-green hover:underline">
                         <BookCheck className="w-3 h-3" />
                         Corrigé
                       </a>
@@ -312,21 +312,21 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" onClick={() => handleTogglePublish(evaluation)} className="rounded-xl">
-                  {evaluation.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                <Button variant="ghost" size="icon" onClick={() => handleTogglePublish(item)} className="rounded-xl">
+                  {item.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => handleEdit(evaluation)} className="rounded-xl">
+                <Button variant="ghost" size="icon" onClick={() => handleEdit(item)} className="rounded-xl">
                   <Edit className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => handleDelete(evaluation.id)} className="rounded-xl text-destructive">
+                <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} className="rounded-xl text-destructive">
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>
           </div>
         ))}
-        {evaluations.length === 0 && (
-          <p className="text-muted-foreground text-center py-8">Aucune évaluation créée</p>
+        {items.length === 0 && (
+          <p className="text-muted-foreground text-center py-8">Aucun exercice d'entraînement</p>
         )}
       </div>
     </div>

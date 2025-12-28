@@ -53,6 +53,8 @@ const getSubSections = (level: AdminCourseLevel) => {
   const baseSections = [
     { id: 'activites', label: 'Activité de découverte', icon: Lightbulb },
     { id: 'cours', label: 'Cours', icon: BookOpen },
+    { id: 'exercices-entrainement', label: 'Exercices d\'entraînement', icon: ClipboardList },
+    { id: 'tests-entrainement', label: 'Tests d\'entraînement', icon: FileCheck },
     { id: 'devoirs', label: 'Devoirs de niveaux', icon: ClipboardList },
     { id: 'evaluations', label: 'Évaluations', icon: FileCheck },
   ];
