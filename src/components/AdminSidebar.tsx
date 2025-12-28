@@ -21,11 +21,12 @@ import {
   Shield,
   ClipboardList,
   FileCheck,
-  CheckSquare,
   Home,
   Star,
   ChevronDown,
-  Lightbulb
+  Lightbulb,
+  Dumbbell,
+  Target
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -53,8 +54,8 @@ const getSubSections = (level: AdminCourseLevel) => {
   const baseSections = [
     { id: 'activites', label: 'Activité de découverte', icon: Lightbulb },
     { id: 'cours', label: 'Cours', icon: BookOpen },
-    { id: 'exercices-entrainement', label: 'Exercices d\'entraînement', icon: ClipboardList },
-    { id: 'tests-entrainement', label: 'Tests d\'entraînement', icon: FileCheck },
+    { id: 'exercices-entrainement', label: "Exercices d'entraînement", icon: Dumbbell },
+    { id: 'tests-entrainement', label: "Tests d'entraînement", icon: Target },
     { id: 'devoirs', label: 'Devoirs de niveaux', icon: ClipboardList },
     { id: 'evaluations', label: 'Évaluations', icon: FileCheck },
   ];
@@ -192,19 +193,6 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSideb
           <SidebarGroupLabel className="font-display text-muted-foreground">Gestion</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  onClick={() => onTabChange?.('grading')}
-                  className={`cursor-pointer transition-colors ${
-                    activeTab === 'grading' && !activeLevel
-                      ? 'bg-rainbow-purple/10 text-rainbow-purple font-medium' 
-                      : 'hover:bg-muted/50'
-                  }`}
-                >
-                  <CheckSquare className="w-4 h-4 mr-2" />
-                  <span>Correction</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   onClick={() => onTabChange?.('users')}
