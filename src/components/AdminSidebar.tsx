@@ -55,7 +55,7 @@ const getSubSections = (level: AdminCourseLevel) => {
     { id: 'activites', label: 'Activité de découverte', icon: Lightbulb },
     { id: 'cours', label: 'Cours', icon: BookOpen },
     { id: 'exercices-entrainement', label: "Exercices d'entraînement", icon: Dumbbell },
-    { id: 'tests-entrainement', label: "Tests d'entraînement", icon: Target },
+    { id: 'tests-entrainement', label: "Tests (Évaluations formatives)", icon: Target },
     { id: 'devoirs', label: 'Devoirs de niveaux', icon: ClipboardList },
     { id: 'evaluations', label: 'Évaluations', icon: FileCheck },
   ];

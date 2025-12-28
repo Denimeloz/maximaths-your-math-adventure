@@ -186,67 +186,6 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Submissions Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="card-cartoon bg-card border-border p-6">
-          <h3 className="font-display text-lg text-foreground mb-4 flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 text-rainbow-green" />
-            Soumissions de devoirs de niveaux
-          </h3>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Total soumissions</span>
-              <span className="font-display text-foreground">{stats.totalSubmissions}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Corrigées</span>
-              <span className="font-display text-rainbow-green">{stats.gradedSubmissions}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">En attente</span>
-              <span className="font-display text-rainbow-orange">{stats.totalSubmissions - stats.gradedSubmissions}</span>
-            </div>
-            {stats.totalSubmissions > 0 && (
-              <div className="pt-2">
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-rainbow-green rounded-full transition-all"
-                    style={{ width: `${(stats.gradedSubmissions / stats.totalSubmissions) * 100}%` }}
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground mt-1 text-center">
-                  {Math.round((stats.gradedSubmissions / stats.totalSubmissions) * 100)}% corrigées
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="card-cartoon bg-card border-border p-6">
-          <h3 className="font-display text-lg text-foreground mb-4 flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-rainbow-blue" />
-            Cours par niveau
-          </h3>
-          <div className="space-y-3">
-            {Object.entries(stats.coursesByLevel).length > 0 ? (
-              Object.entries(stats.coursesByLevel)
-                .sort(([a], [b]) => {
-                  const order = ['6eme', '5eme', '4eme', '3eme', 'seconde', 'premiere', 'terminale'];
-                  return order.indexOf(a) - order.indexOf(b);
-                })
-                .map(([level, count]) => (
-                  <div key={level} className="flex justify-between items-center p-2 bg-muted/50 rounded-xl">
-                    <span className="text-foreground font-body">{getLevelLabel(level)}</span>
-                    <span className="font-display text-rainbow-blue">{count}</span>
-                  </div>
-                ))
-            ) : (
-              <p className="text-muted-foreground text-center py-4">Aucun cours</p>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* Recent Users */}
       <div className="card-cartoon bg-card border-border p-6">
         <h3 className="font-display text-lg text-foreground mb-4 flex items-center gap-2">

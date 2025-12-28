@@ -180,7 +180,7 @@ export const TrainingTestManager: React.FC<TrainingTestManagerProps> = ({ filter
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-display text-foreground">Tests d'entraînement</h2>
+        <h2 className="text-2xl font-display text-foreground">Tests (Évaluations formatives)</h2>
         <Button onClick={() => setShowForm(true)} className="btn-3d bg-primary rounded-xl">
           <Plus className="w-4 h-4 mr-2" />
           Nouveau test

@@ -57,7 +57,7 @@ const contentConfig: Record<ContentType, { icon: React.ElementType; title: strin
   },
   'tests-entrainement': {
     icon: Target,
-    title: "Tests d'entraînement",
+    title: "Tests (Évaluations formatives)",
     description: 'Tests pour évaluer vos connaissances'
   },
   devoirs: {

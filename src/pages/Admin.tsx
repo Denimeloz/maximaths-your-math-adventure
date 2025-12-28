@@ -530,7 +530,7 @@ const Admin = () => {
                   activeTab === 'cours' ? 'Cours' :
                   activeTab === 'activites' ? 'Activité de découverte' :
                   activeTab === 'exercices-entrainement' ? "Exercices d'entraînement" :
-                  activeTab === 'tests-entrainement' ? "Tests d'entraînement" :
+                  activeTab === 'tests-entrainement' ? "Tests (Évaluations formatives)" :
                   activeTab === 'devoirs' ? 'Devoirs de niveaux' :
                   activeTab === 'evaluations' ? 'Évaluations' :
                   activeTab === 'prepa-dnb' ? 'Prépa DNB' : ''

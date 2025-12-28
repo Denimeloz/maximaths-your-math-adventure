@@ -26,7 +26,7 @@ CREATE POLICY "Anyone can view published training exercises"
   FOR SELECT 
   USING (is_published = true);
 
--- Create table for Tests d'entraînement
+-- Create table for Tests (Évaluations formatives)
 CREATE TABLE public.training_tests (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   level TEXT NOT NULL,
