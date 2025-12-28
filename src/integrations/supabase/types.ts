@@ -935,6 +935,84 @@ export type Database = {
           },
         ]
       }
+      training_exercises: {
+        Row: {
+          correction_url: string | null
+          created_at: string
+          description: string | null
+          file_url: string | null
+          id: string
+          is_published: boolean
+          level: string
+          order_index: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          correction_url?: string | null
+          created_at?: string
+          description?: string | null
+          file_url?: string | null
+          id?: string
+          is_published?: boolean
+          level: string
+          order_index?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          correction_url?: string | null
+          created_at?: string
+          description?: string | null
+          file_url?: string | null
+          id?: string
+          is_published?: boolean
+          level?: string
+          order_index?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      training_tests: {
+        Row: {
+          correction_url: string | null
+          created_at: string
+          description: string | null
+          file_url: string | null
+          id: string
+          is_published: boolean
+          level: string
+          order_index: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          correction_url?: string | null
+          created_at?: string
+          description?: string | null
+          file_url?: string | null
+          id?: string
+          is_published?: boolean
+          level: string
+          order_index?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          correction_url?: string | null
+          created_at?: string
+          description?: string | null
+          file_url?: string | null
+          id?: string
+          is_published?: boolean
+          level?: string
+          order_index?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_badges: {
         Row: {
           badge_id: string
