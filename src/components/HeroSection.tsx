@@ -19,7 +19,7 @@ const subMenuItems = [
   { id: 'activites', label: 'Activités', description: 'Découverte et exploration', icon: Lightbulb },
   { id: 'cours', label: 'Cours', description: 'Leçons et chapitres', icon: BookOpen },
   { id: 'exercices-entrainement', label: 'Exercices', description: 'Entraînement', icon: ClipboardList },
-  { id: 'tests-entrainement', label: 'Tests', description: 'Tests d\'entraînement', icon: FileCheck },
+  { id: 'tests-entrainement', label: 'Tests', description: 'Tests (Évaluations formatives)', icon: FileCheck },
   { id: 'devoirs', label: 'Devoirs', description: 'Devoirs de niveaux', icon: ClipboardList },
   { id: 'evaluations', label: 'Évaluations', description: 'Tests et examens', icon: FileCheck },
 ];

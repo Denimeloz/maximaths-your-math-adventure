@@ -67,7 +67,7 @@ const subMenuItems = [
   { id: 'activites', label: 'Activité de découverte', description: 'Découverte et exploration' },
   { id: 'cours', label: 'Cours', description: 'Leçons et chapitres' },
   { id: 'exercices-entrainement', label: 'Exercices d\'entraînement', description: 'Entraînement' },
-  { id: 'tests-entrainement', label: 'Tests d\'entraînement', description: 'Tests' },
+  { id: 'tests-entrainement', label: 'Tests (Évaluations formatives)', description: 'Tests' },
   { id: 'devoirs', label: 'Devoirs de niveaux', description: 'Devoirs de niveaux' },
   { id: 'evaluations', label: 'Évaluations', description: 'Tests et examens' },
 ];
