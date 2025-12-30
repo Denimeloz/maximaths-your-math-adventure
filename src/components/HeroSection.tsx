@@ -84,11 +84,11 @@ const QuotesCarousel = () => {
   const quote = quotes[currentIndex];
 
   return (
-    <div className="max-w-5xl mx-auto mb-10 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-      <div className="relative min-h-[280px] md:min-h-[260px] overflow-hidden">
+    <div className="max-w-2xl mx-auto mb-6 animate-slide-up px-4" style={{ animationDelay: "0.2s" }}>
+      <div className="relative min-h-[120px] md:min-h-[140px] overflow-hidden">
         <blockquote
           key={currentIndex}
-          className={`absolute inset-0 p-8 md:p-12 lg:p-14 bg-card/90 backdrop-blur-md rounded-[2rem] border-2 ${quote.borderColor} shadow-2xl transition-all duration-500 ease-out ${
+          className={`absolute inset-0 p-4 md:p-6 bg-card/90 backdrop-blur-md rounded-xl border-2 ${quote.borderColor} shadow-lg transition-all duration-500 ease-out ${
             isSliding 
               ? slideDirection === 'left' 
                 ? '-translate-x-full opacity-0' 
@@ -96,32 +96,31 @@ const QuotesCarousel = () => {
               : 'translate-x-0 opacity-100'
           }`}
         >
-          <div className={`absolute -top-6 -left-3 text-8xl ${quote.quoteColor} opacity-50 font-serif`}>«</div>
-          <p className="text-2xl md:text-3xl lg:text-4xl font-display text-center leading-relaxed pt-4">
+          <div className={`absolute -top-2 -left-1 text-4xl ${quote.quoteColor} opacity-50 font-serif`}>«</div>
+          <p className="text-base md:text-lg lg:text-xl font-display text-center leading-relaxed pt-2">
             <span className="text-rainbow">{quote.text1}</span>
-            <br className="hidden md:block" />
             <span className="text-foreground"> et </span>
             <span className={quote.highlightColor}>{quote.text2}</span>
           </p>
-          <footer className="mt-6 text-center">
-            <cite className="text-xl md:text-2xl font-body text-muted-foreground not-italic">
+          <footer className="mt-2 text-center">
+            <cite className="text-sm md:text-base font-body text-muted-foreground not-italic">
               — <span className={`font-semibold ${quote.authorColor}`}>{quote.author}</span>
             </cite>
           </footer>
-          <div className={`absolute -bottom-6 -right-3 text-8xl ${quote.quoteColor} opacity-50 font-serif rotate-180`}>«</div>
+          <div className={`absolute -bottom-2 -right-1 text-4xl ${quote.quoteColor} opacity-50 font-serif rotate-180`}>«</div>
         </blockquote>
       </div>
       
       {/* Indicators */}
-      <div className="flex justify-center gap-3 mt-8">
+      <div className="flex justify-center gap-2 mt-4">
         {quotes.map((_, index) => (
           <button
             key={index}
             onClick={() => handleIndicatorClick(index)}
-            className={`w-4 h-4 rounded-full transition-all duration-300 ${
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${
               index === currentIndex
-                ? "bg-primary scale-125 shadow-lg"
-                : "bg-muted-foreground/30 hover:bg-muted-foreground/50 hover:scale-110"
+                ? "bg-primary scale-110"
+                : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
             }`}
             aria-label={`Citation ${index + 1}`}
           />
@@ -194,8 +193,8 @@ const HeroSection = () => {
         <QuotesCarousel />
 
         {/* Subtitle - enhanced */}
-        <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground text-center max-w-3xl mb-8 animate-slide-up font-body font-semibold leading-relaxed" style={{ animationDelay: "0.4s" }}>
-          La plateforme de mathématiques pour les élèves du <span className="text-rainbow-blue font-bold">Collège</span> et du <span className="text-rainbow-purple font-bold">Lycée</span>
+        <p className="text-base md:text-lg lg:text-xl text-muted-foreground text-center max-w-3xl mb-8 animate-slide-up font-body font-medium italic leading-relaxed" style={{ animationDelay: "0.4s" }}>
+          "La vie est une équation mathématique et le défi est de transformer les <span className="text-rainbow-coral font-bold">négatifs</span> en <span className="text-rainbow-green font-bold">positifs</span>."
         </p>
 
         {/* Class Selection - Click to expand */}
