@@ -76,19 +76,9 @@ const Dashboard = () => {
   const fetchUserData = async () => {
     setStatsLoading(true);
     
-    const { data: progress } = await supabase
-      .from('user_progress')
-      .select('*')
-      .eq('user_id', user?.id);
-    
-    const completedExercises = progress?.filter(p => p.is_completed).length || 0;
-    
-    const { data: badgesData } = await supabase
-      .from('user_badges')
-      .select('badge_id, badges(id, name, description, icon)')
-      .eq('user_id', user?.id);
-    
-    const badges = badgesData?.map(b => (b.badges as unknown as Badge)) || [];
+    // Simple stats without non-existent tables
+    const completedExercises = 0;
+    const badges: Badge[] = [];
     
     const userLevel = profile?.level;
     type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';

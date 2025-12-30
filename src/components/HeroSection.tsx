@@ -92,24 +92,40 @@ const HeroSection = () => {
           </div>
         </div>
 
-        {/* Title - more impactful */}
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-display text-center mb-6 animate-slide-up drop-shadow-sm" style={{ animationDelay: "0.2s" }}>
-          <span className="text-rainbow">Deviens un pro des maths</span>
-          <br />
-          <span className="text-foreground">avec </span>
-          <span className="inline-block">
-            <span className="text-rainbow-coral">M</span>
-            <span className="text-rainbow-yellow">A</span>
-            <span className="text-rainbow-orange">X</span>
-            <span className="text-rainbow-pink">I</span>
-            <span className="text-rainbow-purple">M</span>
-            <span className="text-rainbow-blue">A</span>
-            <span className="text-rainbow-green">T</span>
-            <span className="text-rainbow-coral">H</span>
-            <span className="text-rainbow-yellow">S</span>
-          </span>
-          <span className="text-foreground"> !</span>
-        </h1>
+        {/* Inspirational Quotes */}
+        <div className="max-w-4xl mx-auto mb-8 animate-slide-up" style={{ animationDelay: "0.2s" }}>
+          <blockquote className="relative p-6 md:p-8 bg-card/80 backdrop-blur-sm rounded-3xl border-2 border-rainbow-yellow/30 shadow-xl mb-4 group hover:scale-[1.02] transition-transform">
+            <div className="absolute -top-4 -left-2 text-6xl text-rainbow-yellow opacity-60 font-serif">«</div>
+            <p className="text-xl md:text-2xl lg:text-3xl font-display text-center leading-relaxed">
+              <span className="text-rainbow">Le génie, c'est 1 % d'inspiration</span>
+              <br className="hidden md:block" />
+              <span className="text-foreground"> et </span>
+              <span className="text-rainbow-coral">99 % de transpiration.</span>
+            </p>
+            <footer className="mt-4 text-center">
+              <cite className="text-lg md:text-xl font-body text-muted-foreground not-italic">
+                — <span className="font-semibold text-rainbow-orange">Thomas Edison</span>
+              </cite>
+            </footer>
+            <div className="absolute -bottom-4 -right-2 text-6xl text-rainbow-yellow opacity-60 font-serif rotate-180">«</div>
+          </blockquote>
+
+          <blockquote className="relative p-6 md:p-8 bg-card/80 backdrop-blur-sm rounded-3xl border-2 border-rainbow-purple/30 shadow-xl group hover:scale-[1.02] transition-transform">
+            <div className="absolute -top-4 -left-2 text-6xl text-rainbow-purple opacity-60 font-serif">«</div>
+            <p className="text-xl md:text-2xl lg:text-3xl font-display text-center leading-relaxed">
+              <span className="text-rainbow">Le génie, c'est 1 % de talent</span>
+              <br className="hidden md:block" />
+              <span className="text-foreground"> et </span>
+              <span className="text-rainbow-blue">99 % de travail acharné.</span>
+            </p>
+            <footer className="mt-4 text-center">
+              <cite className="text-lg md:text-xl font-body text-muted-foreground not-italic">
+                — <span className="font-semibold text-rainbow-purple">Albert Einstein</span>
+              </cite>
+            </footer>
+            <div className="absolute -bottom-4 -right-2 text-6xl text-rainbow-purple opacity-60 font-serif rotate-180">«</div>
+          </blockquote>
+        </div>
 
         {/* Subtitle - enhanced */}
         <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground text-center max-w-3xl mb-8 animate-slide-up font-body font-semibold leading-relaxed" style={{ animationDelay: "0.4s" }}>

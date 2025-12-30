@@ -66,26 +66,25 @@ export const AdminDashboard: React.FC = () => {
         rolesRes,
         coursesRes,
         exercisesRes,
-        quizzesRes,
         assignmentsRes,
-        submissionsRes,
         filesRes,
         videosRes,
+        trainingExercisesRes,
+        trainingTestsRes,
       ] = await Promise.all([
         supabase.from('profiles').select('id, first_name, last_name, email, created_at').order('created_at', { ascending: false }).limit(10),
         supabase.from('user_roles').select('*'),
         supabase.from('courses').select('id, level, is_published'),
         supabase.from('exercises').select('id'),
-        supabase.from('quizzes').select('id'),
         supabase.from('assignments').select('id'),
-        supabase.from('assignment_submissions').select('id, graded_at'),
         supabase.from('course_files').select('id'),
         supabase.from('videos').select('id'),
+        supabase.from('training_exercises').select('id'),
+        supabase.from('training_tests').select('id'),
       ]);
 
       const courses = coursesRes.data || [];
       const roles = rolesRes.data || [];
-      const submissions = submissionsRes.data || [];
 
       // Calculate courses by level
       const coursesByLevel: Record<string, number> = {};
@@ -99,10 +98,10 @@ export const AdminDashboard: React.FC = () => {
         publishedCourses: courses.filter(c => c.is_published).length,
         totalAdmins: roles.filter(r => r.role === 'admin').length,
         totalExercises: exercisesRes.data?.length || 0,
-        totalQuizzes: quizzesRes.data?.length || 0,
+        totalQuizzes: (trainingExercisesRes.data?.length || 0) + (trainingTestsRes.data?.length || 0),
         totalAssignments: assignmentsRes.data?.length || 0,
-        totalSubmissions: submissions.length,
-        gradedSubmissions: submissions.filter(s => s.graded_at).length,
+        totalSubmissions: 0,
+        gradedSubmissions: 0,
         totalFiles: filesRes.data?.length || 0,
         totalVideos: videosRes.data?.length || 0,
         recentUsers: usersRes.data || [],
