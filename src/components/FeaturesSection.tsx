@@ -82,13 +82,15 @@ const FeaturesSection = () => {
       <Star className="absolute bottom-24 left-[20%] w-7 h-7 text-rainbow-purple fill-rainbow-purple opacity-60 animate-float-slow" />
       
       <div className="container mx-auto px-4 relative">
-        <h2 className="text-3xl md:text-5xl lg:text-6xl font-display text-center mb-4">
-          <span className="text-foreground">Tout ce qu'il te faut pour </span>
-          <span className="text-rainbow-orange">réussir en maths</span>
-          <span className="text-foreground"> 🚀</span>
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-display text-center mb-4 italic">
+          <span className="text-foreground">"La vie est une équation mathématique et le défi est de transformer les </span>
+          <span className="text-rainbow-coral">négatifs</span>
+          <span className="text-foreground"> en </span>
+          <span className="text-rainbow-green">positifs</span>
+          <span className="text-foreground">."</span>
         </h2>
         <p className="text-muted-foreground text-center text-lg md:text-xl mb-16 font-body max-w-3xl mx-auto">
-          Une plateforme complète avec des cours, exercices et évaluations pour progresser à ton rythme du collège au lycée
+          La plateforme de mathématiques pour les élèves du <span className="text-rainbow-blue font-bold">Collège</span> et du <span className="text-rainbow-purple font-bold">Lycée</span>
         </p>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto mb-20">
