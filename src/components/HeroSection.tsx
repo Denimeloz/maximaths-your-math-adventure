@@ -193,8 +193,8 @@ const HeroSection = () => {
         <QuotesCarousel />
 
         {/* Subtitle - enhanced */}
-        <p className="text-base md:text-lg lg:text-xl text-muted-foreground text-center max-w-3xl mb-8 animate-slide-up font-body font-medium italic leading-relaxed" style={{ animationDelay: "0.4s" }}>
-          "La vie est une équation mathématique et le défi est de transformer les <span className="text-rainbow-coral font-bold">négatifs</span> en <span className="text-rainbow-green font-bold">positifs</span>."
+        <p className="text-muted-foreground text-center text-lg md:text-xl mb-16 font-body max-w-3xl mx-auto">
+          La plateforme de mathématiques pour les élèves du <span className="text-rainbow-blue font-bold">Collège</span> et du <span className="text-rainbow-purple font-bold">Lycée</span>
         </p>
 
         {/* Class Selection - Click to expand */}
