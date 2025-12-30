@@ -54,13 +54,7 @@ interface Exercise {
   file_url: string | null;
 }
 
-interface Quiz {
-  id: string;
-  title: string;
-  description: string | null;
-  time_limit_minutes: number | null;
-  passing_score: number;
-}
+// Quiz interface removed - table doesn't exist
 
 interface Assignment {
   id: string;
@@ -97,7 +91,7 @@ const CourseView = () => {
   const [course, setCourse] = useState<Course | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  // quizzes state removed - table doesn't exist
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [courseFiles, setCourseFiles] = useState<CourseFile[]>([]);
   const [videos, setVideos] = useState<VideoItem[]>([]);
@@ -134,11 +128,10 @@ const CourseView = () => {
 
     setCourse(courseData);
 
-    // Fetch all content directly by course_id
-    const [lessonsRes, exercisesRes, quizzesRes, assignmentsRes, filesRes, videosRes] = await Promise.all([
+    // Fetch all content directly by course_id (excluding quizzes - table doesn't exist)
+    const [lessonsRes, exercisesRes, assignmentsRes, filesRes, videosRes] = await Promise.all([
       supabase.from('lessons').select('*').eq('course_id', courseId).eq('is_published', true).order('order_index'),
       supabase.from('exercises').select('*').eq('course_id', courseId).eq('is_published', true).order('order_index'),
-      supabase.from('quizzes').select('*').eq('course_id', courseId).eq('is_published', true).order('order_index'),
       supabase.from('assignments').select('*').eq('course_id', courseId).eq('is_published', true).order('order_index'),
       supabase.from('course_files').select('*').eq('course_id', courseId).eq('is_published', true).order('order_index'),
       supabase.from('videos').select('*').eq('course_id', courseId).eq('is_published', true).order('order_index'),
@@ -146,7 +139,6 @@ const CourseView = () => {
 
     setLessons(lessonsRes.data || []);
     setExercises(exercisesRes.data || []);
-    setQuizzes(quizzesRes.data || []);
     setAssignments(assignmentsRes.data || []);
     setCourseFiles(filesRes.data || []);
     setVideos(videosRes.data || []);
@@ -184,7 +176,6 @@ const CourseView = () => {
   const getContentCounts = () => ({
     lessons: lessons.length,
     exercises: exercises.length,
-    quizzes: quizzes.length,
     videos: videos.length,
     files: courseFiles.length,
     assignments: assignments.length,
@@ -253,11 +244,6 @@ const CourseView = () => {
                         <ClipboardList className="w-4 h-4" /> {counts.exercises} exercice(s)
                       </span>
                     )}
-                    {counts.quizzes > 0 && (
-                      <span className="flex items-center gap-1">
-                        <FileQuestion className="w-4 h-4" /> {counts.quizzes} quiz
-                      </span>
-                    )}
                     {counts.videos > 0 && (
                       <span className="flex items-center gap-1">
                         <Video className="w-4 h-4" /> {counts.videos} vidéo(s)
@@ -293,13 +279,6 @@ const CourseView = () => {
                   <span className="hidden sm:inline">Exercices</span>
                   {counts.exercises > 0 && (
                     <span className="ml-1 text-xs bg-primary/20 text-primary px-1.5 rounded-full">{counts.exercises}</span>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="quizzes" className="flex items-center gap-1 py-2">
-                  <FileQuestion className="w-4 h-4" />
-                  <span className="hidden sm:inline">Quiz</span>
-                  {counts.quizzes > 0 && (
-                    <span className="ml-1 text-xs bg-primary/20 text-primary px-1.5 rounded-full">{counts.quizzes}</span>
                   )}
                 </TabsTrigger>
                 <TabsTrigger value="videos" className="flex items-center gap-1 py-2">
@@ -479,46 +458,7 @@ const CourseView = () => {
                 )}
               </TabsContent>
 
-              {/* Quizzes Tab */}
-              <TabsContent value="quizzes">
-                {quizzes.length === 0 ? (
-                  <div className="text-center py-12">
-                    <FileQuestion className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                    <p className="text-muted-foreground">Aucun quiz disponible</p>
-                  </div>
-                ) : (
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    {quizzes.map(quiz => (
-                      <div 
-                        key={quiz.id} 
-                        className="border border-border rounded-xl p-6 transition-colors hover:border-primary/50 cursor-pointer group"
-                        onClick={() => navigate(`/quiz/${quiz.id}`)}
-                      >
-                        <h3 className="font-display text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
-                          {quiz.title}
-                        </h3>
-                        {quiz.description && (
-                          <p className="text-sm text-muted-foreground mb-4">{quiz.description}</p>
-                        )}
-                        <div className="flex items-center justify-between text-sm mb-4">
-                          {quiz.time_limit_minutes && (
-                            <span className="text-muted-foreground flex items-center gap-1">
-                              <Clock className="w-4 h-4" /> {quiz.time_limit_minutes} min
-                            </span>
-                          )}
-                          <span className="text-rainbow-purple font-semibold">
-                            Score min: {quiz.passing_score}%
-                          </span>
-                        </div>
-                        <Button className="w-full btn-3d bg-primary">
-                          <Play className="w-4 h-4 mr-2" />
-                          Commencer le quiz
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
+              {/* Quizzes Tab removed - table doesn't exist */}
 
               {/* Videos Tab */}
               <TabsContent value="videos">

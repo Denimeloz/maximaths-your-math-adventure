@@ -7,8 +7,6 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
-import DashboardBadges from "./pages/DashboardBadges";
-import DashboardAssignments from "./pages/DashboardAssignments";
 import DashboardCalendar from "./pages/DashboardCalendar";
 import DashboardSettings from "./pages/DashboardSettings";
 import Admin from "./pages/Admin";
@@ -16,8 +14,6 @@ import Profile from "./pages/Profile";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import CourseView from "./pages/CourseView";
-import QuizPage from "./pages/QuizPage";
-import AssignmentSubmit from "./pages/AssignmentSubmit";
 import LevelContent from "./pages/LevelContent";
 import AdminLogin from "./pages/AdminLogin";
 
@@ -36,8 +32,6 @@ const App = () => (
             <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/profile" element={<Profile />} />
-            <Route path="/dashboard/badges" element={<DashboardBadges />} />
-            <Route path="/dashboard/assignments" element={<DashboardAssignments />} />
             <Route path="/dashboard/calendar" element={<DashboardCalendar />} />
             <Route path="/dashboard/settings" element={<DashboardSettings />} />
             <Route path="/admin" element={<Admin />} />
@@ -49,8 +43,6 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/niveau/:levelId/:contentType" element={<LevelContent />} />
             <Route path="/course/:courseId" element={<CourseView />} />
-            <Route path="/quiz/:quizId" element={<QuizPage />} />
-            <Route path="/assignment/:assignmentId" element={<AssignmentSubmit />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

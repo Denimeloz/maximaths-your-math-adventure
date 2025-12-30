@@ -180,7 +180,7 @@ const LevelContent = () => {
     }
     else if (type === 'activites') {
       // Activities from dedicated table
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from('activities')
         .select('*')
         .eq('level', level)
