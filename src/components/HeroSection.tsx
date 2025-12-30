@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Sparkles, Star, Zap, ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import heroImage from "@/assets/maximaths-hero.jpeg";
 import brainIcon from "@/assets/brain-icon.png";
 
@@ -31,6 +31,81 @@ const subMenuItems3eme = [
 
 const getSubMenuForLevel = (levelId: string) => {
   return levelId === '3eme' ? subMenuItems3eme : subMenuItems;
+};
+
+const quotes = [
+  {
+    text1: "Le génie, c'est 1 % d'inspiration",
+    text2: "99 % de transpiration.",
+    author: "Thomas Edison",
+    borderColor: "border-rainbow-yellow/30",
+    quoteColor: "text-rainbow-yellow",
+    highlightColor: "text-rainbow-coral",
+    authorColor: "text-rainbow-orange",
+  },
+  {
+    text1: "Le génie, c'est 1 % de talent",
+    text2: "99 % de travail acharné.",
+    author: "Albert Einstein",
+    borderColor: "border-rainbow-purple/30",
+    quoteColor: "text-rainbow-purple",
+    highlightColor: "text-rainbow-blue",
+    authorColor: "text-rainbow-purple",
+  },
+];
+
+const QuotesCarousel = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % quotes.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const quote = quotes[currentIndex];
+
+  return (
+    <div className="max-w-4xl mx-auto mb-8 animate-slide-up" style={{ animationDelay: "0.2s" }}>
+      <div className="relative min-h-[180px]">
+        <blockquote
+          key={currentIndex}
+          className={`p-6 md:p-8 bg-card/80 backdrop-blur-sm rounded-3xl border-2 ${quote.borderColor} shadow-xl animate-fade-in`}
+        >
+          <div className={`absolute -top-4 -left-2 text-6xl ${quote.quoteColor} opacity-60 font-serif`}>«</div>
+          <p className="text-xl md:text-2xl lg:text-3xl font-display text-center leading-relaxed">
+            <span className="text-rainbow">{quote.text1}</span>
+            <br className="hidden md:block" />
+            <span className="text-foreground"> et </span>
+            <span className={quote.highlightColor}>{quote.text2}</span>
+          </p>
+          <footer className="mt-4 text-center">
+            <cite className="text-lg md:text-xl font-body text-muted-foreground not-italic">
+              — <span className={`font-semibold ${quote.authorColor}`}>{quote.author}</span>
+            </cite>
+          </footer>
+          <div className={`absolute -bottom-4 -right-2 text-6xl ${quote.quoteColor} opacity-60 font-serif rotate-180`}>«</div>
+        </blockquote>
+      </div>
+      
+      {/* Indicators */}
+      <div className="flex justify-center gap-2 mt-6">
+        {quotes.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentIndex(index)}
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              index === currentIndex
+                ? "bg-primary scale-110"
+                : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
+            }`}
+            aria-label={`Citation ${index + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
 };
 
 const HeroSection = () => {
@@ -92,40 +167,8 @@ const HeroSection = () => {
           </div>
         </div>
 
-        {/* Inspirational Quotes */}
-        <div className="max-w-4xl mx-auto mb-8 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-          <blockquote className="relative p-6 md:p-8 bg-card/80 backdrop-blur-sm rounded-3xl border-2 border-rainbow-yellow/30 shadow-xl mb-4 group hover:scale-[1.02] transition-transform">
-            <div className="absolute -top-4 -left-2 text-6xl text-rainbow-yellow opacity-60 font-serif">«</div>
-            <p className="text-xl md:text-2xl lg:text-3xl font-display text-center leading-relaxed">
-              <span className="text-rainbow">Le génie, c'est 1 % d'inspiration</span>
-              <br className="hidden md:block" />
-              <span className="text-foreground"> et </span>
-              <span className="text-rainbow-coral">99 % de transpiration.</span>
-            </p>
-            <footer className="mt-4 text-center">
-              <cite className="text-lg md:text-xl font-body text-muted-foreground not-italic">
-                — <span className="font-semibold text-rainbow-orange">Thomas Edison</span>
-              </cite>
-            </footer>
-            <div className="absolute -bottom-4 -right-2 text-6xl text-rainbow-yellow opacity-60 font-serif rotate-180">«</div>
-          </blockquote>
-
-          <blockquote className="relative p-6 md:p-8 bg-card/80 backdrop-blur-sm rounded-3xl border-2 border-rainbow-purple/30 shadow-xl group hover:scale-[1.02] transition-transform">
-            <div className="absolute -top-4 -left-2 text-6xl text-rainbow-purple opacity-60 font-serif">«</div>
-            <p className="text-xl md:text-2xl lg:text-3xl font-display text-center leading-relaxed">
-              <span className="text-rainbow">Le génie, c'est 1 % de talent</span>
-              <br className="hidden md:block" />
-              <span className="text-foreground"> et </span>
-              <span className="text-rainbow-blue">99 % de travail acharné.</span>
-            </p>
-            <footer className="mt-4 text-center">
-              <cite className="text-lg md:text-xl font-body text-muted-foreground not-italic">
-                — <span className="font-semibold text-rainbow-purple">Albert Einstein</span>
-              </cite>
-            </footer>
-            <div className="absolute -bottom-4 -right-2 text-6xl text-rainbow-purple opacity-60 font-serif rotate-180">«</div>
-          </blockquote>
-        </div>
+        {/* Inspirational Quotes - Animated Carousel */}
+        <QuotesCarousel />
 
         {/* Subtitle - enhanced */}
         <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground text-center max-w-3xl mb-8 animate-slide-up font-body font-semibold leading-relaxed" style={{ animationDelay: "0.4s" }}>
