@@ -56,49 +56,72 @@ const quotes = [
 
 const QuotesCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isSliding, setIsSliding] = useState(false);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('left');
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % quotes.length);
+      setSlideDirection('left');
+      setIsSliding(true);
+      setTimeout(() => {
+        setCurrentIndex((prev) => (prev + 1) % quotes.length);
+        setIsSliding(false);
+      }, 500);
     }, 5000);
     return () => clearInterval(interval);
   }, []);
 
+  const handleIndicatorClick = (index: number) => {
+    if (index === currentIndex) return;
+    setSlideDirection(index > currentIndex ? 'left' : 'right');
+    setIsSliding(true);
+    setTimeout(() => {
+      setCurrentIndex(index);
+      setIsSliding(false);
+    }, 500);
+  };
+
   const quote = quotes[currentIndex];
 
   return (
-    <div className="max-w-4xl mx-auto mb-8 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-      <div className="relative min-h-[180px]">
+    <div className="max-w-5xl mx-auto mb-10 animate-slide-up" style={{ animationDelay: "0.2s" }}>
+      <div className="relative min-h-[280px] md:min-h-[260px] overflow-hidden">
         <blockquote
           key={currentIndex}
-          className={`p-6 md:p-8 bg-card/80 backdrop-blur-sm rounded-3xl border-2 ${quote.borderColor} shadow-xl animate-fade-in`}
+          className={`absolute inset-0 p-8 md:p-12 lg:p-14 bg-card/90 backdrop-blur-md rounded-[2rem] border-2 ${quote.borderColor} shadow-2xl transition-all duration-500 ease-out ${
+            isSliding 
+              ? slideDirection === 'left' 
+                ? '-translate-x-full opacity-0' 
+                : 'translate-x-full opacity-0'
+              : 'translate-x-0 opacity-100'
+          }`}
         >
-          <div className={`absolute -top-4 -left-2 text-6xl ${quote.quoteColor} opacity-60 font-serif`}>«</div>
-          <p className="text-xl md:text-2xl lg:text-3xl font-display text-center leading-relaxed">
+          <div className={`absolute -top-6 -left-3 text-8xl ${quote.quoteColor} opacity-50 font-serif`}>«</div>
+          <p className="text-2xl md:text-3xl lg:text-4xl font-display text-center leading-relaxed pt-4">
             <span className="text-rainbow">{quote.text1}</span>
             <br className="hidden md:block" />
             <span className="text-foreground"> et </span>
             <span className={quote.highlightColor}>{quote.text2}</span>
           </p>
-          <footer className="mt-4 text-center">
-            <cite className="text-lg md:text-xl font-body text-muted-foreground not-italic">
+          <footer className="mt-6 text-center">
+            <cite className="text-xl md:text-2xl font-body text-muted-foreground not-italic">
               — <span className={`font-semibold ${quote.authorColor}`}>{quote.author}</span>
             </cite>
           </footer>
-          <div className={`absolute -bottom-4 -right-2 text-6xl ${quote.quoteColor} opacity-60 font-serif rotate-180`}>«</div>
+          <div className={`absolute -bottom-6 -right-3 text-8xl ${quote.quoteColor} opacity-50 font-serif rotate-180`}>«</div>
         </blockquote>
       </div>
       
       {/* Indicators */}
-      <div className="flex justify-center gap-2 mt-6">
+      <div className="flex justify-center gap-3 mt-8">
         {quotes.map((_, index) => (
           <button
             key={index}
-            onClick={() => setCurrentIndex(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+            onClick={() => handleIndicatorClick(index)}
+            className={`w-4 h-4 rounded-full transition-all duration-300 ${
               index === currentIndex
-                ? "bg-primary scale-110"
-                : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                ? "bg-primary scale-125 shadow-lg"
+                : "bg-muted-foreground/30 hover:bg-muted-foreground/50 hover:scale-110"
             }`}
             aria-label={`Citation ${index + 1}`}
           />
