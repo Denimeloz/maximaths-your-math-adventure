@@ -84,11 +84,11 @@ const QuotesCarousel = () => {
   const quote = quotes[currentIndex];
 
   return (
-    <div className="max-w-2xl mx-auto mb-6 animate-slide-up px-4" style={{ animationDelay: "0.2s" }}>
-      <div className="relative min-h-[120px] md:min-h-[140px] overflow-hidden">
+    <div className="w-full max-w-4xl mx-auto mb-6 animate-slide-up px-4" style={{ animationDelay: "0.2s" }}>
+      <div className="relative overflow-hidden">
         <blockquote
           key={currentIndex}
-          className={`absolute inset-0 p-4 md:p-6 bg-card/90 backdrop-blur-md rounded-xl border-2 ${quote.borderColor} shadow-lg transition-all duration-500 ease-out ${
+          className={`p-4 md:p-6 bg-card/90 backdrop-blur-md rounded-xl border-2 ${quote.borderColor} shadow-lg transition-all duration-500 ease-out ${
             isSliding 
               ? slideDirection === 'left' 
                 ? '-translate-x-full opacity-0' 
@@ -96,18 +96,18 @@ const QuotesCarousel = () => {
               : 'translate-x-0 opacity-100'
           }`}
         >
-          <div className={`absolute -top-2 -left-1 text-4xl ${quote.quoteColor} opacity-50 font-serif`}>«</div>
-          <p className="text-base md:text-lg lg:text-xl font-display text-center leading-relaxed pt-2">
+          <div className={`absolute top-2 left-3 text-3xl ${quote.quoteColor} opacity-50 font-serif`}>«</div>
+          <p className="text-sm md:text-base lg:text-lg font-display text-center leading-relaxed px-6">
             <span className="text-rainbow">{quote.text1}</span>
             <span className="text-foreground"> et </span>
             <span className={quote.highlightColor}>{quote.text2}</span>
           </p>
           <footer className="mt-2 text-center">
-            <cite className="text-sm md:text-base font-body text-muted-foreground not-italic">
+            <cite className="text-xs md:text-sm font-body text-muted-foreground not-italic">
               — <span className={`font-semibold ${quote.authorColor}`}>{quote.author}</span>
             </cite>
           </footer>
-          <div className={`absolute -bottom-2 -right-1 text-4xl ${quote.quoteColor} opacity-50 font-serif rotate-180`}>«</div>
+          <div className={`absolute bottom-2 right-3 text-3xl ${quote.quoteColor} opacity-50 font-serif rotate-180`}>«</div>
         </blockquote>
       </div>
       
