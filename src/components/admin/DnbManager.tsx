@@ -5,6 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, Star, Upload, FileText, Loader2, BookCheck } from 'lucide-react';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableItem } from './SortableItem';
 
 interface DnbContent {
   id: string;
@@ -37,6 +40,11 @@ export const DnbManager: React.FC = () => {
     category: 'exercice',
     year: new Date().getFullYear(),
   });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   useEffect(() => {
     fetchData();
@@ -181,6 +189,27 @@ export const DnbManager: React.FC = () => {
       category: 'exercice',
       year: new Date().getFullYear(),
     });
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = items.findIndex((i) => i.id === active.id);
+    const newIndex = items.findIndex((i) => i.id === over.id);
+    const newItems = arrayMove(items, oldIndex, newIndex);
+    setItems(newItems);
+
+    // Update order_index in database
+    const updates = newItems.map((item, index) => ({
+      id: item.id,
+      order_index: index,
+    }));
+
+    for (const update of updates) {
+      await supabase.from('dnb_content').update({ order_index: update.order_index }).eq('id', update.id);
+    }
+    toast({ title: "Ordre mis à jour" });
   };
 
   const getCategoryLabel = (category: string) => {
@@ -328,52 +357,58 @@ export const DnbManager: React.FC = () => {
         </div>
       )}
 
-      <div className="space-y-4">
-        {items.map(item => (
-          <div key={item.id} className="card-cartoon bg-card border-border p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-rainbow-coral/20 flex items-center justify-center">
-                  <Star className="w-5 h-5 text-rainbow-coral" />
-                </div>
-                <div>
-                  <p className="font-display text-foreground">{item.title}</p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">{getCategoryLabel(item.category)}</span>
-                    {item.year && (
-                      <span className="text-xs text-muted-foreground">• {item.year}</span>
-                    )}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-4">
+            {items.map(item => (
+              <SortableItem key={item.id} id={item.id}>
+                <div className="card-cartoon bg-card border-border p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-rainbow-coral/20 flex items-center justify-center">
+                        <Star className="w-5 h-5 text-rainbow-coral" />
+                      </div>
+                      <div>
+                        <p className="font-display text-foreground">{item.title}</p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">{getCategoryLabel(item.category)}</span>
+                          {item.year && (
+                            <span className="text-xs text-muted-foreground">• {item.year}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {item.file_url && (
+                        <span className="px-2 py-1 rounded-full bg-rainbow-blue/20 text-rainbow-blue text-xs">
+                          Sujet
+                        </span>
+                      )}
+                      {item.correction_url && (
+                        <span className="px-2 py-1 rounded-full bg-rainbow-green/20 text-rainbow-green text-xs">
+                          Corrigé
+                        </span>
+                      )}
+                      <Button variant="ghost" size="icon" onClick={() => handleTogglePublish(item)} className="rounded-xl">
+                        {item.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleEdit(item)} className="rounded-xl">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} className="rounded-xl text-destructive">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {item.file_url && (
-                  <span className="px-2 py-1 rounded-full bg-rainbow-blue/20 text-rainbow-blue text-xs">
-                    Sujet
-                  </span>
-                )}
-                {item.correction_url && (
-                  <span className="px-2 py-1 rounded-full bg-rainbow-green/20 text-rainbow-green text-xs">
-                    Corrigé
-                  </span>
-                )}
-                <Button variant="ghost" size="icon" onClick={() => handleTogglePublish(item)} className="rounded-xl">
-                  {item.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => handleEdit(item)} className="rounded-xl">
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} className="rounded-xl text-destructive">
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
+              </SortableItem>
+            ))}
+            {items.length === 0 && (
+              <p className="text-muted-foreground text-center py-8">Aucun contenu DNB créé</p>
+            )}
           </div>
-        ))}
-        {items.length === 0 && (
-          <p className="text-muted-foreground text-center py-8">Aucun contenu DNB créé</p>
-        )}
-      </div>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 };
