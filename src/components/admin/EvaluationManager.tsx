@@ -5,6 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, FileCheck, Upload, FileText, Loader2, BookCheck } from 'lucide-react';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableItem } from './SortableItem';
 
 interface Evaluation {
   id: string;
@@ -38,6 +41,11 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
     file_url: '',
     correction_url: '',
   });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   useEffect(() => {
     fetchData();
@@ -177,6 +185,26 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
     });
   };
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = evaluations.findIndex((i) => i.id === active.id);
+    const newIndex = evaluations.findIndex((i) => i.id === over.id);
+    const newItems = arrayMove(evaluations, oldIndex, newIndex);
+    setEvaluations(newItems);
+
+    const updates = newItems.map((item, index) => ({
+      id: item.id,
+      order_index: index,
+    }));
+
+    for (const update of updates) {
+      await supabase.from('evaluations').update({ order_index: update.order_index }).eq('id', update.id);
+    }
+    toast({ title: "Ordre mis à jour" });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -285,50 +313,56 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
         </div>
       )}
 
-      <div className="space-y-4">
-        {evaluations.map(evaluation => (
-          <div key={evaluation.id} className="card-cartoon bg-card border-border p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-rainbow-coral/20 flex items-center justify-center">
-                  <FileCheck className="w-5 h-5 text-rainbow-coral" />
-                </div>
-                <div>
-                  <p className="font-display text-foreground">{evaluation.title}</p>
-                  <div className="flex items-center gap-3 mt-1">
-                    {evaluation.file_url && (
-                      <a href={evaluation.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-rainbow-blue hover:underline">
-                        <FileText className="w-3 h-3" />
-                        Fichier
-                      </a>
-                    )}
-                    {evaluation.correction_url && (
-                      <a href={evaluation.correction_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-rainbow-green hover:underline">
-                        <BookCheck className="w-3 h-3" />
-                        Corrigé
-                      </a>
-                    )}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={evaluations.map(i => i.id)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-4">
+            {evaluations.map(evaluation => (
+              <SortableItem key={evaluation.id} id={evaluation.id}>
+                <div className="card-cartoon bg-card border-border p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-rainbow-coral/20 flex items-center justify-center">
+                        <FileCheck className="w-5 h-5 text-rainbow-coral" />
+                      </div>
+                      <div>
+                        <p className="font-display text-foreground">{evaluation.title}</p>
+                        <div className="flex items-center gap-3 mt-1">
+                          {evaluation.file_url && (
+                            <a href={evaluation.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-rainbow-blue hover:underline">
+                              <FileText className="w-3 h-3" />
+                              Fichier
+                            </a>
+                          )}
+                          {evaluation.correction_url && (
+                            <a href={evaluation.correction_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-rainbow-green hover:underline">
+                              <BookCheck className="w-3 h-3" />
+                              Corrigé
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="icon" onClick={() => handleTogglePublish(evaluation)} className="rounded-xl">
+                        {evaluation.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleEdit(evaluation)} className="rounded-xl">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(evaluation.id)} className="rounded-xl text-destructive">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" onClick={() => handleTogglePublish(evaluation)} className="rounded-xl">
-                  {evaluation.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => handleEdit(evaluation)} className="rounded-xl">
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => handleDelete(evaluation.id)} className="rounded-xl text-destructive">
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
+              </SortableItem>
+            ))}
+            {evaluations.length === 0 && (
+              <p className="text-muted-foreground text-center py-8">Aucune évaluation créée</p>
+            )}
           </div>
-        ))}
-        {evaluations.length === 0 && (
-          <p className="text-muted-foreground text-center py-8">Aucune évaluation créée</p>
-        )}
-      </div>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 };
