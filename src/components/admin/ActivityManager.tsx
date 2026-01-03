@@ -6,8 +6,24 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Pencil, Trash2, FileText, BookOpen, Lightbulb, Upload, Loader2, X, BookCheck } from 'lucide-react';
+import { Plus, Pencil, Trash2, FileText, BookOpen, Lightbulb, Upload, Loader2, X, BookCheck, GripVertical } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { SortableItem } from './SortableItem';
 
 interface Activity {
   id: string;
@@ -21,6 +37,7 @@ interface Activity {
   created_at: string;
   updated_at: string;
 }
+
 const levels = [
   { id: '6eme', label: '6ème' },
   { id: '5eme', label: '5ème' },
@@ -45,6 +62,13 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const correctionInputRef = useRef<HTMLInputElement>(null);
   
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+  
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -63,17 +87,15 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
     setIsLoading(true);
     try {
       let query = supabase
-        .from('training_exercises' as any)
+        .from('activities')
         .select('*')
         .order('order_index', { ascending: true });
       
-      // We'll use training_exercises as a proxy for activities with a different category
-      // Actually, let's query from activities table using 'any' cast
-      const { data, error } = await (supabase as any)
-        .from('activities')
-        .select('*')
-        .order('order_index', { ascending: true })
-        .eq('level', selectedLevel || '6eme');
+      if (selectedLevel) {
+        query = query.eq('level', selectedLevel);
+      }
+      
+      const { data, error } = await query;
       
       if (error) {
         toast.error('Erreur lors du chargement des activités');
@@ -85,6 +107,33 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
       console.error(error);
     }
     setIsLoading(false);
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = activities.findIndex((item) => item.id === active.id);
+      const newIndex = activities.findIndex((item) => item.id === over.id);
+
+      const newItems = arrayMove(activities, oldIndex, newIndex);
+      setActivities(newItems);
+
+      // Update order_index in database
+      const updates = newItems.map((item, index) => ({
+        id: item.id,
+        order_index: index,
+      }));
+
+      for (const update of updates) {
+        await supabase
+          .from('activities')
+          .update({ order_index: update.order_index })
+          .eq('id', update.id);
+      }
+      
+      toast.success('Ordre mis à jour');
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -179,7 +228,7 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
     };
 
     if (editingActivity) {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('activities')
         .update(activityData)
         .eq('id', editingActivity.id);
@@ -193,7 +242,7 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
         resetForm();
       }
     } else {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('activities')
         .insert(activityData);
       
@@ -211,7 +260,7 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
   const handleDelete = async (id: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette activité ?')) return;
     
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('activities')
       .delete()
       .eq('id', id);
@@ -356,67 +405,74 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
         </Card>
       )}
 
-      <div className="grid gap-4">
-        {activities.length === 0 ? (
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              <Lightbulb className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              Aucune activité de découverte pour ce niveau
-            </CardContent>
-          </Card>
-        ) : (
-          activities.map((activity) => (
-            <Card key={activity.id} className={!activity.is_published ? 'opacity-60' : ''}>
-              <CardContent className="py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <Lightbulb className="w-5 h-5 text-rainbow-orange" />
-                    <div>
-                      <h3 className="font-semibold">{activity.title}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {levels.find(l => l.id === activity.level)?.label}
-                        {!activity.is_published && ' • Non publié'}
-                      </p>
-                      <div className="flex gap-4 mt-1">
-                        {activity.file_url && (
-                          <a 
-                            href={activity.file_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-sm text-rainbow-blue hover:underline flex items-center gap-1"
-                          >
-                            <FileText className="w-4 h-4" />
-                            Sujet
-                          </a>
-                        )}
-                        {activity.correction_url && (
-                          <a 
-                            href={activity.correction_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-sm text-rainbow-green hover:underline flex items-center gap-1"
-                          >
-                            <BookOpen className="w-4 h-4" />
-                            Corrigé
-                          </a>
-                        )}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={activities.map(a => a.id)} strategy={verticalListSortingStrategy}>
+          <div className="grid gap-4">
+            {activities.length === 0 ? (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  <Lightbulb className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  Aucune activité de découverte pour ce niveau
+                </CardContent>
+              </Card>
+            ) : (
+              activities.map((activity) => (
+                <SortableItem key={activity.id} id={activity.id}>
+                  <Card className={!activity.is_published ? 'opacity-60' : ''}>
+                    <CardContent className="py-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <GripVertical className="w-5 h-5 text-muted-foreground cursor-grab" />
+                          <Lightbulb className="w-5 h-5 text-rainbow-orange" />
+                          <div>
+                            <h3 className="font-semibold">{activity.title}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {levels.find(l => l.id === activity.level)?.label}
+                              {!activity.is_published && ' • Non publié'}
+                            </p>
+                            <div className="flex gap-4 mt-1">
+                              {activity.file_url && (
+                                <a 
+                                  href={activity.file_url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-sm text-rainbow-blue hover:underline flex items-center gap-1"
+                                >
+                                  <FileText className="w-4 h-4" />
+                                  Sujet
+                                </a>
+                              )}
+                              {activity.correction_url && (
+                                <a 
+                                  href={activity.correction_url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-sm text-rainbow-green hover:underline flex items-center gap-1"
+                                >
+                                  <BookOpen className="w-4 h-4" />
+                                  Corrigé
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="ghost" size="icon" onClick={() => handleEdit(activity)}>
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDelete(activity.id)}>
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(activity)}>
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(activity.id)}>
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+                    </CardContent>
+                  </Card>
+                </SortableItem>
+              ))
+            )}
+          </div>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 };
