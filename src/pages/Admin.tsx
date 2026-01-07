@@ -18,6 +18,7 @@ import { DnbManager } from '@/components/admin/DnbManager';
 import ActivityManager from '@/components/admin/ActivityManager';
 import { TrainingExerciseManager } from '@/components/admin/TrainingExerciseManager';
 import { TrainingTestManager } from '@/components/admin/TrainingTestManager';
+import { ClubMathsManager } from '@/components/admin/ClubMathsManager';
 import PDFViewer from '@/components/PDFViewer';
 import { 
   Users, 
@@ -562,6 +563,9 @@ const Admin = () => {
 
           {/* Dashboard Tab */}
           {activeTab === 'dashboard' && !activeLevel && <AdminDashboard />}
+
+          {/* Club de maths Tab */}
+          {activeTab === 'club-maths' && !activeLevel && <ClubMathsManager />}
 
           {/* Courses Tab - filtered by level */}
           {activeTab === 'cours' && activeLevel && (

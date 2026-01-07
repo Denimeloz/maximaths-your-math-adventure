@@ -26,7 +26,8 @@ import {
   ChevronDown,
   Lightbulb,
   Dumbbell,
-  Target
+  Target,
+  Puzzle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -185,6 +186,28 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSideb
                 </CollapsibleContent>
               </Collapsible>
             ))}
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Club de maths */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="font-display text-muted-foreground">Club de maths</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  onClick={() => onTabChange?.('club-maths')}
+                  className={`cursor-pointer transition-colors ${
+                    activeTab === 'club-maths' && !activeLevel
+                      ? 'bg-rainbow-pink/10 text-rainbow-pink font-medium' 
+                      : 'hover:bg-muted/50'
+                  }`}
+                >
+                  <Puzzle className="w-4 h-4 mr-2" />
+                  <span>Club Jules Verne</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
