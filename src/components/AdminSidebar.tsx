@@ -33,12 +33,13 @@ import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useState } from 'react';
 
-export type AdminCourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
+export type AdminCourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale' | 'club-maths';
 
 interface LevelConfig {
   id: AdminCourseLevel;
   label: string;
   color: string;
+  isClub?: boolean;
 }
 
 const levels: LevelConfig[] = [
@@ -49,9 +50,18 @@ const levels: LevelConfig[] = [
   { id: 'seconde', label: 'Seconde', color: 'rainbow-purple' },
   { id: 'premiere', label: 'Première', color: 'rainbow-pink' },
   { id: 'terminale', label: 'Terminale', color: 'rainbow-blue' },
+  { id: 'club-maths', label: 'Club Jules Verne', color: 'rainbow-pink', isClub: true },
 ];
 
 const getSubSections = (level: AdminCourseLevel) => {
+  // Club de maths a ses propres sous-sections
+  if (level === 'club-maths') {
+    return [
+      { id: 'enigmes', label: 'Énigmes hebdomadaires', icon: Puzzle },
+      { id: 'projets', label: 'Projets pédagogiques', icon: BookOpen },
+    ];
+  }
+  
   const baseSections = [
     { id: 'activites', label: 'Activité de découverte', icon: Lightbulb },
     { id: 'cours', label: 'Cours', icon: BookOpen },
@@ -146,9 +156,9 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSideb
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Niveaux */}
+        {/* Niveaux et Club */}
         <SidebarGroup>
-          <SidebarGroupLabel className="font-display text-muted-foreground">Niveaux</SidebarGroupLabel>
+          <SidebarGroupLabel className="font-display text-muted-foreground">Niveaux & Club</SidebarGroupLabel>
           <SidebarGroupContent>
             {levels.map((level) => (
               <Collapsible 
@@ -160,7 +170,11 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSideb
                   activeLevel === level.id ? `text-${level.color}` : 'text-foreground'
                 }`}>
                   <span className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full bg-${level.color}`} />
+                    {level.isClub ? (
+                      <Puzzle className={`w-4 h-4 text-${level.color}`} />
+                    ) : (
+                      <div className={`w-2 h-2 rounded-full bg-${level.color}`} />
+                    )}
                     {level.label}
                   </span>
                   <ChevronDown className={`w-4 h-4 transition-transform ${openLevels[level.id] ? 'rotate-180' : ''}`} />
@@ -189,27 +203,6 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSideb
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Club de maths */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="font-display text-muted-foreground">Club de maths</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  onClick={() => onTabChange?.('club-maths')}
-                  className={`cursor-pointer transition-colors ${
-                    activeTab === 'club-maths' && !activeLevel
-                      ? 'bg-rainbow-pink/10 text-rainbow-pink font-medium' 
-                      : 'hover:bg-muted/50'
-                  }`}
-                >
-                  <Puzzle className="w-4 h-4 mr-2" />
-                  <span>Club Jules Verne</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
 
         {/* Gestion */}
         <SidebarGroup>

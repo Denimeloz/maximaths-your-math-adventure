@@ -1,18 +1,19 @@
 import { Button } from "@/components/ui/button";
-import { Sparkles, Star, Zap, ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap } from "lucide-react";
+import { Sparkles, Star, Zap, ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap, Puzzle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import heroImage from "@/assets/maximaths-hero.jpeg";
 import brainIcon from "@/assets/brain-icon.png";
 
 const levels = [
-  { id: '6eme', label: '6ème', color: 'bg-rainbow-blue', textColor: 'text-rainbow-blue', borderColor: 'border-rainbow-blue' },
-  { id: '5eme', label: '5ème', color: 'bg-rainbow-green', textColor: 'text-rainbow-green', borderColor: 'border-rainbow-green' },
-  { id: '4eme', label: '4ème', color: 'bg-rainbow-orange', textColor: 'text-rainbow-orange', borderColor: 'border-rainbow-orange' },
-  { id: '3eme', label: '3ème', color: 'bg-rainbow-coral', textColor: 'text-rainbow-coral', borderColor: 'border-rainbow-coral' },
-  { id: 'seconde', label: 'Seconde', color: 'bg-rainbow-pink', textColor: 'text-rainbow-pink', borderColor: 'border-rainbow-pink' },
-  { id: 'premiere', label: 'Première', color: 'bg-rainbow-purple', textColor: 'text-rainbow-purple', borderColor: 'border-rainbow-purple' },
-  { id: 'terminale', label: 'Terminale', color: 'bg-rainbow-yellow', textColor: 'text-rainbow-yellow', borderColor: 'border-rainbow-yellow' },
+  { id: '6eme', label: '6ème', color: 'bg-rainbow-blue', textColor: 'text-rainbow-blue', borderColor: 'border-rainbow-blue', isClub: false },
+  { id: '5eme', label: '5ème', color: 'bg-rainbow-green', textColor: 'text-rainbow-green', borderColor: 'border-rainbow-green', isClub: false },
+  { id: '4eme', label: '4ème', color: 'bg-rainbow-orange', textColor: 'text-rainbow-orange', borderColor: 'border-rainbow-orange', isClub: false },
+  { id: '3eme', label: '3ème', color: 'bg-rainbow-coral', textColor: 'text-rainbow-coral', borderColor: 'border-rainbow-coral', isClub: false },
+  { id: 'seconde', label: 'Seconde', color: 'bg-rainbow-pink', textColor: 'text-rainbow-pink', borderColor: 'border-rainbow-pink', isClub: false },
+  { id: 'premiere', label: 'Première', color: 'bg-rainbow-purple', textColor: 'text-rainbow-purple', borderColor: 'border-rainbow-purple', isClub: false },
+  { id: 'terminale', label: 'Terminale', color: 'bg-rainbow-yellow', textColor: 'text-rainbow-yellow', borderColor: 'border-rainbow-yellow', isClub: false },
+  { id: 'club-maths', label: 'Club de maths', color: 'bg-gradient-to-r from-rainbow-purple to-rainbow-pink', textColor: 'text-rainbow-pink', borderColor: 'border-rainbow-pink', isClub: true },
 ];
 
 const subMenuItems = [
@@ -30,7 +31,9 @@ const subMenuItems3eme = [
 ];
 
 const getSubMenuForLevel = (levelId: string) => {
-  return levelId === '3eme' ? subMenuItems3eme : subMenuItems;
+  if (levelId === '3eme') return subMenuItems3eme;
+  if (levelId === 'club-maths') return []; // Club has dynamic activities from database
+  return subMenuItems;
 };
 
 const quotes = [
@@ -142,6 +145,10 @@ const HeroSection = () => {
     navigate(`/niveau/${levelId}/${subMenuId}`);
   };
 
+  const handleClubClick = () => {
+    navigate('/club-maths');
+  };
+
   return (
     <section className="relative min-h-screen bg-hero-gradient overflow-hidden pt-20">
       {/* Math pattern overlay */}
@@ -203,20 +210,24 @@ const HeroSection = () => {
             Choisis ta classe 👇
           </h3>
           
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
             {levels.map((level) => (
-              <div key={level.id} className="relative">
+              <div key={level.id} className={`relative ${level.isClub ? 'col-span-2 sm:col-span-4 lg:col-span-8' : ''}`}>
                 <button
-                  onClick={() => handleLevelClick(level.id)}
+                  onClick={() => level.isClub ? handleClubClick() : handleLevelClick(level.id)}
                   className={`w-full p-3 rounded-xl font-display font-bold text-sm md:text-base transition-all border-2 ${
-                    expandedLevel === level.id 
-                      ? `${level.color} text-white ${level.borderColor} scale-105 shadow-lg` 
-                      : `bg-card ${level.textColor} ${level.borderColor} hover:scale-105 hover:shadow-md`
+                    level.isClub 
+                      ? `${level.color} text-white ${level.borderColor} hover:scale-[1.02] hover:shadow-lg`
+                      : expandedLevel === level.id 
+                        ? `${level.color} text-white ${level.borderColor} scale-105 shadow-lg` 
+                        : `bg-card ${level.textColor} ${level.borderColor} hover:scale-105 hover:shadow-md`
                   }`}
                 >
                   <span className="flex items-center justify-center gap-1">
                     {level.label}
-                    {expandedLevel === level.id ? (
+                    {level.isClub ? (
+                      <Puzzle className="w-4 h-4" />
+                    ) : expandedLevel === level.id ? (
                       <ChevronUp className="w-4 h-4" />
                     ) : (
                       <ChevronDown className="w-4 h-4" />
@@ -228,7 +239,7 @@ const HeroSection = () => {
           </div>
 
           {/* Expanded submenu */}
-          {expandedLevel && (
+          {expandedLevel && !levels.find(l => l.id === expandedLevel)?.isClub && (
             <div className="mt-6 p-4 bg-card/95 backdrop-blur-sm rounded-2xl border-2 border-border animate-slide-up shadow-xl">
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
                 {getSubMenuForLevel(expandedLevel).map((item) => {
