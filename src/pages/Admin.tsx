@@ -527,14 +527,16 @@ const Admin = () => {
           {activeLevel && (
             <div className="mb-6 p-4 rounded-xl bg-card border border-border">
             <h2 className="text-xl font-display text-foreground flex items-center gap-2">
-                {getLevelLabel(activeLevel)} - {
+                {activeLevel === 'club-maths' ? 'Club Jules Verne' : getLevelLabel(activeLevel as CourseLevel)} - {
                   activeTab === 'cours' ? 'Cours' :
                   activeTab === 'activites' ? 'Activité de découverte' :
                   activeTab === 'exercices-entrainement' ? "Exercices d'entraînement" :
                   activeTab === 'tests-entrainement' ? "Tests (Évaluations formatives)" :
                   activeTab === 'devoirs' ? 'Devoirs de niveaux' :
                   activeTab === 'evaluations' ? 'Évaluations' :
-                  activeTab === 'prepa-dnb' ? 'Prépa DNB' : ''
+                  activeTab === 'prepa-dnb' ? 'Prépa DNB' :
+                  activeTab === 'enigmes' ? 'Énigmes hebdomadaires' :
+                  activeTab === 'projets' ? 'Projets pédagogiques' : ''
                 }
               </h2>
             </div>
@@ -564,17 +566,19 @@ const Admin = () => {
           {/* Dashboard Tab */}
           {activeTab === 'dashboard' && !activeLevel && <AdminDashboard />}
 
-          {/* Club de maths Tab */}
-          {activeTab === 'club-maths' && !activeLevel && <ClubMathsManager />}
+          {/* Club de maths Sections */}
+          {activeLevel === 'club-maths' && (activeTab === 'enigmes' || activeTab === 'projets') && (
+            <ClubMathsManager selectedActivityType={activeTab} />
+          )}
 
           {/* Courses Tab - filtered by level */}
-          {activeTab === 'cours' && activeLevel && (
+          {activeTab === 'cours' && activeLevel && activeLevel !== 'club-maths' && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-display text-foreground">Cours - {getLevelLabel(activeLevel)}</h2>
+                <h2 className="text-2xl font-display text-foreground">Cours - {getLevelLabel(activeLevel as CourseLevel)}</h2>
                 <Button 
                   onClick={() => {
-                    setCourseForm(prev => ({ ...prev, level: activeLevel }));
+                    setCourseForm(prev => ({ ...prev, level: activeLevel as CourseLevel }));
                     setShowCourseForm(true);
                   }} 
                   className="btn-3d bg-primary rounded-xl"
@@ -848,28 +852,28 @@ const Admin = () => {
           )}
 
           {/* Activites Tab - filtered by level */}
-          {activeTab === 'activites' && activeLevel && (
-            <ActivityManager selectedLevel={activeLevel} />
+          {activeTab === 'activites' && activeLevel && activeLevel !== 'club-maths' && (
+            <ActivityManager selectedLevel={activeLevel as CourseLevel} />
           )}
 
           {/* Training Exercises Tab - filtered by level */}
-          {activeTab === 'exercices-entrainement' && activeLevel && (
-            <TrainingExerciseManager filterLevel={activeLevel} />
+          {activeTab === 'exercices-entrainement' && activeLevel && activeLevel !== 'club-maths' && (
+            <TrainingExerciseManager filterLevel={activeLevel as CourseLevel} />
           )}
 
           {/* Training Tests Tab - filtered by level */}
-          {activeTab === 'tests-entrainement' && activeLevel && (
-            <TrainingTestManager filterLevel={activeLevel} />
+          {activeTab === 'tests-entrainement' && activeLevel && activeLevel !== 'club-maths' && (
+            <TrainingTestManager filterLevel={activeLevel as CourseLevel} />
           )}
 
           {/* Assignments Tab - filtered by level */}
-          {activeTab === 'devoirs' && activeLevel && (
-            <AssignmentManager filterLevel={activeLevel} />
+          {activeTab === 'devoirs' && activeLevel && activeLevel !== 'club-maths' && (
+            <AssignmentManager filterLevel={activeLevel as CourseLevel} />
           )}
 
           {/* Evaluations Tab - filtered by level */}
-          {activeTab === 'evaluations' && activeLevel && (
-            <EvaluationManager filterLevel={activeLevel} />
+          {activeTab === 'evaluations' && activeLevel && activeLevel !== 'club-maths' && (
+            <EvaluationManager filterLevel={activeLevel as CourseLevel} />
           )}
 
           {/* DNB Tab - only for 3eme */}

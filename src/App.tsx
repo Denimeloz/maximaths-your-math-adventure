@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import CourseView from "./pages/CourseView";
 import LevelContent from "./pages/LevelContent";
 import AdminLogin from "./pages/AdminLogin";
+import ClubMaths from "./pages/ClubMaths";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,8 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/niveau/:levelId/:contentType" element={<LevelContent />} />
             <Route path="/course/:courseId" element={<CourseView />} />
+            <Route path="/club-maths" element={<ClubMaths />} />
+            <Route path="/club-maths/:activitySlug" element={<ClubMaths />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
