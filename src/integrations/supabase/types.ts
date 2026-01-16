@@ -177,6 +177,7 @@ export type Database = {
           content: string | null
           created_at: string
           file_url: string | null
+          file_urls: Json | null
           id: string
           is_published: boolean
           level: string
@@ -188,6 +189,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           file_url?: string | null
+          file_urls?: Json | null
           id?: string
           is_published?: boolean
           level: string
@@ -199,6 +201,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           file_url?: string | null
+          file_urls?: Json | null
           id?: string
           is_published?: boolean
           level?: string

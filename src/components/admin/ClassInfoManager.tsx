@@ -38,12 +38,18 @@ import { SortableItem } from './SortableItem';
 
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
+interface FileAttachment {
+  url: string;
+  name: string;
+}
+
 interface ClassInfo {
   id: string;
   level: string;
   title: string;
   content: string | null;
   file_url: string | null;
+  file_urls: FileAttachment[] | null;
   is_published: boolean;
   order_index: number;
   created_at: string;
@@ -66,7 +72,7 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    file_url: '',
+    file_urls: [] as FileAttachment[],
     is_published: false,
   });
 
@@ -102,39 +108,48 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 20 * 1024 * 1024) {
-      toast({
-        title: "Erreur",
-        description: "Le fichier ne doit pas dépasser 20MB",
-        variant: "destructive",
-      });
-      return;
-    }
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
     setIsUploading(true);
 
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `class-info/${selectedLevel}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const newFiles: FileAttachment[] = [];
 
-      const { error: uploadError } = await supabase.storage
-        .from('course-files')
-        .upload(fileName, file);
+      for (const file of Array.from(files)) {
+        if (file.size > 20 * 1024 * 1024) {
+          toast({
+            title: "Erreur",
+            description: `Le fichier ${file.name} dépasse 20MB`,
+            variant: "destructive",
+          });
+          continue;
+        }
 
-      if (uploadError) throw uploadError;
+        const fileExt = file.name.split('.').pop();
+        const fileName = `class-info/${selectedLevel}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('course-files')
-        .getPublicUrl(fileName);
+        const { error: uploadError } = await supabase.storage
+          .from('course-files')
+          .upload(fileName, file);
 
-      setFormData(prev => ({ ...prev, file_url: publicUrl }));
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('course-files')
+          .getPublicUrl(fileName);
+
+        newFiles.push({ url: publicUrl, name: file.name });
+      }
+
+      setFormData(prev => ({ 
+        ...prev, 
+        file_urls: [...prev.file_urls, ...newFiles] 
+      }));
 
       toast({
         title: "Succès ✨",
-        description: "Fichier téléchargé avec succès",
+        description: `${newFiles.length} fichier(s) téléchargé(s)`,
       });
     } catch (error) {
       console.error('Error uploading file:', error);
@@ -145,7 +160,17 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
       });
     } finally {
       setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
+  };
+
+  const removeFile = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      file_urls: prev.file_urls.filter((_, i) => i !== index)
+    }));
   };
 
   const handleSubmit = async () => {
@@ -164,7 +189,7 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
         .update({
           title: formData.title,
           content: formData.content || null,
-          file_url: formData.file_url || null,
+          file_urls: formData.file_urls,
           is_published: formData.is_published,
         })
         .eq('id', editingInfo.id);
@@ -190,7 +215,7 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
           level: selectedLevel,
           title: formData.title,
           content: formData.content || null,
-          file_url: formData.file_url || null,
+          file_urls: formData.file_urls,
           is_published: formData.is_published,
           order_index: infos.length,
         });
@@ -214,10 +239,18 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
 
   const handleEdit = (info: ClassInfo) => {
     setEditingInfo(info);
+    // Parse file_urls from JSON if needed
+    let fileUrls: FileAttachment[] = [];
+    if (info.file_urls && Array.isArray(info.file_urls)) {
+      fileUrls = info.file_urls;
+    } else if (info.file_url) {
+      // Backwards compatibility with single file_url
+      fileUrls = [{ url: info.file_url, name: 'Pièce jointe' }];
+    }
     setFormData({
       title: info.title,
       content: info.content || '',
-      file_url: info.file_url || '',
+      file_urls: fileUrls,
       is_published: info.is_published,
     });
     setShowForm(true);
@@ -272,7 +305,7 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
     setFormData({
       title: '',
       content: '',
-      file_url: '',
+      file_urls: [],
       is_published: false,
     });
   };
@@ -336,43 +369,46 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
             </div>
 
             <div>
-              <Label>Pièce jointe</Label>
-              <div className="mt-1 flex items-center gap-4">
-                {formData.file_url ? (
-                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl flex-1">
-                    <FileText className="w-6 h-6 text-rainbow-blue" />
-                    <div className="flex-1 min-w-0">
-                      <a 
-                        href={formData.file_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-sm text-rainbow-blue hover:underline truncate block"
+              <Label>Pièces jointes</Label>
+              <div className="mt-2 space-y-2">
+                {formData.file_urls.length > 0 ? (
+                  formData.file_urls.map((file, index) => (
+                    <div key={index} className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl">
+                      <FileText className="w-5 h-5 text-rainbow-blue shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <a 
+                          href={file.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm text-rainbow-blue hover:underline truncate block"
+                        >
+                          {file.name}
+                        </a>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeFile(index)}
+                        className="shrink-0 h-8 w-8"
                       >
-                        Voir le fichier
-                      </a>
+                        <X className="w-4 h-4" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setFormData(prev => ({ ...prev, file_url: '' }))}
-                      className="shrink-0"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  ))
                 ) : (
-                  <div className="flex-1 p-4 rounded-xl border-2 border-dashed border-muted-foreground/30 text-center">
+                  <div className="p-4 rounded-xl border-2 border-dashed border-muted-foreground/30 text-center">
                     <FileText className="w-8 h-8 mx-auto text-muted-foreground/50 mb-2" />
                     <span className="text-sm text-muted-foreground">Aucun fichier</span>
                   </div>
                 )}
               </div>
-              <div className="mt-2">
+              <div className="mt-3">
                 <input
                   type="file"
                   ref={fileInputRef}
                   onChange={handleFileUpload}
                   className="hidden"
+                  multiple
                 />
                 <Button
                   type="button"
@@ -389,11 +425,11 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
                   ) : (
                     <>
                       <Upload className="w-4 h-4 mr-2" />
-                      {formData.file_url ? 'Changer' : 'Télécharger'}
+                      Ajouter des fichiers
                     </>
                   )}
                 </Button>
-                <p className="text-xs text-muted-foreground mt-1">Max 20MB</p>
+                <p className="text-xs text-muted-foreground mt-1">Max 20MB par fichier</p>
               </div>
             </div>
 
@@ -461,16 +497,32 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
                           <p className="text-sm text-muted-foreground line-clamp-2">{info.content}</p>
                         )}
                         
-                        {info.file_url && (
-                          <a 
-                            href={info.file_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-rainbow-blue hover:underline mt-2"
-                          >
-                            <FileText className="w-3 h-3" />
-                            Pièce jointe
-                          </a>
+                        {((info.file_urls && info.file_urls.length > 0) || info.file_url) && (
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {info.file_urls && info.file_urls.map((file, idx) => (
+                              <a 
+                                key={idx}
+                                href={file.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-xs text-rainbow-blue hover:underline"
+                              >
+                                <FileText className="w-3 h-3" />
+                                {file.name}
+                              </a>
+                            ))}
+                            {!info.file_urls?.length && info.file_url && (
+                              <a 
+                                href={info.file_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-xs text-rainbow-blue hover:underline"
+                              >
+                                <FileText className="w-3 h-3" />
+                                Pièce jointe
+                              </a>
+                            )}
+                          </div>
                         )}
                       </div>
                       
