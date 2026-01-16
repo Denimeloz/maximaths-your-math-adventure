@@ -100,12 +100,18 @@ interface Activity {
   correction_url: string | null;
 }
 
+interface FileAttachment {
+  url: string;
+  name: string;
+}
+
 interface ClassInfo {
   id: string;
   title: string;
   content: string | null;
   level: string;
   file_url: string | null;
+  file_urls: FileAttachment[] | null;
 }
 
 interface Activity {
@@ -399,17 +405,32 @@ const LevelContent = () => {
             </p>
           )}
           
-          {info.file_url && (
-            <div className="pt-4 border-t border-border">
-              <a 
-                href={info.file_url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-sm text-rainbow-blue hover:underline flex items-center gap-1"
-              >
-                <FileText className="w-4 h-4" />
-                Pièce jointe
-              </a>
+          {((info.file_urls && info.file_urls.length > 0) || info.file_url) && (
+            <div className="pt-4 border-t border-border space-y-2">
+              <p className="text-xs font-medium text-muted-foreground">Pièces jointes :</p>
+              {info.file_urls && info.file_urls.map((file, idx) => (
+                <a 
+                  key={idx}
+                  href={file.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-rainbow-blue hover:underline flex items-center gap-1"
+                >
+                  <FileText className="w-4 h-4" />
+                  {file.name}
+                </a>
+              ))}
+              {!info.file_urls?.length && info.file_url && (
+                <a 
+                  href={info.file_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-rainbow-blue hover:underline flex items-center gap-1"
+                >
+                  <FileText className="w-4 h-4" />
+                  Pièce jointe
+                </a>
+              )}
             </div>
           )}
         </div>

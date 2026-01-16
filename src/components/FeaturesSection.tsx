@@ -1,7 +1,18 @@
-import { Play, Brain, Ruler, TrendingUp, Star, Lightbulb, BookOpen, ClipboardList, FileCheck } from "lucide-react";
+import { Play, Brain, Ruler, TrendingUp, Star, Lightbulb, BookOpen, ClipboardList, FileCheck, Megaphone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const features = [
+  {
+    icon: Megaphone,
+    title: "Infos pour la classe",
+    description: "Retrouve ici toutes les informations importantes : dates d'examens, directives et consignes spéciales !",
+    color: "bg-feature-orange",
+    iconBg: "bg-rainbow-orange/20",
+    iconColor: "text-rainbow-orange",
+    borderColor: "border-rainbow-orange",
+    shadowColor: "shadow-glow-orange",
+    emoji: "📢",
+  },
   {
     icon: Lightbulb,
     title: "Activités de découverte",
@@ -93,7 +104,7 @@ const FeaturesSection = () => {
           La plateforme de mathématiques pour les élèves du <span className="text-rainbow-blue font-bold">Collège</span> et du <span className="text-rainbow-purple font-bold">Lycée</span>
         </p>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto mb-20">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6 max-w-7xl mx-auto mb-20">
           {features.map((feature, index) => (
             <div 
               key={feature.title}
