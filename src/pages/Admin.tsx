@@ -19,6 +19,7 @@ import ActivityManager from '@/components/admin/ActivityManager';
 import { TrainingExerciseManager } from '@/components/admin/TrainingExerciseManager';
 import { TrainingTestManager } from '@/components/admin/TrainingTestManager';
 import { ClubMathsManager } from '@/components/admin/ClubMathsManager';
+import { ClassInfoManager } from '@/components/admin/ClassInfoManager';
 import PDFViewer from '@/components/PDFViewer';
 import { 
   Users, 
@@ -528,6 +529,7 @@ const Admin = () => {
             <div className="mb-6 p-4 rounded-xl bg-card border border-border">
             <h2 className="text-xl font-display text-foreground flex items-center gap-2">
                 {activeLevel === 'club-maths' ? 'Club Jules Verne' : getLevelLabel(activeLevel as CourseLevel)} - {
+                  activeTab === 'infos' ? 'Informations pour la classe' :
                   activeTab === 'cours' ? 'Cours' :
                   activeTab === 'activites' ? 'Activité de découverte' :
                   activeTab === 'exercices-entrainement' ? "Exercices d'entraînement" :
@@ -565,6 +567,11 @@ const Admin = () => {
 
           {/* Dashboard Tab */}
           {activeTab === 'dashboard' && !activeLevel && <AdminDashboard />}
+
+          {/* Class Info Section */}
+          {activeTab === 'infos' && activeLevel && activeLevel !== 'club-maths' && (
+            <ClassInfoManager selectedLevel={activeLevel as CourseLevel} />
+          )}
 
           {/* Club de maths Sections */}
           {activeLevel === 'club-maths' && (activeTab === 'enigmes' || activeTab === 'projets') && (
