@@ -27,7 +27,8 @@ import {
   Lightbulb,
   Dumbbell,
   Target,
-  Puzzle
+  Puzzle,
+  Megaphone
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -63,6 +64,7 @@ const getSubSections = (level: AdminCourseLevel) => {
   }
   
   const baseSections = [
+    { id: 'infos', label: 'Informations pour la classe', icon: Megaphone },
     { id: 'activites', label: 'Activité de découverte', icon: Lightbulb },
     { id: 'cours', label: 'Cours', icon: BookOpen },
     { id: 'exercices-entrainement', label: "Exercices d'entraînement", icon: Dumbbell },

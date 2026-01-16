@@ -172,6 +172,42 @@ export type Database = {
           },
         ]
       }
+      class_info: {
+        Row: {
+          content: string | null
+          created_at: string
+          file_url: string | null
+          id: string
+          is_published: boolean
+          level: string
+          order_index: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          is_published?: boolean
+          level: string
+          order_index?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          is_published?: boolean
+          level?: string
+          order_index?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       club_activities: {
         Row: {
           created_at: string

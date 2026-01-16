@@ -13,10 +13,11 @@ import {
   Star,
   Lightbulb,
   Dumbbell,
-  Target
+  Target,
+  Megaphone
 } from 'lucide-react';
 
-type ContentType = 'cours' | 'activites' | 'exercices-entrainement' | 'tests-entrainement' | 'devoirs' | 'evaluations' | 'prepa-dnb';
+type ContentType = 'cours' | 'activites' | 'infos' | 'exercices-entrainement' | 'tests-entrainement' | 'devoirs' | 'evaluations' | 'prepa-dnb';
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
 const levelLabels: Record<CourseLevel, string> = {
@@ -40,6 +41,11 @@ const levelColors: Record<CourseLevel, string> = {
 };
 
 const contentConfig: Record<ContentType, { icon: React.ElementType; title: string; description: string }> = {
+  infos: {
+    icon: Megaphone,
+    title: 'Informations pour la classe',
+    description: 'Directives et informations importantes'
+  },
   activites: {
     icon: Lightbulb,
     title: 'Activité de découverte',
@@ -83,6 +89,23 @@ interface Course {
   description: string | null;
   level: CourseLevel;
   category: string;
+}
+
+interface Activity {
+  id: string;
+  title: string;
+  description: string | null;
+  level: string;
+  file_url: string | null;
+  correction_url: string | null;
+}
+
+interface ClassInfo {
+  id: string;
+  title: string;
+  content: string | null;
+  level: string;
+  file_url: string | null;
 }
 
 interface Activity {
@@ -145,6 +168,7 @@ const LevelContent = () => {
   const navigate = useNavigate();
   const [courses, setCourses] = useState<Course[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [classInfos, setClassInfos] = useState<ClassInfo[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [dnbContent, setDnbContent] = useState<DnbContent[]>([]);
@@ -188,6 +212,17 @@ const LevelContent = () => {
         .order('order_index', { ascending: true });
       
       if (data) setActivities(data as Activity[]);
+    }
+    else if (type === 'infos') {
+      // Class information
+      const { data } = await (supabase as any)
+        .from('class_info')
+        .select('*')
+        .eq('level', level)
+        .eq('is_published', true)
+        .order('order_index', { ascending: true });
+      
+      if (data) setClassInfos(data as ClassInfo[]);
     } 
     else if (type === 'devoirs') {
       const { data } = await supabase
@@ -335,6 +370,48 @@ const LevelContent = () => {
               </a>
             )}
           </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderClassInfos = () => (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {classInfos.map((info) => (
+        <div 
+          key={info.id}
+          className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 group`}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Megaphone className={`w-5 h-5 text-${color}`} />
+            <span className="text-xs font-body text-muted-foreground">
+              Information importante
+            </span>
+          </div>
+          
+          <h3 className={`text-xl font-display text-foreground mb-2`}>
+            {info.title}
+          </h3>
+          
+          {info.content && (
+            <p className="text-muted-foreground font-body text-sm mb-4 whitespace-pre-wrap">
+              {info.content}
+            </p>
+          )}
+          
+          {info.file_url && (
+            <div className="pt-4 border-t border-border">
+              <a 
+                href={info.file_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-rainbow-blue hover:underline flex items-center gap-1"
+              >
+                <FileText className="w-4 h-4" />
+                Pièce jointe
+              </a>
+            </div>
+          )}
         </div>
       ))}
     </div>
@@ -617,6 +694,8 @@ const LevelContent = () => {
 
     if (type === 'cours') {
       return courses.length > 0 ? renderCourses() : renderEmptyState();
+    } else if (type === 'infos') {
+      return classInfos.length > 0 ? renderClassInfos() : renderEmptyState();
     } else if (type === 'activites') {
       return activities.length > 0 ? renderActivities() : renderEmptyState();
     } else if (type === 'exercices-entrainement') {
