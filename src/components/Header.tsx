@@ -64,6 +64,7 @@ const levels = [
 ];
 
 const subMenuItems = [
+  { id: 'infos', label: 'Infos pour la classe', description: 'Informations importantes' },
   { id: 'activites', label: 'Activité de découverte', description: 'Découverte et exploration' },
   { id: 'cours', label: 'Cours', description: 'Leçons et chapitres' },
   { id: 'exercices-entrainement', label: 'Exercices d\'entraînement', description: 'Entraînement' },
