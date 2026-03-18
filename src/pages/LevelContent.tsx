@@ -81,6 +81,11 @@ const contentConfig: Record<ContentType, { icon: React.ElementType; title: strin
     icon: Star,
     title: 'Prépa DNB',
     description: 'Préparation au Diplôme National du Brevet'
+  },
+  'classe-activite': {
+    icon: Camera,
+    title: 'Classe en activité',
+    description: 'Photos et moments de classe en action'
   }
 };
 
