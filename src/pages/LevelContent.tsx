@@ -734,7 +734,47 @@ const LevelContent = () => {
     </div>
   );
 
-  const getContent = () => {
+  const renderClassPhotos = () => (
+    <div className="space-y-8">
+      {classPhotos.map((album) => (
+        <div key={album.id} className={`card-sticker bg-card border-${color}/30 p-6`}>
+          <div className="flex items-center gap-2 mb-3">
+            <Camera className={`w-5 h-5 text-${color}`} />
+            <span className="text-xs font-body text-muted-foreground">Classe en activité</span>
+          </div>
+          
+          <h3 className="text-xl font-display text-foreground mb-2">{album.title}</h3>
+          
+          {album.description && (
+            <p className="text-muted-foreground font-body text-sm mb-4">{album.description}</p>
+          )}
+          
+          {Array.isArray(album.image_urls) && album.image_urls.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4">
+              {album.image_urls.map((img, idx) => (
+                <a
+                  key={idx}
+                  href={img.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-colors group"
+                >
+                  <img
+                    src={img.url}
+                    alt={img.name}
+                    className="w-full h-32 sm:h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+
+
     if (isLoading) {
       return (
         <div className="flex justify-center py-20">
