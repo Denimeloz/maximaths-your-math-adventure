@@ -111,6 +111,19 @@ interface FileAttachment {
   name: string;
 }
 
+interface ImageFile {
+  url: string;
+  name: string;
+}
+
+interface ClassPhoto {
+  id: string;
+  title: string;
+  description: string | null;
+  level: string;
+  image_urls: ImageFile[] | null;
+}
+
 interface ClassInfo {
   id: string;
   title: string;
