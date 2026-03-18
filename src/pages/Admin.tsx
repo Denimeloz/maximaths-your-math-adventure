@@ -890,6 +890,11 @@ const Admin = () => {
             <DnbManager />
           )}
 
+          {/* Class Photos Tab - only for 3eme and seconde */}
+          {activeTab === 'classe-activite' && activeLevel && (activeLevel === '3eme' || activeLevel === 'seconde') && (
+            <ClassPhotosManager selectedLevel={activeLevel as CourseLevel} />
+          )}
+
           {/* Files Tab */}
           {activeTab === 'files' && (
             <FileVideoManager courses={courses.map(c => ({ id: c.id, title: c.title }))} />
