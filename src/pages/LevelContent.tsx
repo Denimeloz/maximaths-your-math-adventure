@@ -18,7 +18,7 @@ import {
   Camera
 } from 'lucide-react';
 
-type ContentType = 'cours' | 'activites' | 'infos' | 'exercices-entrainement' | 'tests-entrainement' | 'devoirs' | 'evaluations' | 'prepa-dnb';
+type ContentType = 'cours' | 'activites' | 'infos' | 'exercices-entrainement' | 'tests-entrainement' | 'devoirs' | 'evaluations' | 'prepa-dnb' | 'classe-activite';
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
 const levelLabels: Record<CourseLevel, string> = {
