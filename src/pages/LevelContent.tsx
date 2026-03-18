@@ -199,6 +199,7 @@ const LevelContent = () => {
   const [dnbContent, setDnbContent] = useState<DnbContent[]>([]);
   const [trainingExercises, setTrainingExercises] = useState<TrainingExercise[]>([]);
   const [trainingTests, setTrainingTests] = useState<TrainingTest[]>([]);
+  const [classPhotos, setClassPhotos] = useState<ClassPhoto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const level = levelId as CourseLevel;
