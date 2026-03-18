@@ -538,6 +538,7 @@ const Admin = () => {
                   activeTab === 'devoirs' ? 'Devoirs de niveaux' :
                   activeTab === 'evaluations' ? 'Évaluations' :
                   activeTab === 'prepa-dnb' ? 'Prépa DNB' :
+                  activeTab === 'classe-activite' ? 'Classe en activité' :
                   activeTab === 'enigmes' ? 'Énigmes hebdomadaires' :
                   activeTab === 'projets' ? 'Projets pédagogiques' : ''
                 }
