@@ -799,6 +799,8 @@ const LevelContent = () => {
       return evaluations.length > 0 ? renderEvaluations() : renderEmptyState();
     } else if (type === 'prepa-dnb') {
       return dnbContent.length > 0 ? renderDnbContent() : renderEmptyState();
+    } else if (type === 'classe-activite') {
+      return classPhotos.length > 0 ? renderClassPhotos() : renderEmptyState();
     }
     
     return renderEmptyState();
