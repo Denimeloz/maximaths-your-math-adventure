@@ -81,10 +81,13 @@ const subMenuItems3emeSeconde = [
 const subMenuItems3eme = [
   ...subMenuItems,
   { id: 'prepa-dnb', label: 'Prépa DNB', description: 'Préparation au brevet' },
+  { id: 'classe-activite', label: 'Classe en activité', description: 'Photos et moments de classe' },
 ];
 
 const getSubMenuForLevel = (levelId: string) => {
-  return levelId === '3eme' ? subMenuItems3eme : subMenuItems;
+  if (levelId === '3eme') return subMenuItems3eme;
+  if (levelId === 'seconde') return subMenuItems3emeSeconde;
+  return subMenuItems;
 };
 
 const Header = () => {
