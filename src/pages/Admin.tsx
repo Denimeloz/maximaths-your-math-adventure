@@ -20,6 +20,7 @@ import { TrainingExerciseManager } from '@/components/admin/TrainingExerciseMana
 import { TrainingTestManager } from '@/components/admin/TrainingTestManager';
 import { ClubMathsManager } from '@/components/admin/ClubMathsManager';
 import { ClassInfoManager } from '@/components/admin/ClassInfoManager';
+import { ClassPhotosManager } from '@/components/admin/ClassPhotosManager';
 import PDFViewer from '@/components/PDFViewer';
 import { 
   Users, 
