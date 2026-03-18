@@ -774,7 +774,7 @@ const LevelContent = () => {
     </div>
   );
 
-
+  const getContent = () => {
     if (isLoading) {
       return (
         <div className="flex justify-center py-20">
