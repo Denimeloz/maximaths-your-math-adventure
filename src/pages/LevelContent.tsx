@@ -299,6 +299,16 @@ const LevelContent = () => {
       
       if (data) setDnbContent(data as DnbContent[]);
     }
+    else if (type === 'classe-activite') {
+      const { data } = await (supabase as any)
+        .from('class_photos')
+        .select('*')
+        .eq('level', level)
+        .eq('is_published', true)
+        .order('order_index', { ascending: true });
+      
+      if (data) setClassPhotos(data as ClassPhoto[]);
+    }
     
     setIsLoading(false);
   };
