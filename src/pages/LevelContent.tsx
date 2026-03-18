@@ -14,7 +14,8 @@ import {
   Lightbulb,
   Dumbbell,
   Target,
-  Megaphone
+  Megaphone,
+  Camera
 } from 'lucide-react';
 
 type ContentType = 'cours' | 'activites' | 'infos' | 'exercices-entrainement' | 'tests-entrainement' | 'devoirs' | 'evaluations' | 'prepa-dnb';
