@@ -73,6 +73,11 @@ const subMenuItems = [
   { id: 'evaluations', label: 'Évaluations', description: 'Tests et examens' },
 ];
 
+const subMenuItems3emeSeconde = [
+  ...subMenuItems,
+  { id: 'classe-activite', label: 'Classe en activité', description: 'Photos et moments de classe' },
+];
+
 const subMenuItems3eme = [
   ...subMenuItems,
   { id: 'prepa-dnb', label: 'Prépa DNB', description: 'Préparation au brevet' },
