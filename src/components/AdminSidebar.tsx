@@ -28,7 +28,8 @@ import {
   Dumbbell,
   Target,
   Puzzle,
-  Megaphone
+  Megaphone,
+  Camera
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
