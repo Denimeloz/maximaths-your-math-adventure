@@ -211,6 +211,42 @@ export type Database = {
         }
         Relationships: []
       }
+      class_photos: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_urls: Json | null
+          is_published: boolean
+          level: string
+          order_index: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_urls?: Json | null
+          is_published?: boolean
+          level: string
+          order_index?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_urls?: Json | null
+          is_published?: boolean
+          level?: string
+          order_index?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       club_activities: {
         Row: {
           created_at: string
