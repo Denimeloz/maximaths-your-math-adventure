@@ -20,6 +20,7 @@ import { TrainingExerciseManager } from '@/components/admin/TrainingExerciseMana
 import { TrainingTestManager } from '@/components/admin/TrainingTestManager';
 import { ClubMathsManager } from '@/components/admin/ClubMathsManager';
 import { ClassInfoManager } from '@/components/admin/ClassInfoManager';
+import { ClassPhotosManager } from '@/components/admin/ClassPhotosManager';
 import PDFViewer from '@/components/PDFViewer';
 import { 
   Users, 
@@ -537,6 +538,7 @@ const Admin = () => {
                   activeTab === 'devoirs' ? 'Devoirs de niveaux' :
                   activeTab === 'evaluations' ? 'Évaluations' :
                   activeTab === 'prepa-dnb' ? 'Prépa DNB' :
+                  activeTab === 'classe-activite' ? 'Classe en activité' :
                   activeTab === 'enigmes' ? 'Énigmes hebdomadaires' :
                   activeTab === 'projets' ? 'Projets pédagogiques' : ''
                 }
@@ -886,6 +888,11 @@ const Admin = () => {
           {/* DNB Tab - only for 3eme */}
           {activeTab === 'prepa-dnb' && activeLevel === '3eme' && (
             <DnbManager />
+          )}
+
+          {/* Class Photos Tab - only for 3eme and seconde */}
+          {activeTab === 'classe-activite' && activeLevel && (activeLevel === '3eme' || activeLevel === 'seconde') && (
+            <ClassPhotosManager selectedLevel={activeLevel as CourseLevel} />
           )}
 
           {/* Files Tab */}

@@ -28,7 +28,8 @@ import {
   Dumbbell,
   Target,
   Puzzle,
-  Megaphone
+  Megaphone,
+  Camera
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -75,6 +76,11 @@ const getSubSections = (level: AdminCourseLevel) => {
   
   if (level === '3eme') {
     baseSections.push({ id: 'prepa-dnb', label: 'Prépa DNB', icon: Star });
+    baseSections.push({ id: 'classe-activite', label: 'Classe en activité', icon: Camera });
+  }
+
+  if (level === 'seconde') {
+    baseSections.push({ id: 'classe-activite', label: 'Classe en activité', icon: Camera });
   }
   
   return baseSections;

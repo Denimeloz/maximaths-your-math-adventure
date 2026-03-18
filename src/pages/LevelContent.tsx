@@ -14,10 +14,11 @@ import {
   Lightbulb,
   Dumbbell,
   Target,
-  Megaphone
+  Megaphone,
+  Camera
 } from 'lucide-react';
 
-type ContentType = 'cours' | 'activites' | 'infos' | 'exercices-entrainement' | 'tests-entrainement' | 'devoirs' | 'evaluations' | 'prepa-dnb';
+type ContentType = 'cours' | 'activites' | 'infos' | 'exercices-entrainement' | 'tests-entrainement' | 'devoirs' | 'evaluations' | 'prepa-dnb' | 'classe-activite';
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
 const levelLabels: Record<CourseLevel, string> = {
@@ -80,6 +81,11 @@ const contentConfig: Record<ContentType, { icon: React.ElementType; title: strin
     icon: Star,
     title: 'Prépa DNB',
     description: 'Préparation au Diplôme National du Brevet'
+  },
+  'classe-activite': {
+    icon: Camera,
+    title: 'Classe en activité',
+    description: 'Photos et moments de classe en action'
   }
 };
 
@@ -103,6 +109,19 @@ interface Activity {
 interface FileAttachment {
   url: string;
   name: string;
+}
+
+interface ImageFile {
+  url: string;
+  name: string;
+}
+
+interface ClassPhoto {
+  id: string;
+  title: string;
+  description: string | null;
+  level: string;
+  image_urls: ImageFile[] | null;
 }
 
 interface ClassInfo {
@@ -180,6 +199,7 @@ const LevelContent = () => {
   const [dnbContent, setDnbContent] = useState<DnbContent[]>([]);
   const [trainingExercises, setTrainingExercises] = useState<TrainingExercise[]>([]);
   const [trainingTests, setTrainingTests] = useState<TrainingTest[]>([]);
+  const [classPhotos, setClassPhotos] = useState<ClassPhoto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const level = levelId as CourseLevel;
@@ -278,6 +298,16 @@ const LevelContent = () => {
         .order('order_index', { ascending: true });
       
       if (data) setDnbContent(data as DnbContent[]);
+    }
+    else if (type === 'classe-activite') {
+      const { data } = await (supabase as any)
+        .from('class_photos')
+        .select('*')
+        .eq('level', level)
+        .eq('is_published', true)
+        .order('order_index', { ascending: true });
+      
+      if (data) setClassPhotos(data as ClassPhoto[]);
     }
     
     setIsLoading(false);
@@ -704,6 +734,46 @@ const LevelContent = () => {
     </div>
   );
 
+  const renderClassPhotos = () => (
+    <div className="space-y-8">
+      {classPhotos.map((album) => (
+        <div key={album.id} className={`card-sticker bg-card border-${color}/30 p-6`}>
+          <div className="flex items-center gap-2 mb-3">
+            <Camera className={`w-5 h-5 text-${color}`} />
+            <span className="text-xs font-body text-muted-foreground">Classe en activité</span>
+          </div>
+          
+          <h3 className="text-xl font-display text-foreground mb-2">{album.title}</h3>
+          
+          {album.description && (
+            <p className="text-muted-foreground font-body text-sm mb-4">{album.description}</p>
+          )}
+          
+          {Array.isArray(album.image_urls) && album.image_urls.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4">
+              {album.image_urls.map((img, idx) => (
+                <a
+                  key={idx}
+                  href={img.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-colors group"
+                >
+                  <img
+                    src={img.url}
+                    alt={img.name}
+                    className="w-full h-32 sm:h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+
   const getContent = () => {
     if (isLoading) {
       return (
@@ -729,6 +799,8 @@ const LevelContent = () => {
       return evaluations.length > 0 ? renderEvaluations() : renderEmptyState();
     } else if (type === 'prepa-dnb') {
       return dnbContent.length > 0 ? renderDnbContent() : renderEmptyState();
+    } else if (type === 'classe-activite') {
+      return classPhotos.length > 0 ? renderClassPhotos() : renderEmptyState();
     }
     
     return renderEmptyState();
