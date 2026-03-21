@@ -115,8 +115,8 @@ const Admin = () => {
     category: 'algebre',
     image_url: '',
     pdf_url: '',
-    video_url: '',
-    game_url: '',
+    video_links: [] as { title: string; url: string }[],
+    game_links: [] as { title: string; url: string }[],
   });
 
   // Sync activeTab with URL changes
