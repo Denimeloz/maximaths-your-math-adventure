@@ -22,7 +22,9 @@ import {
   Upload,
   Clock,
   Star,
-  Circle
+  Circle,
+  Gamepad2,
+  ExternalLink
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
