@@ -334,7 +334,9 @@ const Admin = () => {
           category: courseForm.category,
           image_url: courseForm.image_url || null,
           pdf_url: courseForm.pdf_url || null,
-        })
+          video_url: courseForm.video_url || null,
+          game_url: courseForm.game_url || null,
+        } as any)
         .eq('id', editingCourse.id);
 
       if (error) {
