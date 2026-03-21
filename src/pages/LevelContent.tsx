@@ -15,7 +15,10 @@ import {
   Dumbbell,
   Target,
   Megaphone,
-  Camera
+  Camera,
+  Video,
+  Gamepad2,
+  ExternalLink
 } from 'lucide-react';
 
 type ContentType = 'cours' | 'activites' | 'infos' | 'exercices-entrainement' | 'tests-entrainement' | 'devoirs' | 'evaluations' | 'prepa-dnb' | 'classe-activite';
@@ -95,6 +98,8 @@ interface Course {
   description: string | null;
   level: CourseLevel;
   category: string;
+  video_url?: string | null;
+  game_url?: string | null;
 }
 
 interface Activity {
@@ -345,6 +350,38 @@ const LevelContent = () => {
             <p className="text-muted-foreground font-body text-sm mb-4 line-clamp-2">
               {course.description}
             </p>
+          )}
+
+          {/* Video & Game links */}
+          {((course as any).video_url || (course as any).game_url) && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {(course as any).video_url && (
+                <a
+                  href={(course as any).video_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-rainbow-coral/10 text-rainbow-coral hover:bg-rainbow-coral/20 transition-colors`}
+                >
+                  <Video className="w-3.5 h-3.5" />
+                  Vidéo
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+              {(course as any).game_url && (
+                <a
+                  href={(course as any).game_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-rainbow-green/10 text-rainbow-green hover:bg-rainbow-green/20 transition-colors`}
+                >
+                  <Gamepad2 className="w-3.5 h-3.5" />
+                  Jeu
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+            </div>
           )}
           
           <div className="flex items-center justify-between mt-auto pt-4 border-t border-border">
