@@ -135,7 +135,7 @@ const CourseView = () => {
       return;
     }
 
-    setCourse(courseData);
+    setCourse(courseData as any);
 
     // Fetch all content directly by course_id (excluding quizzes - table doesn't exist)
     const [lessonsRes, exercisesRes, assignmentsRes, filesRes, videosRes] = await Promise.all([
