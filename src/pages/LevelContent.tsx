@@ -92,14 +92,19 @@ const contentConfig: Record<ContentType, { icon: React.ElementType; title: strin
   }
 };
 
+interface LinkItem {
+  title: string;
+  url: string;
+}
+
 interface Course {
   id: string;
   title: string;
   description: string | null;
   level: CourseLevel;
   category: string;
-  video_url?: string | null;
-  game_url?: string | null;
+  video_links?: LinkItem[] | null;
+  game_links?: LinkItem[] | null;
 }
 
 interface Activity {
