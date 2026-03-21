@@ -363,8 +363,8 @@ const Admin = () => {
           category: courseForm.category,
           image_url: courseForm.image_url || null,
           pdf_url: courseForm.pdf_url || null,
-          video_url: courseForm.video_url || null,
-          game_url: courseForm.game_url || null,
+          video_links: courseForm.video_links.filter(l => l.url.trim()),
+          game_links: courseForm.game_links.filter(l => l.url.trim()),
           order_index: courses.length,
         } as any);
 
