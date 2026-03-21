@@ -619,17 +619,7 @@ const CourseView = () => {
               </TabsContent>
             </Tabs>
           </div>
-        ) : (
-          <div className="card-sticker bg-card p-12 text-center">
-            <BookOpen className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <h2 className="text-xl font-display text-foreground mb-2">
-              Contenu bientôt disponible
-            </h2>
-            <p className="text-muted-foreground">
-              Le contenu de ce cours sera bientôt ajouté. Revenez plus tard !
-            </p>
-          </div>
-        )}
+        ) : null}
       </main>
       
       <Footer />
