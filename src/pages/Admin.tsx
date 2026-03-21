@@ -785,7 +785,30 @@ const Admin = () => {
                         </div>
                       )}
                     </div>
-                    
+
+                    {/* Video URL */}
+                    <div>
+                      <label className="text-sm font-body text-muted-foreground mb-1 block">Lien vidéo (YouTube, etc.)</label>
+                      <Input
+                        value={courseForm.video_url}
+                        onChange={(e) => setCourseForm(prev => ({ ...prev, video_url: e.target.value }))}
+                        placeholder="https://www.youtube.com/watch?v=..."
+                        className="rounded-xl"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Collez un lien YouTube ou autre plateforme vidéo</p>
+                    </div>
+
+                    {/* Game URL */}
+                    <div>
+                      <label className="text-sm font-body text-muted-foreground mb-1 block">Lien de jeu éducatif</label>
+                      <Input
+                        value={courseForm.game_url}
+                        onChange={(e) => setCourseForm(prev => ({ ...prev, game_url: e.target.value }))}
+                        placeholder="https://www.geogebra.org/..."
+                        className="rounded-xl"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Collez un lien vers un jeu interactif (GeoGebra, Scratch, etc.)</p>
+                    </div>
                     <div className="flex gap-3 pt-4">
                       <Button onClick={handleSaveCourse} className="btn-3d bg-primary rounded-xl">
                         <Save className="w-4 h-4 mr-2" />
