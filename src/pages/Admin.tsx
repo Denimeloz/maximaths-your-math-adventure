@@ -786,28 +786,82 @@ const Admin = () => {
                       )}
                     </div>
 
-                    {/* Video URL */}
+                    {/* Video Links */}
                     <div>
-                      <label className="text-sm font-body text-muted-foreground mb-1 block">Lien vidéo (YouTube, etc.)</label>
-                      <Input
-                        value={courseForm.video_url}
-                        onChange={(e) => setCourseForm(prev => ({ ...prev, video_url: e.target.value }))}
-                        placeholder="https://www.youtube.com/watch?v=..."
-                        className="rounded-xl"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">Collez un lien YouTube ou autre plateforme vidéo</p>
+                      <label className="text-sm font-body text-muted-foreground mb-1 block">Liens vidéo</label>
+                      {courseForm.video_links.map((link, idx) => (
+                        <div key={idx} className="flex gap-2 mb-2">
+                          <Input
+                            value={link.title}
+                            onChange={(e) => {
+                              const updated = [...courseForm.video_links];
+                              updated[idx] = { ...updated[idx], title: e.target.value };
+                              setCourseForm(prev => ({ ...prev, video_links: updated }));
+                            }}
+                            placeholder="Titre (ex: Vidéo du chapitre 1)"
+                            className="rounded-xl flex-1"
+                          />
+                          <Input
+                            value={link.url}
+                            onChange={(e) => {
+                              const updated = [...courseForm.video_links];
+                              updated[idx] = { ...updated[idx], url: e.target.value };
+                              setCourseForm(prev => ({ ...prev, video_links: updated }));
+                            }}
+                            placeholder="https://youtube.com/..."
+                            className="rounded-xl flex-1"
+                          />
+                          <Button variant="ghost" size="icon" onClick={() => {
+                            setCourseForm(prev => ({ ...prev, video_links: prev.video_links.filter((_, i) => i !== idx) }));
+                          }}>
+                            <X className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button variant="outline" size="sm" className="rounded-xl" onClick={() => {
+                        setCourseForm(prev => ({ ...prev, video_links: [...prev.video_links, { title: '', url: '' }] }));
+                      }}>
+                        <Plus className="w-4 h-4 mr-1" /> Ajouter un lien vidéo
+                      </Button>
                     </div>
 
-                    {/* Game URL */}
+                    {/* Game Links */}
                     <div>
-                      <label className="text-sm font-body text-muted-foreground mb-1 block">Lien de jeu éducatif</label>
-                      <Input
-                        value={courseForm.game_url}
-                        onChange={(e) => setCourseForm(prev => ({ ...prev, game_url: e.target.value }))}
-                        placeholder="https://www.geogebra.org/..."
-                        className="rounded-xl"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">Collez un lien vers un jeu interactif (GeoGebra, Scratch, etc.)</p>
+                      <label className="text-sm font-body text-muted-foreground mb-1 block">Liens de jeux éducatifs</label>
+                      {courseForm.game_links.map((link, idx) => (
+                        <div key={idx} className="flex gap-2 mb-2">
+                          <Input
+                            value={link.title}
+                            onChange={(e) => {
+                              const updated = [...courseForm.game_links];
+                              updated[idx] = { ...updated[idx], title: e.target.value };
+                              setCourseForm(prev => ({ ...prev, game_links: updated }));
+                            }}
+                            placeholder="Titre (ex: Jeu de géométrie)"
+                            className="rounded-xl flex-1"
+                          />
+                          <Input
+                            value={link.url}
+                            onChange={(e) => {
+                              const updated = [...courseForm.game_links];
+                              updated[idx] = { ...updated[idx], url: e.target.value };
+                              setCourseForm(prev => ({ ...prev, game_links: updated }));
+                            }}
+                            placeholder="https://geogebra.org/..."
+                            className="rounded-xl flex-1"
+                          />
+                          <Button variant="ghost" size="icon" onClick={() => {
+                            setCourseForm(prev => ({ ...prev, game_links: prev.game_links.filter((_, i) => i !== idx) }));
+                          }}>
+                            <X className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button variant="outline" size="sm" className="rounded-xl" onClick={() => {
+                        setCourseForm(prev => ({ ...prev, game_links: [...prev.game_links, { title: '', url: '' }] }));
+                      }}>
+                        <Plus className="w-4 h-4 mr-1" /> Ajouter un lien de jeu
+                      </Button>
                     </div>
                     <div className="flex gap-3 pt-4">
                       <Button onClick={handleSaveCourse} className="btn-3d bg-primary rounded-xl">
