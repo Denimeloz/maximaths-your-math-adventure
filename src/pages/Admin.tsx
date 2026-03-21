@@ -394,6 +394,8 @@ const Admin = () => {
       category: course.category,
       image_url: course.image_url || '',
       pdf_url: course.pdf_url || '',
+      video_url: (course as any).video_url || '',
+      game_url: (course as any).game_url || '',
     });
     setShowCourseForm(true);
   };
