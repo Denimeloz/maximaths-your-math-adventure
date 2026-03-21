@@ -34,6 +34,8 @@ interface Course {
   category: string;
   image_url: string | null;
   pdf_url: string | null;
+  video_url?: string | null;
+  game_url?: string | null;
 }
 
 interface Lesson {
