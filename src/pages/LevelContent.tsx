@@ -358,36 +358,43 @@ const LevelContent = () => {
           )}
 
           {/* Video & Game links */}
-          {((course as any).video_url || (course as any).game_url) && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {(course as any).video_url && (
-                <a
-                  href={(course as any).video_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-rainbow-coral/10 text-rainbow-coral hover:bg-rainbow-coral/20 transition-colors`}
-                >
-                  <Video className="w-3.5 h-3.5" />
-                  Vidéo
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              )}
-              {(course as any).game_url && (
-                <a
-                  href={(course as any).game_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-rainbow-green/10 text-rainbow-green hover:bg-rainbow-green/20 transition-colors`}
-                >
-                  <Gamepad2 className="w-3.5 h-3.5" />
-                  Jeu
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              )}
-            </div>
-          )}
+          {(() => {
+            const videoLinks: LinkItem[] = Array.isArray((course as any).video_links) ? (course as any).video_links : [];
+            const gameLinks: LinkItem[] = Array.isArray((course as any).game_links) ? (course as any).game_links : [];
+            if (videoLinks.length === 0 && gameLinks.length === 0) return null;
+            return (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {videoLinks.map((link, idx) => (
+                  <a
+                    key={`v-${idx}`}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-rainbow-coral/10 text-rainbow-coral hover:bg-rainbow-coral/20 transition-colors`}
+                  >
+                    <Video className="w-3.5 h-3.5" />
+                    {link.title || 'Vidéo'}
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                ))}
+                {gameLinks.map((link, idx) => (
+                  <a
+                    key={`g-${idx}`}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-rainbow-green/10 text-rainbow-green hover:bg-rainbow-green/20 transition-colors`}
+                  >
+                    <Gamepad2 className="w-3.5 h-3.5" />
+                    {link.title || 'Jeu'}
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                ))}
+              </div>
+            );
+          })()}
           
           <div className="flex items-center justify-between mt-auto pt-4 border-t border-border">
             <span className="text-sm text-muted-foreground font-body capitalize">
