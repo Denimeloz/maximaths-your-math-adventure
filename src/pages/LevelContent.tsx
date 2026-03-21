@@ -95,6 +95,8 @@ interface Course {
   description: string | null;
   level: CourseLevel;
   category: string;
+  video_url?: string | null;
+  game_url?: string | null;
 }
 
 interface Activity {
