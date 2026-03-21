@@ -28,6 +28,11 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+interface LinkItem {
+  title: string;
+  url: string;
+}
+
 interface Course {
   id: string;
   title: string;
@@ -36,8 +41,8 @@ interface Course {
   category: string;
   image_url: string | null;
   pdf_url: string | null;
-  video_url?: string | null;
-  game_url?: string | null;
+  video_links?: LinkItem[] | null;
+  game_links?: LinkItem[] | null;
 }
 
 interface Lesson {
