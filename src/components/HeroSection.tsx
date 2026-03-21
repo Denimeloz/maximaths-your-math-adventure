@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Sparkles, Star, Zap, ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap, Puzzle } from "lucide-react";
+import { Sparkles, Star, Zap, ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap, Puzzle, Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import heroImage from "@/assets/maximaths-hero.jpeg";
