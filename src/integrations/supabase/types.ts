@@ -389,6 +389,7 @@ export type Database = {
           category: string
           created_at: string
           description: string | null
+          game_url: string | null
           id: string
           image_url: string | null
           is_published: boolean
@@ -397,11 +398,13 @@ export type Database = {
           pdf_url: string | null
           title: string
           updated_at: string
+          video_url: string | null
         }
         Insert: {
           category?: string
           created_at?: string
           description?: string | null
+          game_url?: string | null
           id?: string
           image_url?: string | null
           is_published?: boolean
@@ -410,11 +413,13 @@ export type Database = {
           pdf_url?: string | null
           title: string
           updated_at?: string
+          video_url?: string | null
         }
         Update: {
           category?: string
           created_at?: string
           description?: string | null
+          game_url?: string | null
           id?: string
           image_url?: string | null
           is_published?: boolean
@@ -423,6 +428,7 @@ export type Database = {
           pdf_url?: string | null
           title?: string
           updated_at?: string
+          video_url?: string | null
         }
         Relationships: []
       }
