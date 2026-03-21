@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Sparkles, Star, Zap, ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap, Puzzle } from "lucide-react";
+import { Sparkles, Star, Zap, ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap, Puzzle, Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import heroImage from "@/assets/maximaths-hero.jpeg";
@@ -25,14 +25,23 @@ const subMenuItems = [
   { id: 'evaluations', label: 'Évaluations', description: 'Tests et examens', icon: FileCheck },
 ];
 
+const classeActiviteItem = { id: 'classe-activite', label: 'Classe en activité', description: 'Photos et moments', icon: Camera };
+
 const subMenuItems3eme = [
   ...subMenuItems,
   { id: 'prepa-dnb', label: 'Prépa DNB', description: 'Préparation au brevet', icon: GraduationCap },
+  classeActiviteItem,
+];
+
+const subMenuItemsSeconde = [
+  ...subMenuItems,
+  classeActiviteItem,
 ];
 
 const getSubMenuForLevel = (levelId: string) => {
   if (levelId === '3eme') return subMenuItems3eme;
-  if (levelId === 'club-maths') return []; // Club has dynamic activities from database
+  if (levelId === 'seconde') return subMenuItemsSeconde;
+  if (levelId === 'club-maths') return [];
   return subMenuItems;
 };
 

@@ -28,6 +28,11 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+interface LinkItem {
+  title: string;
+  url: string;
+}
+
 interface Course {
   id: string;
   title: string;
@@ -36,8 +41,8 @@ interface Course {
   category: string;
   image_url: string | null;
   pdf_url: string | null;
-  video_url?: string | null;
-  game_url?: string | null;
+  video_links?: LinkItem[] | null;
+  game_links?: LinkItem[] | null;
 }
 
 interface Lesson {
@@ -130,7 +135,7 @@ const CourseView = () => {
       return;
     }
 
-    setCourse(courseData);
+    setCourse(courseData as any);
 
     // Fetch all content directly by course_id (excluding quizzes - table doesn't exist)
     const [lessonsRes, exercisesRes, assignmentsRes, filesRes, videosRes] = await Promise.all([
@@ -255,34 +260,41 @@ const CourseView = () => {
                     )}
                   </div>
                   {/* Video & Game links */}
-                  {((course as any).video_url || (course as any).game_url) && (
-                    <div className="flex flex-wrap gap-3 mt-4">
-                      {(course as any).video_url && (
-                        <a
-                          href={(course as any).video_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rainbow-coral/10 text-rainbow-coral hover:bg-rainbow-coral/20 transition-colors font-medium text-sm"
-                        >
-                          <Video className="w-4 h-4" />
-                          Voir la vidéo
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
-                      )}
-                      {(course as any).game_url && (
-                        <a
-                          href={(course as any).game_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rainbow-green/10 text-rainbow-green hover:bg-rainbow-green/20 transition-colors font-medium text-sm"
-                        >
-                          <Gamepad2 className="w-4 h-4" />
-                          Jouer au jeu
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
-                      )}
-                    </div>
-                  )}
+                  {(() => {
+                    const videoLinks: LinkItem[] = Array.isArray((course as any).video_links) ? (course as any).video_links : [];
+                    const gameLinks: LinkItem[] = Array.isArray((course as any).game_links) ? (course as any).game_links : [];
+                    if (videoLinks.length === 0 && gameLinks.length === 0) return null;
+                    return (
+                      <div className="flex flex-wrap gap-3 mt-4">
+                        {videoLinks.map((link, idx) => (
+                          <a
+                            key={`v-${idx}`}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rainbow-coral/10 text-rainbow-coral hover:bg-rainbow-coral/20 transition-colors font-medium text-sm"
+                          >
+                            <Video className="w-4 h-4" />
+                            {link.title || 'Voir la vidéo'}
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        ))}
+                        {gameLinks.map((link, idx) => (
+                          <a
+                            key={`g-${idx}`}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rainbow-green/10 text-rainbow-green hover:bg-rainbow-green/20 transition-colors font-medium text-sm"
+                          >
+                            <Gamepad2 className="w-4 h-4" />
+                            {link.title || 'Jouer au jeu'}
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        ))}
+                      </div>
+                    );
+                  })()}
 
                   {course.pdf_url && (
                     <div className="mt-4">
@@ -619,17 +631,7 @@ const CourseView = () => {
               </TabsContent>
             </Tabs>
           </div>
-        ) : (
-          <div className="card-sticker bg-card p-12 text-center">
-            <BookOpen className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <h2 className="text-xl font-display text-foreground mb-2">
-              Contenu bientôt disponible
-            </h2>
-            <p className="text-muted-foreground">
-              Le contenu de ce cours sera bientôt ajouté. Revenez plus tard !
-            </p>
-          </div>
-        )}
+        ) : null}
       </main>
       
       <Footer />
