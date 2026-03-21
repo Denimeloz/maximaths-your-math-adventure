@@ -236,7 +236,7 @@ const LevelContent = () => {
         .neq('category', 'activite')
         .order('order_index', { ascending: true });
       
-      if (data) setCourses(data as Course[]);
+      if (data) setCourses(data as unknown as Course[]);
     }
     else if (type === 'activites') {
       // Activities from dedicated table
