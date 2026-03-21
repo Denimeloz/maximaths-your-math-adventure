@@ -260,34 +260,41 @@ const CourseView = () => {
                     )}
                   </div>
                   {/* Video & Game links */}
-                  {((course as any).video_url || (course as any).game_url) && (
-                    <div className="flex flex-wrap gap-3 mt-4">
-                      {(course as any).video_url && (
-                        <a
-                          href={(course as any).video_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rainbow-coral/10 text-rainbow-coral hover:bg-rainbow-coral/20 transition-colors font-medium text-sm"
-                        >
-                          <Video className="w-4 h-4" />
-                          Voir la vidéo
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
-                      )}
-                      {(course as any).game_url && (
-                        <a
-                          href={(course as any).game_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rainbow-green/10 text-rainbow-green hover:bg-rainbow-green/20 transition-colors font-medium text-sm"
-                        >
-                          <Gamepad2 className="w-4 h-4" />
-                          Jouer au jeu
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
-                      )}
-                    </div>
-                  )}
+                  {(() => {
+                    const videoLinks: LinkItem[] = Array.isArray((course as any).video_links) ? (course as any).video_links : [];
+                    const gameLinks: LinkItem[] = Array.isArray((course as any).game_links) ? (course as any).game_links : [];
+                    if (videoLinks.length === 0 && gameLinks.length === 0) return null;
+                    return (
+                      <div className="flex flex-wrap gap-3 mt-4">
+                        {videoLinks.map((link, idx) => (
+                          <a
+                            key={`v-${idx}`}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rainbow-coral/10 text-rainbow-coral hover:bg-rainbow-coral/20 transition-colors font-medium text-sm"
+                          >
+                            <Video className="w-4 h-4" />
+                            {link.title || 'Voir la vidéo'}
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        ))}
+                        {gameLinks.map((link, idx) => (
+                          <a
+                            key={`g-${idx}`}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rainbow-green/10 text-rainbow-green hover:bg-rainbow-green/20 transition-colors font-medium text-sm"
+                          >
+                            <Gamepad2 className="w-4 h-4" />
+                            {link.title || 'Jouer au jeu'}
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        ))}
+                      </div>
+                    );
+                  })()}
 
                   {course.pdf_url && (
                     <div className="mt-4">
