@@ -15,7 +15,10 @@ import {
   Dumbbell,
   Target,
   Megaphone,
-  Camera
+  Camera,
+  Video,
+  Gamepad2,
+  ExternalLink
 } from 'lucide-react';
 
 type ContentType = 'cours' | 'activites' | 'infos' | 'exercices-entrainement' | 'tests-entrainement' | 'devoirs' | 'evaluations' | 'prepa-dnb' | 'classe-activite';
