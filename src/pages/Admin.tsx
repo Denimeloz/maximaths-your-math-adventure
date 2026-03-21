@@ -473,6 +473,8 @@ const Admin = () => {
       category: 'algebre',
       image_url: '',
       pdf_url: '',
+      video_url: '',
+      game_url: '',
     });
   };
 
