@@ -132,6 +132,9 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
 
       if (!error) {
         toast({ title: "Succès", description: "Devoir modifié" });
+        if (editingAssignment.is_published) {
+          notifyContentUpdate(filterLevel, 'Devoir', form.title);
+        }
         fetchData();
         resetForm();
       }
