@@ -169,7 +169,12 @@ export const ClassPhotosManager: React.FC<ClassPhotosManagerProps> = ({ selected
   };
 
   const togglePublish = async (id: string, current: boolean) => {
-    await (supabase as any).from('class_photos').update({ is_published: !current }).eq('id', id);
+    const newPublished = !current;
+    await (supabase as any).from('class_photos').update({ is_published: newPublished }).eq('id', id);
+    if (newPublished) {
+      const item = items.find(i => i.id === id);
+      if (item) notifyNewClassPhotos(selectedLevel, item.title);
+    }
     fetchItems();
   };
 
