@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { notifyNewTrainingTest, notifyContentUpdate } from '@/hooks/useNotifyUsers';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
