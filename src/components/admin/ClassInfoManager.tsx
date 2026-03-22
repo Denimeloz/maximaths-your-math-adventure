@@ -235,6 +235,9 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
           title: "Succès",
           description: "Information créée avec succès",
         });
+        if (formData.is_published) {
+          notifyNewClassInfo(selectedLevel, formData.title);
+        }
         resetForm();
         fetchInfos();
       }

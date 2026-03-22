@@ -255,6 +255,9 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
         console.error(error);
       } else {
         toast.success('Activité créée');
+        if (formData.is_published) {
+          notifyNewActivity(formData.level, formData.title);
+        }
         fetchActivities();
         resetForm();
       }

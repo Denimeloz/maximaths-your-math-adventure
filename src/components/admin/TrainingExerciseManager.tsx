@@ -160,7 +160,11 @@ export const TrainingExerciseManager: React.FC<TrainingExerciseManagerProps> = (
   };
 
   const handleTogglePublish = async (item: TrainingExercise) => {
-    await supabase.from('training_exercises').update({ is_published: !item.is_published }).eq('id', item.id);
+    const newPublished = !item.is_published;
+    await supabase.from('training_exercises').update({ is_published: newPublished }).eq('id', item.id);
+    if (newPublished) {
+      notifyNewExercise(filterLevel, item.title);
+    }
     fetchData();
   };
 

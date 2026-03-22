@@ -160,7 +160,11 @@ export const TrainingTestManager: React.FC<TrainingTestManagerProps> = ({ filter
   };
 
   const handleTogglePublish = async (item: TrainingTest) => {
-    await supabase.from('training_tests').update({ is_published: !item.is_published }).eq('id', item.id);
+    const newPublished = !item.is_published;
+    await supabase.from('training_tests').update({ is_published: newPublished }).eq('id', item.id);
+    if (newPublished) {
+      notifyNewTrainingTest(filterLevel, item.title);
+    }
     fetchData();
   };
 

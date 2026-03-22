@@ -137,6 +137,9 @@ export const ClassPhotosManager: React.FC<ClassPhotosManagerProps> = ({ selected
         return;
       }
       toast({ title: 'Ajouté avec succès' });
+      if (formData.is_published) {
+        notifyNewClassPhotos(selectedLevel, formData.title);
+      }
     }
 
     resetForm();

@@ -163,7 +163,11 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
   };
 
   const handleTogglePublish = async (assignment: Assignment) => {
-    await supabase.from('assignments').update({ is_published: !assignment.is_published }).eq('id', assignment.id);
+    const newPublished = !assignment.is_published;
+    await supabase.from('assignments').update({ is_published: newPublished }).eq('id', assignment.id);
+    if (newPublished) {
+      notifyNewAssignment(filterLevel, assignment.title);
+    }
     fetchData();
   };
 
