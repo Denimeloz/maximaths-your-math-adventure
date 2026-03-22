@@ -125,6 +125,9 @@ export const ClassPhotosManager: React.FC<ClassPhotosManagerProps> = ({ selected
         return;
       }
       toast({ title: 'Modifié avec succès' });
+      if (formData.is_published) {
+        notifyContentUpdate(selectedLevel, 'Photos de classe', formData.title);
+      }
     } else {
       const { error } = await (supabase as any)
         .from('class_photos')
