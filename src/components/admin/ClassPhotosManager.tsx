@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { notifyNewClassPhotos, notifyContentUpdate } from '@/hooks/useNotifyUsers';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
