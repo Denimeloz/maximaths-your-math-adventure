@@ -132,6 +132,9 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
 
       if (!error) {
         toast({ title: "Succès", description: "Évaluation modifiée" });
+        if (editingEvaluation.is_published) {
+          notifyContentUpdate(filterLevel, 'Évaluation', form.title);
+        }
         fetchData();
         resetForm();
       }
