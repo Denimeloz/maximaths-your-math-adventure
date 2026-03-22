@@ -28,7 +28,7 @@ const subMenuItems = [
 const classeActiviteItem = { id: 'classe-activite', label: 'Classe en activité', description: 'Photos et moments', icon: Camera };
 
 const subMenuItems3eme = [
-  ...subMenuItems,
+  ...subMenuItems.map(item => item.id === 'tests-entrainement' ? { ...item, label: 'Tests / Mini DNB', description: 'Tests ou Mini DNB' } : item),
   { id: 'prepa-dnb', label: 'Prépa DNB', description: 'Préparation au brevet', icon: GraduationCap },
   classeActiviteItem,
 ];

@@ -214,7 +214,10 @@ const LevelContent = () => {
 
   const level = levelId as CourseLevel;
   const type = contentType as ContentType;
-  const config = contentConfig[type] || contentConfig.cours;
+  const config = { ...(contentConfig[type] || contentConfig.cours) };
+  if (type === 'tests-entrainement' && level === '3eme') {
+    config.title = 'Tests ou Mini DNB';
+  }
   const Icon = config.icon;
   const color = levelColors[level] || 'rainbow-blue';
 

@@ -79,7 +79,7 @@ const subMenuItems3emeSeconde = [
 ];
 
 const subMenuItems3eme = [
-  ...subMenuItems,
+  ...subMenuItems.map(item => item.id === 'tests-entrainement' ? { ...item, label: 'Tests ou Mini DNB' } : item),
   { id: 'prepa-dnb', label: 'Prépa DNB', description: 'Préparation au brevet' },
   { id: 'classe-activite', label: 'Classe en activité', description: 'Photos et moments de classe' },
 ];
