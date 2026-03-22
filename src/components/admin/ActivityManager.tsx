@@ -239,6 +239,9 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
         console.error(error);
       } else {
         toast.success('Activité mise à jour');
+        if (formData.is_published) {
+          notifyContentUpdate(formData.level, 'Activité', formData.title);
+        }
         fetchActivities();
         resetForm();
       }
