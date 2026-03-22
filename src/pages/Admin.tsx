@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { notifyNewCourse, notifyContentUpdate } from '@/hooks/useNotifyUsers';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -424,9 +425,10 @@ const Admin = () => {
   };
 
   const handleTogglePublish = async (course: Course) => {
+    const newPublished = !course.is_published;
     const { error } = await supabase
       .from('courses')
-      .update({ is_published: !course.is_published })
+      .update({ is_published: newPublished })
       .eq('id', course.id);
 
     if (error) {
@@ -436,6 +438,9 @@ const Admin = () => {
         variant: "destructive",
       });
     } else {
+      if (newPublished) {
+        notifyNewCourse(course.level, course.title);
+      }
       fetchCourses();
     }
   };
