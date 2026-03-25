@@ -203,6 +203,15 @@ interface TrainingTest {
   correction_url: string | null;
 }
 
+interface GamesGeniallyItem {
+  id: string;
+  title: string;
+  description: string | null;
+  level: string;
+  file_url: string | null;
+  links: { title: string; url: string }[] | null;
+}
+
 const LevelContent = () => {
   const { levelId, contentType } = useParams<{ levelId: string; contentType: string }>();
   const navigate = useNavigate();
@@ -215,6 +224,7 @@ const LevelContent = () => {
   const [trainingExercises, setTrainingExercises] = useState<TrainingExercise[]>([]);
   const [trainingTests, setTrainingTests] = useState<TrainingTest[]>([]);
   const [classPhotos, setClassPhotos] = useState<ClassPhoto[]>([]);
+  const [gamesGenially, setGamesGenially] = useState<GamesGeniallyItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const level = levelId as CourseLevel;
