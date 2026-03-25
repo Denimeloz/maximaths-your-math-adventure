@@ -89,6 +89,11 @@ const contentConfig: Record<ContentType, { icon: React.ElementType; title: strin
     icon: Camera,
     title: 'Classe en activité',
     description: 'Photos et moments de classe en action'
+  },
+  'jeux-genially': {
+    icon: Gamepad2,
+    title: 'Jeux et Genially',
+    description: 'Jeux éducatifs et présentations interactives'
   }
 };
 
