@@ -555,6 +555,7 @@ const Admin = () => {
                   activeTab === 'evaluations' ? 'Évaluations' :
                   activeTab === 'prepa-dnb' ? 'Prépa DNB' :
                   activeTab === 'classe-activite' ? 'Classe en activité' :
+                  activeTab === 'jeux-genially' ? 'Jeux et Genially' :
                   activeTab === 'enigmes' ? 'Énigmes hebdomadaires' :
                   activeTab === 'projets' ? 'Projets pédagogiques' : ''
                 }
