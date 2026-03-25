@@ -72,6 +72,7 @@ const getSubSections = (level: AdminCourseLevel) => {
     { id: 'tests-entrainement', label: level === '3eme' ? "Tests ou Mini DNB" : "Tests (Évaluations formatives)", icon: Target },
     { id: 'devoirs', label: 'Devoirs de niveaux', icon: ClipboardList },
     { id: 'evaluations', label: 'Évaluations', icon: FileCheck },
+    { id: 'jeux-genially', label: 'Jeux et Genially', icon: Gamepad2 },
   ];
   
   if (level === '3eme') {
