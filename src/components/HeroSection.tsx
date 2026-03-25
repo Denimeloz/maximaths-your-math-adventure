@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Sparkles, Star, Zap, ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap, Puzzle, Camera } from "lucide-react";
+import { Sparkles, Star, Zap, ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap, Puzzle, Camera, Gamepad2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import heroImage from "@/assets/maximaths-hero.jpeg";
@@ -23,6 +23,7 @@ const subMenuItems = [
   { id: 'tests-entrainement', label: 'Tests', description: 'Tests (Évaluations formatives)', icon: FileCheck },
   { id: 'devoirs', label: 'Devoirs', description: 'Devoirs de niveaux', icon: ClipboardList },
   { id: 'evaluations', label: 'Évaluations', description: 'Tests et examens', icon: FileCheck },
+  { id: 'jeux-genially', label: 'Jeux & Genially', description: 'Jeux éducatifs et présentations', icon: Gamepad2 },
 ];
 
 const classeActiviteItem = { id: 'classe-activite', label: 'Classe en activité', description: 'Photos et moments', icon: Camera };

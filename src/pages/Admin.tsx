@@ -22,6 +22,7 @@ import { TrainingTestManager } from '@/components/admin/TrainingTestManager';
 import { ClubMathsManager } from '@/components/admin/ClubMathsManager';
 import { ClassInfoManager } from '@/components/admin/ClassInfoManager';
 import { ClassPhotosManager } from '@/components/admin/ClassPhotosManager';
+import { GamesGeniallyManager } from '@/components/admin/GamesGeniallyManager';
 import PDFViewer from '@/components/PDFViewer';
 import { 
   Users, 
@@ -554,6 +555,7 @@ const Admin = () => {
                   activeTab === 'evaluations' ? 'Évaluations' :
                   activeTab === 'prepa-dnb' ? 'Prépa DNB' :
                   activeTab === 'classe-activite' ? 'Classe en activité' :
+                  activeTab === 'jeux-genially' ? 'Jeux et Genially' :
                   activeTab === 'enigmes' ? 'Énigmes hebdomadaires' :
                   activeTab === 'projets' ? 'Projets pédagogiques' : ''
                 }
@@ -985,6 +987,11 @@ const Admin = () => {
           {/* Class Photos Tab - only for 3eme and seconde */}
           {activeTab === 'classe-activite' && activeLevel && (activeLevel === '3eme' || activeLevel === 'seconde') && (
             <ClassPhotosManager selectedLevel={activeLevel as CourseLevel} />
+          )}
+
+          {/* Games & Genially Tab - filtered by level */}
+          {activeTab === 'jeux-genially' && activeLevel && activeLevel !== 'club-maths' && (
+            <GamesGeniallyManager filterLevel={activeLevel as CourseLevel} />
           )}
 
           {/* Files Tab */}

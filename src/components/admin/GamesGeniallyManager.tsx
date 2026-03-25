@@ -1,0 +1,294 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { notifyContentUpdate } from '@/hooks/useNotifyUsers';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, Gamepad2, Upload, FileText, Loader2, BookCheck, ExternalLink } from 'lucide-react';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableItem } from './SortableItem';
+
+interface LinkItem {
+  title: string;
+  url: string;
+}
+
+interface GamesGenially {
+  id: string;
+  level: string;
+  title: string;
+  description: string | null;
+  file_url: string | null;
+  links: LinkItem[] | null;
+  is_published: boolean;
+  order_index: number;
+}
+
+type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
+
+interface GamesGeniallyManagerProps {
+  filterLevel: CourseLevel;
+}
+
+export const GamesGeniallyManager: React.FC<GamesGeniallyManagerProps> = ({ filterLevel }) => {
+  const { toast } = useToast();
+  const [items, setItems] = useState<GamesGenially[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingItem, setEditingItem] = useState<GamesGenially | null>(null);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    file_url: '',
+    links: [] as LinkItem[],
+  });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  useEffect(() => {
+    fetchData();
+  }, [filterLevel]);
+
+  const fetchData = async () => {
+    const { data } = await (supabase as any)
+      .from('games_genially')
+      .select('*')
+      .eq('level', filterLevel)
+      .order('order_index');
+    if (data) setItems(data);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: "Erreur", description: "Le fichier ne doit pas dépasser 20MB", variant: "destructive" });
+      return;
+    }
+    setIsUploadingFile(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `games-genially/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('course-files').upload(fileName, file);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from('course-files').getPublicUrl(fileName);
+      setForm(prev => ({ ...prev, file_url: publicUrl }));
+      toast({ title: "Succès", description: "Fichier téléchargé" });
+    } catch {
+      toast({ title: "Erreur", description: "Impossible de télécharger le fichier", variant: "destructive" });
+    } finally {
+      setIsUploadingFile(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!form.title.trim()) {
+      toast({ title: "Erreur", description: "Le titre est requis", variant: "destructive" });
+      return;
+    }
+
+    const data = {
+      title: form.title,
+      description: form.description || null,
+      file_url: form.file_url || null,
+      links: form.links.filter(l => l.url.trim()),
+    };
+
+    if (editingItem) {
+      const { error } = await (supabase as any)
+        .from('games_genially')
+        .update(data)
+        .eq('id', editingItem.id);
+      if (!error) {
+        toast({ title: "Succès", description: "Élément modifié" });
+        fetchData();
+        resetForm();
+      }
+    } else {
+      const { error } = await (supabase as any)
+        .from('games_genially')
+        .insert({ ...data, level: filterLevel, order_index: items.length });
+      if (!error) {
+        toast({ title: "Succès", description: "Élément créé" });
+        fetchData();
+        resetForm();
+      }
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Supprimer cet élément ?")) return;
+    await (supabase as any).from('games_genially').delete().eq('id', id);
+    toast({ title: "Supprimé" });
+    fetchData();
+  };
+
+  const handleTogglePublish = async (item: GamesGenially) => {
+    const newPublished = !item.is_published;
+    await (supabase as any).from('games_genially').update({ is_published: newPublished }).eq('id', item.id);
+    if (newPublished) {
+      notifyContentUpdate(filterLevel, 'Jeux et Genially', item.title);
+    }
+    fetchData();
+  };
+
+  const handleEdit = (item: GamesGenially) => {
+    setEditingItem(item);
+    setForm({
+      title: item.title,
+      description: item.description || '',
+      file_url: item.file_url || '',
+      links: Array.isArray(item.links) ? item.links : [],
+    });
+    setShowForm(true);
+  };
+
+  const resetForm = () => {
+    setShowForm(false);
+    setEditingItem(null);
+    setForm({ title: '', description: '', file_url: '', links: [] });
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = items.findIndex((i) => i.id === active.id);
+    const newIndex = items.findIndex((i) => i.id === over.id);
+    const newItems = arrayMove(items, oldIndex, newIndex);
+    setItems(newItems);
+    for (const [index, item] of newItems.entries()) {
+      await (supabase as any).from('games_genially').update({ order_index: index }).eq('id', item.id);
+    }
+    toast({ title: "Ordre mis à jour" });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-display text-foreground">Jeux et Genially</h2>
+        <Button onClick={() => setShowForm(true)} className="btn-3d bg-primary rounded-xl">
+          <Plus className="w-4 h-4 mr-2" />
+          Nouvel élément
+        </Button>
+      </div>
+
+      {showForm && (
+        <div className="card-sticker bg-card border-rainbow-yellow/30 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-display text-foreground">
+              {editingItem ? "Modifier l'élément" : 'Nouvel élément'}
+            </h3>
+            <Button variant="ghost" size="icon" onClick={resetForm}>
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+
+          <div className="grid gap-4">
+            <div>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Titre *</label>
+              <Input value={form.title} onChange={(e) => setForm(prev => ({ ...prev, title: e.target.value }))} placeholder="Titre" className="rounded-xl" />
+            </div>
+
+            <div>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Description</label>
+              <Textarea value={form.description} onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))} placeholder="Description" className="rounded-xl" rows={2} />
+            </div>
+
+            {/* File Upload */}
+            <div>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Fichier PDF</label>
+              <div className="flex items-center gap-4">
+                {form.file_url ? (
+                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl flex-1">
+                    <FileText className="w-6 h-6 text-rainbow-blue" />
+                    <a href={form.file_url} target="_blank" rel="noopener noreferrer" className="text-sm text-rainbow-blue hover:underline truncate">Voir le fichier</a>
+                    <button onClick={() => setForm(prev => ({ ...prev, file_url: '' }))} className="ml-auto"><X className="w-4 h-4 text-destructive" /></button>
+                  </div>
+                ) : (
+                  <>
+                    <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".pdf,.doc,.docx,.ppt,.pptx" />
+                    <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isUploadingFile} className="rounded-xl">
+                      {isUploadingFile ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                      {isUploadingFile ? 'Upload...' : 'Ajouter un fichier'}
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Links */}
+            <div>
+              <label className="text-sm font-body text-muted-foreground mb-1 block">Liens (Genially, jeux, etc.)</label>
+              {form.links.map((link, idx) => (
+                <div key={idx} className="flex gap-2 mb-2">
+                  <Input value={link.title} onChange={(e) => { const u = [...form.links]; u[idx] = { ...u[idx], title: e.target.value }; setForm(prev => ({ ...prev, links: u })); }} placeholder="Titre du lien" className="rounded-xl flex-1" />
+                  <Input value={link.url} onChange={(e) => { const u = [...form.links]; u[idx] = { ...u[idx], url: e.target.value }; setForm(prev => ({ ...prev, links: u })); }} placeholder="https://..." className="rounded-xl flex-1" />
+                  <Button variant="ghost" size="icon" onClick={() => setForm(prev => ({ ...prev, links: prev.links.filter((_, i) => i !== idx) }))}><X className="w-4 h-4 text-destructive" /></Button>
+                </div>
+              ))}
+              <Button variant="outline" size="sm" className="rounded-xl" onClick={() => setForm(prev => ({ ...prev, links: [...prev.links, { title: '', url: '' }] }))}>
+                <Plus className="w-4 h-4 mr-1" /> Ajouter un lien
+              </Button>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button onClick={handleSave} className="btn-3d bg-primary rounded-xl"><Save className="w-4 h-4 mr-2" />Enregistrer</Button>
+              <Button onClick={resetForm} variant="outline" className="rounded-xl">Annuler</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-4">
+            {items.map(item => (
+              <SortableItem key={item.id} id={item.id}>
+                <div className="card-cartoon bg-card border-border p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-rainbow-yellow/20 flex items-center justify-center">
+                        <Gamepad2 className="w-5 h-5 text-rainbow-yellow" />
+                      </div>
+                      <div>
+                        <p className="font-display text-foreground">{item.title}</p>
+                        <div className="flex items-center gap-3 mt-1">
+                          {item.file_url && (
+                            <a href={item.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-rainbow-blue hover:underline">
+                              <FileText className="w-3 h-3" />Fichier
+                            </a>
+                          )}
+                          {Array.isArray(item.links) && item.links.length > 0 && (
+                            <span className="flex items-center gap-1 text-xs text-rainbow-green">
+                              <ExternalLink className="w-3 h-3" />{item.links.length} lien(s)
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="icon" onClick={() => handleTogglePublish(item)} className="rounded-xl">
+                        {item.is_published ? <Eye className="w-4 h-4 text-rainbow-green" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleEdit(item)} className="rounded-xl"><Edit className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} className="rounded-xl text-destructive"><Trash2 className="w-4 h-4" /></Button>
+                    </div>
+                  </div>
+                </div>
+              </SortableItem>
+            ))}
+            {items.length === 0 && (
+              <p className="text-muted-foreground text-center py-8">Aucun jeu ou Genially</p>
+            )}
+          </div>
+        </SortableContext>
+      </DndContext>
+    </div>
+  );
+};

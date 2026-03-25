@@ -21,7 +21,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 
-type ContentType = 'cours' | 'activites' | 'infos' | 'exercices-entrainement' | 'tests-entrainement' | 'devoirs' | 'evaluations' | 'prepa-dnb' | 'classe-activite';
+type ContentType = 'cours' | 'activites' | 'infos' | 'exercices-entrainement' | 'tests-entrainement' | 'devoirs' | 'evaluations' | 'prepa-dnb' | 'classe-activite' | 'jeux-genially';
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
 const levelLabels: Record<CourseLevel, string> = {
@@ -89,6 +89,11 @@ const contentConfig: Record<ContentType, { icon: React.ElementType; title: strin
     icon: Camera,
     title: 'Classe en activité',
     description: 'Photos et moments de classe en action'
+  },
+  'jeux-genially': {
+    icon: Gamepad2,
+    title: 'Jeux et Genially',
+    description: 'Jeux éducatifs et présentations interactives'
   }
 };
 
@@ -198,6 +203,15 @@ interface TrainingTest {
   correction_url: string | null;
 }
 
+interface GamesGeniallyItem {
+  id: string;
+  title: string;
+  description: string | null;
+  level: string;
+  file_url: string | null;
+  links: { title: string; url: string }[] | null;
+}
+
 const LevelContent = () => {
   const { levelId, contentType } = useParams<{ levelId: string; contentType: string }>();
   const navigate = useNavigate();
@@ -210,6 +224,7 @@ const LevelContent = () => {
   const [trainingExercises, setTrainingExercises] = useState<TrainingExercise[]>([]);
   const [trainingTests, setTrainingTests] = useState<TrainingTest[]>([]);
   const [classPhotos, setClassPhotos] = useState<ClassPhoto[]>([]);
+  const [gamesGenially, setGamesGenially] = useState<GamesGeniallyItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const level = levelId as CourseLevel;
@@ -321,6 +336,16 @@ const LevelContent = () => {
         .order('order_index', { ascending: true });
       
       if (data) setClassPhotos(data as ClassPhoto[]);
+    }
+    else if (type === 'jeux-genially') {
+      const { data } = await (supabase as any)
+        .from('games_genially')
+        .select('*')
+        .eq('level', level)
+        .eq('is_published', true)
+        .order('order_index', { ascending: true });
+      
+      if (data) setGamesGenially(data as GamesGeniallyItem[]);
     }
     
     setIsLoading(false);
@@ -826,6 +851,60 @@ const LevelContent = () => {
     </div>
   );
 
+  const renderGamesGenially = () => (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {gamesGenially.map((item) => (
+        <div 
+          key={item.id}
+          className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 group`}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Gamepad2 className={`w-5 h-5 text-${color}`} />
+            <span className="text-xs font-body text-muted-foreground">
+              Jeux et Genially
+            </span>
+          </div>
+          
+          <h3 className="text-xl font-display text-foreground mb-2">
+            {item.title}
+          </h3>
+          
+          {item.description && (
+            <p className="text-muted-foreground font-body text-sm mb-4 line-clamp-2">
+              {item.description}
+            </p>
+          )}
+          
+          <div className="flex flex-wrap gap-2 pt-4 border-t border-border">
+            {item.file_url && (
+              <a 
+                href={item.file_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-rainbow-blue hover:underline flex items-center gap-1"
+              >
+                <FileText className="w-4 h-4" />
+                Fichier
+              </a>
+            )}
+            {Array.isArray(item.links) && item.links.map((link, idx) => (
+              <a
+                key={idx}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-rainbow-green/10 text-rainbow-green hover:bg-rainbow-green/20 transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                {link.title || 'Lien'}
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   const getContent = () => {
     if (isLoading) {
       return (
@@ -853,6 +932,8 @@ const LevelContent = () => {
       return dnbContent.length > 0 ? renderDnbContent() : renderEmptyState();
     } else if (type === 'classe-activite') {
       return classPhotos.length > 0 ? renderClassPhotos() : renderEmptyState();
+    } else if (type === 'jeux-genially') {
+      return gamesGenially.length > 0 ? renderGamesGenially() : renderEmptyState();
     }
     
     return renderEmptyState();
