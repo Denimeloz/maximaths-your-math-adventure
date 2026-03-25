@@ -337,6 +337,16 @@ const LevelContent = () => {
       
       if (data) setClassPhotos(data as ClassPhoto[]);
     }
+    else if (type === 'jeux-genially') {
+      const { data } = await (supabase as any)
+        .from('games_genially')
+        .select('*')
+        .eq('level', level)
+        .eq('is_published', true)
+        .order('order_index', { ascending: true });
+      
+      if (data) setGamesGenially(data as GamesGeniallyItem[]);
+    }
     
     setIsLoading(false);
   };
