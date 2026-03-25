@@ -71,6 +71,7 @@ const subMenuItems = [
   { id: 'tests-entrainement', label: 'Tests (Évaluations formatives)', description: 'Tests' },
   { id: 'devoirs', label: 'Devoirs de niveaux', description: 'Devoirs de niveaux' },
   { id: 'evaluations', label: 'Évaluations', description: 'Tests et examens' },
+  { id: 'jeux-genially', label: 'Jeux et Genially', description: 'Jeux éducatifs et présentations' },
 ];
 
 const subMenuItems3emeSeconde = [

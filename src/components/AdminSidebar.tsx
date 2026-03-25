@@ -29,7 +29,8 @@ import {
   Target,
   Puzzle,
   Megaphone,
-  Camera
+  Camera,
+  Gamepad2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
