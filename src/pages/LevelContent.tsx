@@ -878,6 +878,8 @@ const LevelContent = () => {
       return dnbContent.length > 0 ? renderDnbContent() : renderEmptyState();
     } else if (type === 'classe-activite') {
       return classPhotos.length > 0 ? renderClassPhotos() : renderEmptyState();
+    } else if (type === 'jeux-genially') {
+      return gamesGenially.length > 0 ? renderGamesGenially() : renderEmptyState();
     }
     
     return renderEmptyState();
