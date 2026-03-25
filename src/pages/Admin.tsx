@@ -989,6 +989,11 @@ const Admin = () => {
             <ClassPhotosManager selectedLevel={activeLevel as CourseLevel} />
           )}
 
+          {/* Games & Genially Tab - filtered by level */}
+          {activeTab === 'jeux-genially' && activeLevel && activeLevel !== 'club-maths' && (
+            <GamesGeniallyManager filterLevel={activeLevel as CourseLevel} />
+          )}
+
           {/* Files Tab */}
           {activeTab === 'files' && (
             <FileVideoManager courses={courses.map(c => ({ id: c.id, title: c.title }))} />
