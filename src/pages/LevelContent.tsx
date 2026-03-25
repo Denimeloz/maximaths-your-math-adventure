@@ -851,6 +851,60 @@ const LevelContent = () => {
     </div>
   );
 
+  const renderGamesGenially = () => (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {gamesGenially.map((item) => (
+        <div 
+          key={item.id}
+          className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 group`}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Gamepad2 className={`w-5 h-5 text-${color}`} />
+            <span className="text-xs font-body text-muted-foreground">
+              Jeux et Genially
+            </span>
+          </div>
+          
+          <h3 className="text-xl font-display text-foreground mb-2">
+            {item.title}
+          </h3>
+          
+          {item.description && (
+            <p className="text-muted-foreground font-body text-sm mb-4 line-clamp-2">
+              {item.description}
+            </p>
+          )}
+          
+          <div className="flex flex-wrap gap-2 pt-4 border-t border-border">
+            {item.file_url && (
+              <a 
+                href={item.file_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-rainbow-blue hover:underline flex items-center gap-1"
+              >
+                <FileText className="w-4 h-4" />
+                Fichier
+              </a>
+            )}
+            {Array.isArray(item.links) && item.links.map((link, idx) => (
+              <a
+                key={idx}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-rainbow-green/10 text-rainbow-green hover:bg-rainbow-green/20 transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                {link.title || 'Lien'}
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   const getContent = () => {
     if (isLoading) {
       return (
