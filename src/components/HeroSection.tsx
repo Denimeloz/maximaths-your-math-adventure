@@ -31,6 +31,7 @@ const classeActiviteItem = { id: 'classe-activite', label: 'Classe en activité'
 const subMenuItems3eme = [
   ...subMenuItems.map(item => item.id === 'tests-entrainement' ? { ...item, label: 'Tests / Mini DNB', description: 'Tests ou Mini DNB' } : item),
   { id: 'prepa-dnb', label: 'Prépa DNB', description: 'Préparation au brevet', icon: GraduationCap },
+  { id: 'ressources-dnb', label: 'Ressources DNB', description: 'Fiches et supports à télécharger', icon: GraduationCap },
   classeActiviteItem,
 ];
 
