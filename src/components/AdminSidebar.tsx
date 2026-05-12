@@ -30,7 +30,8 @@ import {
   Puzzle,
   Megaphone,
   Camera,
-  Gamepad2
+  Gamepad2,
+  GraduationCap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -78,6 +79,7 @@ const getSubSections = (level: AdminCourseLevel) => {
   
   if (level === '3eme') {
     baseSections.push({ id: 'prepa-dnb', label: 'Prépa DNB', icon: Star });
+    baseSections.push({ id: 'ressources-dnb', label: 'Ressources révision DNB', icon: GraduationCap });
     baseSections.push({ id: 'classe-activite', label: 'Classe en activité', icon: Camera });
   }
 

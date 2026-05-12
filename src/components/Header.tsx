@@ -1,4 +1,4 @@
-import { Menu, X, Home, Info, ChevronDown, ChevronUp } from "lucide-react";
+import { Menu, X, Home, Info, ChevronDown, ChevronUp, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -82,6 +82,7 @@ const subMenuItems3emeSeconde = [
 const subMenuItems3eme = [
   ...subMenuItems.map(item => item.id === 'tests-entrainement' ? { ...item, label: 'Tests ou Mini DNB' } : item),
   { id: 'prepa-dnb', label: 'Prépa DNB', description: 'Préparation au brevet' },
+  { id: 'ressources-dnb', label: 'Ressources révision DNB', description: 'Fiches et supports à télécharger' },
   { id: 'classe-activite', label: 'Classe en activité', description: 'Photos et moments de classe' },
 ];
 
@@ -196,6 +197,16 @@ const Header = () => {
           <Button 
             variant="nav" 
             size="sm" 
+            className="gap-2 rounded-full hover:bg-rainbow-coral/20 hover:scale-105 transition-all"
+            onClick={() => navigate('/ressources-dnb')}
+          >
+            <GraduationCap className="w-4 h-4 text-rainbow-coral" />
+            Ressources DNB
+          </Button>
+
+          <Button 
+            variant="nav" 
+            size="sm" 
             className="gap-2 rounded-full hover:bg-rainbow-pink/20 hover:scale-105 transition-all"
             onClick={() => navigate('/about')}
           >
@@ -262,6 +273,15 @@ const Header = () => {
               </div>
             ))}
             
+            <Button 
+              variant="ghost" 
+              className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-coral/20 mt-2"
+              onClick={() => { navigate('/ressources-dnb'); setMobileMenuOpen(false); }}
+            >
+              <GraduationCap className="w-5 h-5 text-rainbow-coral" />
+              Ressources DNB
+            </Button>
+
             <Button 
               variant="ghost" 
               className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-pink/20 mt-2"

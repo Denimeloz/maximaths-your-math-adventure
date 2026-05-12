@@ -237,10 +237,14 @@ const LevelContent = () => {
   const color = levelColors[level] || 'rainbow-blue';
 
   useEffect(() => {
+    if (contentType === 'ressources-dnb') {
+      navigate('/ressources-dnb', { replace: true });
+      return;
+    }
     if (levelId && contentType) {
       fetchContent();
     }
-  }, [levelId, contentType]);
+  }, [levelId, contentType, navigate]);
 
   const fetchContent = async () => {
     setIsLoading(true);
