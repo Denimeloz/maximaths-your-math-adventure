@@ -23,6 +23,7 @@ import { ClubMathsManager } from '@/components/admin/ClubMathsManager';
 import { ClassInfoManager } from '@/components/admin/ClassInfoManager';
 import { ClassPhotosManager } from '@/components/admin/ClassPhotosManager';
 import { GamesGeniallyManager } from '@/components/admin/GamesGeniallyManager';
+import { DnbRevisionResourcesManager } from '@/components/admin/DnbRevisionResourcesManager';
 import PDFViewer from '@/components/PDFViewer';
 import { 
   Users, 
@@ -556,6 +557,7 @@ const Admin = () => {
                   activeTab === 'prepa-dnb' ? 'Prépa DNB' :
                   activeTab === 'classe-activite' ? 'Classe en activité' :
                   activeTab === 'jeux-genially' ? 'Jeux et Genially' :
+                  activeTab === 'ressources-dnb' ? 'Ressources révision DNB' :
                   activeTab === 'enigmes' ? 'Énigmes hebdomadaires' :
                   activeTab === 'projets' ? 'Projets pédagogiques' : ''
                 }
@@ -590,6 +592,11 @@ const Admin = () => {
           {/* Class Info Section */}
           {activeTab === 'infos' && activeLevel && activeLevel !== 'club-maths' && (
             <ClassInfoManager selectedLevel={activeLevel as CourseLevel} />
+          )}
+
+          {/* DNB Revision Resources */}
+          {activeTab === 'ressources-dnb' && activeLevel === '3eme' && (
+            <DnbRevisionResourcesManager />
           )}
 
           {/* Club de maths Sections */}
