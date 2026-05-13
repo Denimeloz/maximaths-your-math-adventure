@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { notifyNewClassInfo, notifyContentUpdate } from '@/hooks/useNotifyUsers';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -207,7 +206,6 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
           description: "Information modifiée avec succès",
         });
         if (formData.is_published) {
-          notifyContentUpdate(selectedLevel, 'Info de classe', formData.title);
         }
         resetForm();
         fetchInfos();
@@ -236,7 +234,6 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
           description: "Information créée avec succès",
         });
         if (formData.is_published) {
-          notifyNewClassInfo(selectedLevel, formData.title);
         }
         resetForm();
         fetchInfos();

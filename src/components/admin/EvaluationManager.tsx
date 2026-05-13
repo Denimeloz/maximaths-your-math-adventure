@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { notifyNewEvaluation, notifyContentUpdate } from '@/hooks/useNotifyUsers';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -133,7 +132,6 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
       if (!error) {
         toast({ title: "Succès", description: "Évaluation modifiée" });
         if (editingEvaluation.is_published) {
-          notifyContentUpdate(filterLevel, 'Évaluation', form.title);
         }
         fetchData();
         resetForm();
@@ -166,7 +164,6 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
     const newPublished = !evaluation.is_published;
     await supabase.from('evaluations').update({ is_published: newPublished }).eq('id', evaluation.id);
     if (newPublished) {
-      notifyNewEvaluation(filterLevel, evaluation.title);
     }
     fetchData();
   };

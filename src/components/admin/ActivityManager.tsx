@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { notifyNewActivity, notifyContentUpdate } from '@/hooks/useNotifyUsers';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -240,7 +239,6 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
       } else {
         toast.success('Activité mise à jour');
         if (formData.is_published) {
-          notifyContentUpdate(formData.level, 'Activité', formData.title);
         }
         fetchActivities();
         resetForm();
@@ -256,7 +254,6 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
       } else {
         toast.success('Activité créée');
         if (formData.is_published) {
-          notifyNewActivity(formData.level, formData.title);
         }
         fetchActivities();
         resetForm();

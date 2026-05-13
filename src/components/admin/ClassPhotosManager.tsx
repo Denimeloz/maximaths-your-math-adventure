@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { notifyNewClassPhotos, notifyContentUpdate } from '@/hooks/useNotifyUsers';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -126,7 +125,6 @@ export const ClassPhotosManager: React.FC<ClassPhotosManagerProps> = ({ selected
       }
       toast({ title: 'Modifié avec succès' });
       if (formData.is_published) {
-        notifyContentUpdate(selectedLevel, 'Photos de classe', formData.title);
       }
     } else {
       const { error } = await (supabase as any)
@@ -138,7 +136,6 @@ export const ClassPhotosManager: React.FC<ClassPhotosManagerProps> = ({ selected
       }
       toast({ title: 'Ajouté avec succès' });
       if (formData.is_published) {
-        notifyNewClassPhotos(selectedLevel, formData.title);
       }
     }
 
@@ -173,7 +170,6 @@ export const ClassPhotosManager: React.FC<ClassPhotosManagerProps> = ({ selected
     await (supabase as any).from('class_photos').update({ is_published: newPublished }).eq('id', id);
     if (newPublished) {
       const item = items.find(i => i.id === id);
-      if (item) notifyNewClassPhotos(selectedLevel, item.title);
     }
     fetchItems();
   };
