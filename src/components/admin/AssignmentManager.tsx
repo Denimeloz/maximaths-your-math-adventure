@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { notifyNewAssignment, notifyContentUpdate } from '@/hooks/useNotifyUsers';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -133,7 +132,6 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
       if (!error) {
         toast({ title: "Succès", description: "Devoir modifié" });
         if (editingAssignment.is_published) {
-          notifyContentUpdate(filterLevel, 'Devoir', form.title);
         }
         fetchData();
         resetForm();
@@ -166,7 +164,6 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
     const newPublished = !assignment.is_published;
     await supabase.from('assignments').update({ is_published: newPublished }).eq('id', assignment.id);
     if (newPublished) {
-      notifyNewAssignment(filterLevel, assignment.title);
     }
     fetchData();
   };

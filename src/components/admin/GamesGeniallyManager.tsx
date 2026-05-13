@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { notifyContentUpdate } from '@/hooks/useNotifyUsers';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -133,7 +132,6 @@ export const GamesGeniallyManager: React.FC<GamesGeniallyManagerProps> = ({ filt
     const newPublished = !item.is_published;
     await (supabase as any).from('games_genially').update({ is_published: newPublished }).eq('id', item.id);
     if (newPublished) {
-      notifyContentUpdate(filterLevel, 'Jeux et Genially', item.title);
     }
     fetchData();
   };

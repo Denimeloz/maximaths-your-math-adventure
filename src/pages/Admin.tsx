@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { notifyNewCourse, notifyContentUpdate } from '@/hooks/useNotifyUsers';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -441,7 +440,6 @@ const Admin = () => {
       });
     } else {
       if (newPublished) {
-        notifyNewCourse(course.level, course.title);
       }
       fetchCourses();
     }

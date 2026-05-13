@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { notifyNewExercise, notifyContentUpdate } from '@/hooks/useNotifyUsers';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -163,7 +162,6 @@ export const TrainingExerciseManager: React.FC<TrainingExerciseManagerProps> = (
     const newPublished = !item.is_published;
     await supabase.from('training_exercises').update({ is_published: newPublished }).eq('id', item.id);
     if (newPublished) {
-      notifyNewExercise(filterLevel, item.title);
     }
     fetchData();
   };

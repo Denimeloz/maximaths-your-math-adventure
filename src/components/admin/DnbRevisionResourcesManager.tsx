@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { notifyUsers } from '@/hooks/useNotifyUsers';
+
 import { Plus, Trash2, Edit, X, Upload, Loader2, FileText, Eye, EyeOff, GraduationCap, GripVertical } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -99,29 +99,11 @@ export const DnbRevisionResourcesManager: React.FC = () => {
       const { error } = await (supabase as any)
         .from('dnb_revision_resources').update(payload).eq('id', editing.id);
       if (error) return toast({ title: "Erreur", description: "Échec de la mise à jour", variant: "destructive" });
-      if (form.is_published) {
-        notifyUsers({
-          level: '3eme',
-          type: 'system',
-          title: '🎓 Mise à jour: Ressources révision DNB',
-          message: form.title,
-          link: '/niveau/3eme/ressources-dnb',
-        });
-      }
       toast({ title: "Succès", description: "Ressource mise à jour" });
     } else {
       const { error } = await (supabase as any)
         .from('dnb_revision_resources').insert({ ...payload, order_index: items.length });
       if (error) return toast({ title: "Erreur", description: "Échec de la création", variant: "destructive" });
-      if (form.is_published) {
-        notifyUsers({
-          level: '3eme',
-          type: 'system',
-          title: '🎓 Nouvelle ressource de révision DNB',
-          message: form.title,
-          link: '/niveau/3eme/ressources-dnb',
-        });
-      }
       toast({ title: "Succès", description: "Ressource créée" });
     }
     resetForm();
