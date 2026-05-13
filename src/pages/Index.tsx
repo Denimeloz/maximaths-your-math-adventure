@@ -3,7 +3,7 @@ import HeroSection from "@/components/HeroSection";
 import FeaturesSection from "@/components/FeaturesSection";
 import ClassInfoSection from "@/components/ClassInfoSection";
 import ClassPhotosSection from "@/components/ClassPhotosSection";
-import GamesGeniallySection from "@/components/GamesGeniallySection";
+import DnbRevisionSection from "@/components/DnbRevisionSection";
 import Footer from "@/components/Footer";
 
 const Index = () => {
