@@ -369,6 +369,7 @@ const Admin = () => {
           pdf_url: courseForm.pdf_url || null,
           video_links: courseForm.video_links.filter(l => l.url.trim()),
           game_links: courseForm.game_links.filter(l => l.url.trim()),
+          resource_links: courseForm.resource_links.filter(l => l.url.trim()),
           order_index: courses.length,
         } as any);
 
