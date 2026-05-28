@@ -336,8 +336,9 @@ const Admin = () => {
           level: courseForm.level,
           category: courseForm.category,
           image_url: courseForm.image_url || null,
-          pdf_url: courseForm.pdf_url || null,
           video_links: courseForm.video_links.filter(l => l.url.trim()),
+          game_links: courseForm.game_links.filter(l => l.url.trim()),
+          resource_links: courseForm.resource_links.filter(l => l.url.trim()),
           game_links: courseForm.game_links.filter(l => l.url.trim()),
         } as any)
         .eq('id', editingCourse.id);
