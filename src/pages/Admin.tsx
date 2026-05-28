@@ -880,6 +880,45 @@ const Admin = () => {
                         <Plus className="w-4 h-4 mr-1" /> Ajouter un lien de jeu
                       </Button>
                     </div>
+
+                    {/* Resource Links (Padlet, etc.) */}
+                    <div>
+                      <label className="text-sm font-body text-muted-foreground mb-1 block">Liens de ressources (Padlet, sites, etc.)</label>
+                      {courseForm.resource_links.map((link, idx) => (
+                        <div key={idx} className="flex gap-2 mb-2">
+                          <Input
+                            value={link.title}
+                            onChange={(e) => {
+                              const updated = [...courseForm.resource_links];
+                              updated[idx] = { ...updated[idx], title: e.target.value };
+                              setCourseForm(prev => ({ ...prev, resource_links: updated }));
+                            }}
+                            placeholder="Titre (ex: Padlet du chapitre)"
+                            className="rounded-xl flex-1"
+                          />
+                          <Input
+                            value={link.url}
+                            onChange={(e) => {
+                              const updated = [...courseForm.resource_links];
+                              updated[idx] = { ...updated[idx], url: e.target.value };
+                              setCourseForm(prev => ({ ...prev, resource_links: updated }));
+                            }}
+                            placeholder="https://padlet.com/..."
+                            className="rounded-xl flex-1"
+                          />
+                          <Button variant="ghost" size="icon" onClick={() => {
+                            setCourseForm(prev => ({ ...prev, resource_links: prev.resource_links.filter((_, i) => i !== idx) }));
+                          }}>
+                            <X className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button variant="outline" size="sm" className="rounded-xl" onClick={() => {
+                        setCourseForm(prev => ({ ...prev, resource_links: [...prev.resource_links, { title: '', url: '' }] }));
+                      }}>
+                        <Plus className="w-4 h-4 mr-1" /> Ajouter un lien de ressource
+                      </Button>
+                    </div>
                     <div className="flex gap-3 pt-4">
                       <Button onClick={handleSaveCourse} className="btn-3d bg-primary rounded-xl">
                         <Save className="w-4 h-4 mr-2" />
