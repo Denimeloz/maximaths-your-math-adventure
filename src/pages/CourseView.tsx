@@ -260,7 +260,8 @@ const CourseView = () => {
                       </span>
                     )}
                   </div>
-                  {/* Video & Game links */}
+                  {/* Video, Game & Resource links */}
+                  {(() => {
                     const videoLinks: LinkItem[] = Array.isArray((course as any).video_links) ? (course as any).video_links : [];
                     const gameLinks: LinkItem[] = Array.isArray((course as any).game_links) ? (course as any).game_links : [];
                     const resourceLinks: LinkItem[] = Array.isArray((course as any).resource_links) ? (course as any).resource_links : [];
