@@ -397,6 +397,7 @@ export type Database = {
           level: Database["public"]["Enums"]["course_level"]
           order_index: number
           pdf_url: string | null
+          resource_links: Json
           title: string
           updated_at: string
           video_links: Json | null
@@ -414,6 +415,7 @@ export type Database = {
           level: Database["public"]["Enums"]["course_level"]
           order_index?: number
           pdf_url?: string | null
+          resource_links?: Json
           title: string
           updated_at?: string
           video_links?: Json | null
@@ -431,6 +433,7 @@ export type Database = {
           level?: Database["public"]["Enums"]["course_level"]
           order_index?: number
           pdf_url?: string | null
+          resource_links?: Json
           title?: string
           updated_at?: string
           video_links?: Json | null
