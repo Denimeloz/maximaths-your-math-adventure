@@ -119,6 +119,7 @@ const Admin = () => {
     pdf_url: '',
     video_links: [] as { title: string; url: string }[],
     game_links: [] as { title: string; url: string }[],
+    resource_links: [] as { title: string; url: string }[],
   });
 
   // Sync activeTab with URL changes
