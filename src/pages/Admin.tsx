@@ -396,10 +396,10 @@ const Admin = () => {
       level: course.level,
       category: course.category,
       image_url: course.image_url || '',
+      pdf_url: course.pdf_url || '',
       video_links: Array.isArray((course as any).video_links) ? (course as any).video_links : [],
       game_links: Array.isArray((course as any).game_links) ? (course as any).game_links : [],
       resource_links: Array.isArray((course as any).resource_links) ? (course as any).resource_links : [],
-    });
     });
     setShowCourseForm(true);
   };
