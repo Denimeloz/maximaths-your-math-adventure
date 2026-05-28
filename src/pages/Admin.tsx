@@ -481,6 +481,7 @@ const Admin = () => {
       pdf_url: '',
       video_links: [],
       game_links: [],
+      resource_links: [],
     });
   };
 
