@@ -43,6 +43,7 @@ interface Course {
   pdf_url: string | null;
   video_links?: LinkItem[] | null;
   game_links?: LinkItem[] | null;
+  resource_links?: LinkItem[] | null;
 }
 
 interface Lesson {
@@ -259,11 +260,12 @@ const CourseView = () => {
                       </span>
                     )}
                   </div>
-                  {/* Video & Game links */}
+                  {/* Video, Game & Resource links */}
                   {(() => {
                     const videoLinks: LinkItem[] = Array.isArray((course as any).video_links) ? (course as any).video_links : [];
                     const gameLinks: LinkItem[] = Array.isArray((course as any).game_links) ? (course as any).game_links : [];
-                    if (videoLinks.length === 0 && gameLinks.length === 0) return null;
+                    const resourceLinks: LinkItem[] = Array.isArray((course as any).resource_links) ? (course as any).resource_links : [];
+                    if (videoLinks.length === 0 && gameLinks.length === 0 && resourceLinks.length === 0) return null;
                     return (
                       <div className="flex flex-wrap gap-3 mt-4">
                         {videoLinks.map((link, idx) => (
@@ -290,6 +292,18 @@ const CourseView = () => {
                             <Gamepad2 className="w-4 h-4" />
                             {link.title || 'Jouer au jeu'}
                             <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        ))}
+                        {resourceLinks.map((link, idx) => (
+                          <a
+                            key={`r-${idx}`}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rainbow-blue/10 text-rainbow-blue hover:bg-rainbow-blue/20 transition-colors font-medium text-sm"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            {link.title || 'Ouvrir la ressource'}
                           </a>
                         ))}
                       </div>

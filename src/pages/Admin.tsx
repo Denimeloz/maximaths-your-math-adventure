@@ -119,6 +119,7 @@ const Admin = () => {
     pdf_url: '',
     video_links: [] as { title: string; url: string }[],
     game_links: [] as { title: string; url: string }[],
+    resource_links: [] as { title: string; url: string }[],
   });
 
   // Sync activeTab with URL changes
@@ -338,6 +339,7 @@ const Admin = () => {
           pdf_url: courseForm.pdf_url || null,
           video_links: courseForm.video_links.filter(l => l.url.trim()),
           game_links: courseForm.game_links.filter(l => l.url.trim()),
+          resource_links: courseForm.resource_links.filter(l => l.url.trim()),
         } as any)
         .eq('id', editingCourse.id);
 
@@ -367,6 +369,7 @@ const Admin = () => {
           pdf_url: courseForm.pdf_url || null,
           video_links: courseForm.video_links.filter(l => l.url.trim()),
           game_links: courseForm.game_links.filter(l => l.url.trim()),
+          resource_links: courseForm.resource_links.filter(l => l.url.trim()),
           order_index: courses.length,
         } as any);
 
@@ -398,6 +401,7 @@ const Admin = () => {
       pdf_url: course.pdf_url || '',
       video_links: Array.isArray((course as any).video_links) ? (course as any).video_links : [],
       game_links: Array.isArray((course as any).game_links) ? (course as any).game_links : [],
+      resource_links: Array.isArray((course as any).resource_links) ? (course as any).resource_links : [],
     });
     setShowCourseForm(true);
   };
@@ -480,6 +484,7 @@ const Admin = () => {
       pdf_url: '',
       video_links: [],
       game_links: [],
+      resource_links: [],
     });
   };
 
@@ -873,6 +878,45 @@ const Admin = () => {
                         setCourseForm(prev => ({ ...prev, game_links: [...prev.game_links, { title: '', url: '' }] }));
                       }}>
                         <Plus className="w-4 h-4 mr-1" /> Ajouter un lien de jeu
+                      </Button>
+                    </div>
+
+                    {/* Resource Links (Padlet, etc.) */}
+                    <div>
+                      <label className="text-sm font-body text-muted-foreground mb-1 block">Liens de ressources (Padlet, sites, etc.)</label>
+                      {courseForm.resource_links.map((link, idx) => (
+                        <div key={idx} className="flex gap-2 mb-2">
+                          <Input
+                            value={link.title}
+                            onChange={(e) => {
+                              const updated = [...courseForm.resource_links];
+                              updated[idx] = { ...updated[idx], title: e.target.value };
+                              setCourseForm(prev => ({ ...prev, resource_links: updated }));
+                            }}
+                            placeholder="Titre (ex: Padlet du chapitre)"
+                            className="rounded-xl flex-1"
+                          />
+                          <Input
+                            value={link.url}
+                            onChange={(e) => {
+                              const updated = [...courseForm.resource_links];
+                              updated[idx] = { ...updated[idx], url: e.target.value };
+                              setCourseForm(prev => ({ ...prev, resource_links: updated }));
+                            }}
+                            placeholder="https://padlet.com/..."
+                            className="rounded-xl flex-1"
+                          />
+                          <Button variant="ghost" size="icon" onClick={() => {
+                            setCourseForm(prev => ({ ...prev, resource_links: prev.resource_links.filter((_, i) => i !== idx) }));
+                          }}>
+                            <X className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button variant="outline" size="sm" className="rounded-xl" onClick={() => {
+                        setCourseForm(prev => ({ ...prev, resource_links: [...prev.resource_links, { title: '', url: '' }] }));
+                      }}>
+                        <Plus className="w-4 h-4 mr-1" /> Ajouter un lien de ressource
                       </Button>
                     </div>
                     <div className="flex gap-3 pt-4">
