@@ -43,6 +43,7 @@ interface Course {
   pdf_url: string | null;
   video_links?: LinkItem[] | null;
   game_links?: LinkItem[] | null;
+  resource_links?: LinkItem[] | null;
 }
 
 interface Lesson {
