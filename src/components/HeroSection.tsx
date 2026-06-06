@@ -1,19 +1,17 @@
-import { Button } from "@/components/ui/button";
-import { Sparkles, Star, Zap, ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap, Puzzle, Camera, Gamepad2 } from "lucide-react";
+import { ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap, Puzzle, Camera, Gamepad2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import heroImage from "@/assets/maximaths-hero.jpeg";
-import brainIcon from "@/assets/brain-icon.png";
+import { useState } from "react";
+import bannerAsset from "@/assets/maximaths-banner.png.asset.json";
 
 const levels = [
-  { id: '6eme', label: '6ème', color: 'bg-rainbow-blue', textColor: 'text-rainbow-blue', borderColor: 'border-rainbow-blue', isClub: false },
-  { id: '5eme', label: '5ème', color: 'bg-rainbow-green', textColor: 'text-rainbow-green', borderColor: 'border-rainbow-green', isClub: false },
-  { id: '4eme', label: '4ème', color: 'bg-rainbow-orange', textColor: 'text-rainbow-orange', borderColor: 'border-rainbow-orange', isClub: false },
-  { id: '3eme', label: '3ème', color: 'bg-rainbow-coral', textColor: 'text-rainbow-coral', borderColor: 'border-rainbow-coral', isClub: false },
-  { id: 'seconde', label: 'Seconde', color: 'bg-rainbow-pink', textColor: 'text-rainbow-pink', borderColor: 'border-rainbow-pink', isClub: false },
-  { id: 'premiere', label: 'Première', color: 'bg-rainbow-purple', textColor: 'text-rainbow-purple', borderColor: 'border-rainbow-purple', isClub: false },
-  { id: 'terminale', label: 'Terminale', color: 'bg-rainbow-yellow', textColor: 'text-rainbow-yellow', borderColor: 'border-rainbow-yellow', isClub: false },
-  { id: 'club-maths', label: 'Club de maths', color: 'bg-gradient-to-r from-rainbow-purple to-rainbow-pink', textColor: 'text-rainbow-pink', borderColor: 'border-rainbow-pink', isClub: true },
+  { id: '6eme', label: '6ème', isClub: false },
+  { id: '5eme', label: '5ème', isClub: false },
+  { id: '4eme', label: '4ème', isClub: false },
+  { id: '3eme', label: '3ème', isClub: false },
+  { id: 'seconde', label: 'Seconde', isClub: false },
+  { id: 'premiere', label: 'Première', isClub: false },
+  { id: 'terminale', label: 'Terminale', isClub: false },
+  { id: 'club-maths', label: 'Club de maths', isClub: true },
 ];
 
 const subMenuItems = [
@@ -35,113 +33,13 @@ const subMenuItems3eme = [
   classeActiviteItem,
 ];
 
-const subMenuItemsSeconde = [
-  ...subMenuItems,
-  classeActiviteItem,
-];
+const subMenuItemsSeconde = [...subMenuItems, classeActiviteItem];
 
 const getSubMenuForLevel = (levelId: string) => {
   if (levelId === '3eme') return subMenuItems3eme;
   if (levelId === 'seconde') return subMenuItemsSeconde;
   if (levelId === 'club-maths') return [];
   return subMenuItems;
-};
-
-const quotes = [
-  {
-    text1: "Le génie, c'est 1 % d'inspiration",
-    text2: "99 % de transpiration.",
-    author: "Thomas Edison",
-    borderColor: "border-rainbow-yellow/30",
-    quoteColor: "text-rainbow-yellow",
-    highlightColor: "text-rainbow-coral",
-    authorColor: "text-rainbow-orange",
-  },
-  {
-    text1: "Le génie, c'est 1 % de talent",
-    text2: "99 % de travail acharné.",
-    author: "Albert Einstein",
-    borderColor: "border-rainbow-purple/30",
-    quoteColor: "text-rainbow-purple",
-    highlightColor: "text-rainbow-blue",
-    authorColor: "text-rainbow-purple",
-  },
-];
-
-const QuotesCarousel = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isSliding, setIsSliding] = useState(false);
-  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('left');
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSlideDirection('left');
-      setIsSliding(true);
-      setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % quotes.length);
-        setIsSliding(false);
-      }, 500);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleIndicatorClick = (index: number) => {
-    if (index === currentIndex) return;
-    setSlideDirection(index > currentIndex ? 'left' : 'right');
-    setIsSliding(true);
-    setTimeout(() => {
-      setCurrentIndex(index);
-      setIsSliding(false);
-    }, 500);
-  };
-
-  const quote = quotes[currentIndex];
-
-  return (
-    <div className="w-full max-w-4xl mx-auto mb-6 animate-slide-up px-4" style={{ animationDelay: "0.2s" }}>
-      <div className="relative overflow-hidden">
-        <blockquote
-          key={currentIndex}
-          className={`p-4 md:p-6 bg-card/90 backdrop-blur-md rounded-xl border-2 ${quote.borderColor} shadow-lg transition-all duration-500 ease-out ${
-            isSliding 
-              ? slideDirection === 'left' 
-                ? '-translate-x-full opacity-0' 
-                : 'translate-x-full opacity-0'
-              : 'translate-x-0 opacity-100'
-          }`}
-        >
-          <div className={`absolute top-2 left-3 text-3xl ${quote.quoteColor} opacity-50 font-serif`}>«</div>
-          <p className="text-sm md:text-base lg:text-lg font-display text-center leading-relaxed px-6">
-            <span className="text-rainbow">{quote.text1}</span>
-            <span className="text-foreground"> et </span>
-            <span className={quote.highlightColor}>{quote.text2}</span>
-          </p>
-          <footer className="mt-2 text-center">
-            <cite className="text-xs md:text-sm font-body text-muted-foreground not-italic">
-              — <span className={`font-semibold ${quote.authorColor}`}>{quote.author}</span>
-            </cite>
-          </footer>
-          <div className={`absolute bottom-2 right-3 text-3xl ${quote.quoteColor} opacity-50 font-serif rotate-180`}>«</div>
-        </blockquote>
-      </div>
-      
-      {/* Indicators */}
-      <div className="flex justify-center gap-2 mt-4">
-        {quotes.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => handleIndicatorClick(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              index === currentIndex
-                ? "bg-primary scale-110"
-                : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
-            }`}
-            aria-label={`Citation ${index + 1}`}
-          />
-        ))}
-      </div>
-    </div>
-  );
 };
 
 const HeroSection = () => {
@@ -156,85 +54,53 @@ const HeroSection = () => {
     navigate(`/niveau/${levelId}/${subMenuId}`);
   };
 
-  const handleClubClick = () => {
-    navigate('/club-maths');
-  };
+  const handleClubClick = () => navigate('/club-maths');
 
   return (
-    <section className="relative min-h-screen bg-hero-gradient overflow-hidden pt-20">
-      {/* Math pattern overlay */}
-      <div className="absolute inset-0 math-pattern opacity-40" />
-      
-      {/* Decorative clouds - enhanced */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="cloud w-48 h-24 top-24 left-5 opacity-90 animate-float" />
-        <div className="cloud w-72 h-32 top-28 right-10 opacity-80 animate-float-delayed" />
-        <div className="cloud w-40 h-20 top-52 left-1/4 opacity-70 animate-float-slow" />
-        <div className="cloud w-56 h-28 bottom-32 right-1/4 opacity-80 animate-float" />
-        <div className="cloud w-36 h-18 bottom-48 left-10 opacity-60 animate-float-delayed" />
-        
-        {/* Decorative stars - more vibrant */}
-        <Star className="absolute top-28 left-[15%] w-8 h-8 text-rainbow-yellow fill-rainbow-yellow twinkle drop-shadow-lg" />
-        <Star className="absolute top-36 right-[20%] w-6 h-6 text-rainbow-pink fill-rainbow-pink twinkle drop-shadow-lg" style={{ animationDelay: "0.5s" }} />
-        <Star className="absolute top-56 left-[40%] w-7 h-7 text-rainbow-purple fill-rainbow-purple twinkle drop-shadow-lg" style={{ animationDelay: "1s" }} />
-        <Star className="absolute bottom-52 right-[35%] w-8 h-8 text-rainbow-orange fill-rainbow-orange twinkle drop-shadow-lg" style={{ animationDelay: "1.5s" }} />
-        <Star className="absolute top-72 right-[10%] w-5 h-5 text-rainbow-blue fill-rainbow-blue twinkle drop-shadow-lg" style={{ animationDelay: "0.8s" }} />
-        <Zap className="absolute bottom-64 left-[20%] w-7 h-7 text-rainbow-yellow fill-rainbow-yellow animate-wiggle drop-shadow-lg" />
-      </div>
+    <section className="relative bg-hero-gradient overflow-hidden pt-24 pb-16">
+      {/* Soft golden glow */}
+      <div className="absolute inset-0 sun-rays opacity-30 pointer-events-none" />
 
-      {/* Sun rays background */}
-      <div className="absolute inset-0 sun-rays opacity-40" />
-
-      {/* Content */}
-      <div className="relative container mx-auto px-4 py-12 flex flex-col items-center justify-center min-h-[calc(100vh-80px)]">
-        {/* Hero Image with enhanced 3D effect */}
-        <div className="relative mb-10 animate-bounce-in group">
-          {/* Glow effect behind */}
-          <div className="absolute -inset-8 bg-rainbow rounded-[3rem] opacity-30 blur-2xl group-hover:opacity-40 transition-opacity" />
-          
-          {/* Main image */}
-          <div className="relative">
-            <img 
-              src={heroImage} 
-              alt="MAXIMATHS - Plateforme de mathématiques ludique" 
-              className="w-full max-w-2xl rounded-[2rem] shadow-sticker border-[6px] border-sky-cloud transition-transform duration-300 group-hover:scale-[1.02]"
+      <div className="relative container mx-auto px-4">
+        {/* Banner */}
+        <div className="relative mx-auto max-w-6xl animate-fade-in-up">
+          <div className="absolute -inset-4 md:-inset-6 bg-gradient-to-br from-primary/10 via-transparent to-secondary/20 rounded-[2.5rem] blur-2xl" />
+          <div className="relative rounded-[1.75rem] md:rounded-[2.25rem] overflow-hidden ring-1 ring-border shadow-[0_20px_60px_-20px_hsl(218_81%_18%/0.25)] bg-card animate-float-slow">
+            <img
+              src={bannerAsset.url}
+              alt="MAXIMATHS — Curiosité, Assiduité, Rigueur. Comprendre, S'entraîner, Progresser."
+              className="w-full h-auto block"
+              loading="eager"
             />
-            
-            {/* Floating brain icon */}
-            <div className="absolute -top-8 -right-8 w-20 h-20 animate-icon-float">
-              <img src={brainIcon} alt="" className="w-full h-full drop-shadow-xl" />
-            </div>
           </div>
         </div>
 
-        {/* Inspirational Quotes - Animated Carousel */}
-        <QuotesCarousel />
-
-        {/* Subtitle - enhanced */}
-        <p className="text-muted-foreground text-center text-lg md:text-xl mb-16 font-body max-w-3xl mx-auto">
-          La plateforme de mathématiques pour les élèves du <span className="text-rainbow-blue font-bold">Collège</span> et du <span className="text-rainbow-purple font-bold">Lycée</span>
+        {/* Subtitle */}
+        <p className="mt-10 text-center text-base md:text-lg font-body text-muted-foreground max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          La plateforme de mathématiques de l'<span className="text-primary font-semibold">École Internationale Jules Verne</span>,
+          du <span className="text-primary font-semibold">collège</span> au <span className="text-primary font-semibold">lycée</span>.
         </p>
 
-        {/* Class Selection - Click to expand */}
-        <div className="w-full max-w-4xl mx-auto mb-12 animate-slide-up" style={{ animationDelay: "0.5s" }}>
-          <h3 className="text-xl md:text-2xl font-display text-center mb-6 text-foreground">
-            Choisis ta classe 👇
+        {/* Class Selection */}
+        <div className="w-full max-w-5xl mx-auto mt-12 animate-fade-in-up" style={{ animationDelay: "0.5s" }}>
+          <h3 className="text-lg md:text-xl font-display text-center mb-6 text-foreground tracking-wide">
+            Choisis ta classe
           </h3>
-          
+
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
             {levels.map((level) => (
               <div key={level.id} className={`relative ${level.isClub ? 'col-span-2 sm:col-span-4 lg:col-span-8' : ''}`}>
                 <button
                   onClick={() => level.isClub ? handleClubClick() : handleLevelClick(level.id)}
-                  className={`w-full p-3 rounded-xl font-display font-bold text-sm md:text-base transition-all border-2 ${
-                    level.isClub 
-                      ? `${level.color} text-white ${level.borderColor} hover:scale-[1.02] hover:shadow-lg`
-                      : expandedLevel === level.id 
-                        ? `${level.color} text-white ${level.borderColor} scale-105 shadow-lg` 
-                        : `bg-card ${level.textColor} ${level.borderColor} hover:scale-105 hover:shadow-md`
+                  className={`w-full px-3 py-3 rounded-xl font-display font-semibold text-sm md:text-base transition-all border ${
+                    level.isClub
+                      ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-primary hover:shadow-lg hover:-translate-y-0.5'
+                      : expandedLevel === level.id
+                        ? 'bg-primary text-primary-foreground border-primary shadow-md'
+                        : 'bg-card text-primary border-border hover:border-secondary hover:shadow-md hover:-translate-y-0.5'
                   }`}
                 >
-                  <span className="flex items-center justify-center gap-1">
+                  <span className="flex items-center justify-center gap-1.5">
                     {level.label}
                     {level.isClub ? (
                       <Puzzle className="w-4 h-4" />
@@ -249,24 +115,20 @@ const HeroSection = () => {
             ))}
           </div>
 
-          {/* Expanded submenu */}
           {expandedLevel && !levels.find(l => l.id === expandedLevel)?.isClub && (
-            <div className="mt-6 p-4 bg-card/95 backdrop-blur-sm rounded-2xl border-2 border-border animate-slide-up shadow-xl">
+            <div className="mt-6 p-5 bg-card rounded-2xl border border-border animate-fade-in-up shadow-lg">
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                {getSubMenuForLevel(expandedLevel).map((item) => {
-                  const level = levels.find(l => l.id === expandedLevel);
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => handleSubMenuClick(expandedLevel, item.id)}
-                      className={`p-4 rounded-xl bg-muted/50 hover:bg-muted transition-all hover:scale-105 text-left group border border-transparent hover:${level?.borderColor || 'border-border'}`}
-                    >
-                      <item.icon className={`w-6 h-6 mb-2 ${level?.textColor || 'text-foreground'} group-hover:scale-110 transition-transform`} />
-                      <div className="font-display text-sm text-foreground">{item.label}</div>
-                      <p className="text-xs text-muted-foreground font-body mt-1">{item.description}</p>
-                    </button>
-                  );
-                })}
+                {getSubMenuForLevel(expandedLevel).map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => handleSubMenuClick(expandedLevel, item.id)}
+                    className="p-4 rounded-xl bg-muted/40 hover:bg-secondary/15 transition-all hover:-translate-y-0.5 text-left group border border-transparent hover:border-secondary"
+                  >
+                    <item.icon className="w-6 h-6 mb-2 text-primary group-hover:scale-110 transition-transform" />
+                    <div className="font-display text-sm text-foreground">{item.label}</div>
+                    <p className="text-xs text-muted-foreground font-body mt-1">{item.description}</p>
+                  </button>
+                ))}
               </div>
             </div>
           )}
