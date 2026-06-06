@@ -126,13 +126,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      
+
       if (session?.user) {
-        fetchProfile(session.user.id).then(setProfile);
-        checkAdminRole(session.user.id).then(setIsAdmin);
+        const [profileData, adminStatus] = await Promise.all([
+          fetchProfile(session.user.id),
+          checkAdminRole(session.user.id),
+        ]);
+        setProfile(profileData);
+        setIsAdmin(adminStatus);
       }
       setIsLoading(false);
     });
