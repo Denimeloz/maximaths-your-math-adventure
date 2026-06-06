@@ -75,11 +75,17 @@ const HeroSection = () => {
           </div>
         </div>
 
-        {/* Subtitle */}
-        <p className="mt-10 text-center text-base md:text-lg font-body text-muted-foreground max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.3s' }}>
-          La plateforme de mathématiques de l'<span className="text-primary font-semibold">École Internationale Jules Verne</span>,
-          du <span className="text-primary font-semibold">collège</span> au <span className="text-primary font-semibold">lycée</span>.
-        </p>
+        {/* Quote */}
+        <figure className="mt-10 max-w-3xl mx-auto text-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          <blockquote className="text-lg md:text-xl font-body italic text-foreground/90 leading-relaxed">
+            <span className="text-secondary text-3xl font-display leading-none align-top mr-1">“</span>
+            Le génie, c'est <span className="text-primary font-semibold not-italic">1 % d'inspiration</span> et <span className="text-primary font-semibold not-italic">99 % de transpiration</span>.
+            <span className="text-secondary text-3xl font-display leading-none align-bottom ml-1">”</span>
+          </blockquote>
+          <figcaption className="mt-3 font-display text-sm tracking-wider uppercase text-muted-foreground">
+            — Thomas Edison
+          </figcaption>
+        </figure>
 
         {/* Class Selection */}
         <div className="w-full max-w-5xl mx-auto mt-12 animate-fade-in-up" style={{ animationDelay: "0.5s" }}>
