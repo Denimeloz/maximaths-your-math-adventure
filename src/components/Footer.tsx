@@ -1,58 +1,60 @@
-import { Mail, Heart, Star, Sparkles } from "lucide-react";
+import { Mail, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import newLogo from "@/assets/new-logo.png";
 
 const Footer = () => {
   return (
-    <footer className="bg-footer-gradient text-secondary-foreground py-16 relative overflow-hidden">
-      {/* Decorative elements */}
-      <Star className="absolute top-10 left-[10%] w-6 h-6 fill-rainbow-yellow/30 text-rainbow-yellow/30 animate-float" />
-      <Sparkles className="absolute top-20 right-[15%] w-8 h-8 text-rainbow-pink/30 animate-wiggle" />
-      <Star className="absolute bottom-20 left-[25%] w-5 h-5 fill-rainbow-blue/30 text-rainbow-blue/30 animate-float-delayed" />
-      
+    <footer className="bg-footer-gradient text-foreground py-16 relative overflow-hidden border-t border-border">
       <div className="container mx-auto px-4 relative">
         <div className="flex flex-col md:flex-row items-center justify-between gap-10">
-          {/* Logo */}
+          {/* Logo + Jules Verne */}
           <div className="text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
-              <img src={newLogo} alt="" className="w-14 h-14 rounded-xl shadow-lg" />
-              <h3 className="text-4xl font-display">
-                <span className="text-rainbow-yellow">MAXI</span>
-                <span className="text-sky-cloud">MATHS</span>
-              </h3>
+            <div className="flex items-center justify-center md:justify-start gap-4 mb-3">
+              <img
+                src={newLogo}
+                alt="Logo École Internationale Jules Verne"
+                className="w-16 h-16 rounded-xl shadow-md bg-card p-1"
+              />
+              <div>
+                <h3 className="text-3xl font-display leading-none">
+                  <span className="text-secondary">MAXI</span>
+                  <span className="text-primary">MATHS</span>
+                </h3>
+                <p className="font-body text-sm text-muted-foreground mt-1">
+                  École Internationale Jules Verne
+                </p>
+              </div>
             </div>
-            <p className="font-body font-semibold opacity-90 text-lg">Par APELETE Maxime</p>
+            <p className="font-body font-semibold text-muted-foreground">Par APELETE Maxime</p>
           </div>
 
           {/* Links */}
-          <nav className="flex flex-wrap justify-center gap-8 font-body font-bold text-lg">
-            <Link to="/6eme/cours" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block">Collège</Link>
-            <Link to="/seconde/cours" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block">Lycée</Link>
-            <Link to="/about" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block">À propos</Link>
-            <a href="mailto:maximathsclasse@gmail.com" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block">Contact</a>
-            <Link to="/admin-login" className="hover:text-rainbow-yellow transition-colors hover:scale-105 inline-block opacity-50 text-sm">Admin</Link>
+          <nav className="flex flex-wrap justify-center gap-6 font-body font-semibold">
+            <Link to="/niveau/6eme/cours" className="text-foreground hover:text-secondary transition-colors">Collège</Link>
+            <Link to="/niveau/seconde/cours" className="text-foreground hover:text-secondary transition-colors">Lycée</Link>
+            <Link to="/about" className="text-foreground hover:text-secondary transition-colors">À propos</Link>
+            <a href="mailto:maximathsclasse@gmail.com" className="text-foreground hover:text-secondary transition-colors">Contact</a>
+            <Link to="/admin-login" className="text-muted-foreground hover:text-secondary transition-colors opacity-60 text-sm">Admin</Link>
           </nav>
 
           {/* Contact */}
           <div className="text-center md:text-right">
-            <a 
+            <a
               href="mailto:maximathsclasse@gmail.com"
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-sky-cloud/20 hover:bg-sky-cloud/30 transition-all font-body font-bold text-lg border-4 border-sky-cloud/30 hover:scale-105 shadow-lg"
+              className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-card hover:bg-secondary/10 transition-all font-body font-semibold border border-border shadow-sm hover:shadow-md text-foreground"
             >
-              <Mail className="w-6 h-6" />
+              <Mail className="w-5 h-5 text-primary" />
               maximathsclasse@gmail.com
             </a>
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="my-10 border-t-4 border-sky-cloud/20 rounded-full" />
+        <div className="my-10 border-t border-border" />
 
-        {/* Bottom */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-base font-body opacity-90">
-          <p className="font-semibold">© 2024 MAXIMATHS. Tous droits réservés.</p>
-          <p className="flex items-center gap-2 font-semibold">
-            Fait avec <Heart className="w-5 h-5 text-rainbow-pink fill-rainbow-pink animate-pulse" /> pour les maths
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm font-body text-muted-foreground">
+          <p>© 2024 MAXIMATHS — École Internationale Jules Verne. Tous droits réservés.</p>
+          <p className="flex items-center gap-2">
+            Fait avec <Heart className="w-4 h-4 text-destructive fill-destructive" /> pour les maths
           </p>
         </div>
       </div>
