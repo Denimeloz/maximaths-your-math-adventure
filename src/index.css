@@ -68,15 +68,15 @@
     --card-blue: 210 40% 96%;
     --card-pink: 44 80% 95%;
 
-    /* Sidebar */
-    --sidebar-background: 218 81% 18%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 44 100% 48%;
-    --sidebar-primary-foreground: 218 81% 18%;
-    --sidebar-accent: 218 70% 28%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 218 60% 25%;
-    --sidebar-ring: 44 100% 48%;
+    /* Sidebar - light, airy */
+    --sidebar-background: 210 30% 98%;
+    --sidebar-foreground: 218 75% 18%;
+    --sidebar-primary: 218 81% 23%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 25% 94%;
+    --sidebar-accent-foreground: 218 81% 23%;
+    --sidebar-border: 210 25% 88%;
+    --sidebar-ring: 218 81% 30%;
   }
 
   .dark {
@@ -255,9 +255,9 @@
     background: linear-gradient(135deg, hsl(218 81% 23%) 0%, hsl(218 70% 35%) 60%, hsl(44 100% 48%) 100%);
   }
 
-  /* Footer gradient - deep navy */
+  /* Footer gradient - light cream with subtle gold */
   .bg-footer-gradient {
-    background: linear-gradient(135deg, hsl(218 81% 18%) 0%, hsl(218 70% 25%) 100%);
+    background: linear-gradient(135deg, hsl(210 30% 98%) 0%, hsl(44 60% 95%) 100%);
   }
 
   /* Soft golden rays */
