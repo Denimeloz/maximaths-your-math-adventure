@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,76 +6,77 @@
 
 @layer base {
   :root {
-    /* Background - Sky blue from reference #E0F2FE */
-    --background: 200 80% 94%;
-    --foreground: 222 47% 15%;
+    /* Jules Verne palette — Navy / Gold / White */
+    /* Background - Very light grey */
+    --background: 210 30% 98%;
+    --foreground: 218 75% 18%;
 
-    /* Card - White with slight blue tint */
-    --card: 200 50% 98%;
-    --card-foreground: 222 47% 15%;
+    /* Card - White */
+    --card: 0 0% 100%;
+    --card-foreground: 218 75% 18%;
 
     /* Popover */
-    --popover: 200 50% 98%;
-    --popover-foreground: 222 47% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 218 75% 18%;
 
-    /* Primary - Sunny Yellow #FFD700 */
-    --primary: 51 100% 50%;
-    --primary-foreground: 222 47% 15%;
+    /* Primary - Jules Verne Navy #0B2D6B */
+    --primary: 218 81% 23%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Orange Vif #FFA500 */
-    --secondary: 39 100% 50%;
-    --secondary-foreground: 0 0% 100%;
+    /* Secondary - Jules Verne Gold #F4B400 */
+    --secondary: 44 100% 48%;
+    --secondary-foreground: 218 81% 18%;
 
-    /* Muted - Soft blue */
-    --muted: 200 40% 90%;
-    --muted-foreground: 222 30% 45%;
+    /* Muted */
+    --muted: 210 25% 94%;
+    --muted-foreground: 218 20% 40%;
 
-    /* Accent - Pink Candy #FF69B4 */
-    --accent: 330 100% 71%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent - Gold */
+    --accent: 44 100% 48%;
+    --accent-foreground: 218 81% 18%;
 
     /* Destructive */
-    --destructive: 0 84% 60%;
+    --destructive: 0 78% 52%;
     --destructive-foreground: 0 0% 100%;
 
     /* Border & Input */
-    --border: 200 40% 85%;
-    --input: 200 40% 90%;
-    --ring: 260 50% 65%;
+    --border: 210 25% 88%;
+    --input: 210 25% 92%;
+    --ring: 218 81% 30%;
 
     --radius: 1rem;
 
-    /* Custom Rainbow Colors - from reference */
-    --rainbow-yellow: 51 100% 50%;
-    --rainbow-orange: 39 100% 50%;
-    --rainbow-pink: 330 100% 71%;
-    --rainbow-purple: 260 50% 65%;
-    --rainbow-blue: 199 89% 60%;
-    --rainbow-green: 145 70% 50%;
-    --rainbow-coral: 16 100% 66%;
+    /* Legacy "rainbow" tokens remapped to Jules Verne tones for backward compatibility */
+    --rainbow-yellow: 44 100% 48%;
+    --rainbow-orange: 38 95% 50%;
+    --rainbow-pink: 218 81% 23%;
+    --rainbow-purple: 218 70% 35%;
+    --rainbow-blue: 218 81% 23%;
+    --rainbow-green: 218 50% 40%;
+    --rainbow-coral: 38 95% 50%;
 
-    /* Sky Colors */
-    --sky-light: 200 85% 95%;
-    --sky-base: 200 80% 88%;
-    --sky-cloud: 200 30% 98%;
-    --sky-deep: 207 89% 68%;
+    /* Surface Colors */
+    --sky-light: 210 30% 98%;
+    --sky-base: 210 25% 94%;
+    --sky-cloud: 0 0% 100%;
+    --sky-deep: 218 81% 30%;
 
-    /* Feature card colors - more vibrant */
-    --card-green: 160 60% 88%;
-    --card-purple: 260 70% 90%;
-    --card-orange: 39 100% 90%;
-    --card-blue: 200 80% 90%;
-    --card-pink: 330 80% 92%;
+    /* Feature card surfaces - subtle */
+    --card-green: 210 30% 96%;
+    --card-purple: 218 40% 96%;
+    --card-orange: 44 80% 95%;
+    --card-blue: 210 40% 96%;
+    --card-pink: 44 80% 95%;
 
     /* Sidebar */
-    --sidebar-background: 260 60% 50%;
+    --sidebar-background: 218 81% 18%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 51 100% 50%;
-    --sidebar-primary-foreground: 222 47% 15%;
-    --sidebar-accent: 260 50% 60%;
+    --sidebar-primary: 44 100% 48%;
+    --sidebar-primary-foreground: 218 81% 18%;
+    --sidebar-accent: 218 70% 28%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 260 40% 45%;
-    --sidebar-ring: 51 100% 50%;
+    --sidebar-border: 218 60% 25%;
+    --sidebar-ring: 44 100% 48%;
   }
 
   .dark {
@@ -237,61 +238,40 @@
 }
 
 @layer utilities {
-  /* Sky gradient background - enhanced with more depth */
+  /* Light background gradient */
   .bg-sky-gradient {
-    background: linear-gradient(
-      180deg,
-      hsl(200 85% 94%) 0%,
-      hsl(200 80% 90%) 40%,
-      hsl(220 70% 92%) 70%,
-      hsl(260 50% 92%) 100%
-    );
+    background: linear-gradient(180deg, hsl(210 30% 98%) 0%, hsl(210 25% 95%) 100%);
   }
 
-  /* Hero gradient - more vibrant */
+  /* Hero gradient - clean light with subtle gold radial */
   .bg-hero-gradient {
-    background: 
-      radial-gradient(ellipse 80% 50% at 50% 0%, hsl(51 100% 90% / 0.3) 0%, transparent 50%),
-      linear-gradient(
-        180deg,
-        hsl(200 85% 94%) 0%,
-        hsl(200 80% 90%) 50%,
-        hsl(220 60% 92%) 100%
-      );
+    background:
+      radial-gradient(ellipse 70% 50% at 50% 0%, hsl(44 100% 90% / 0.4) 0%, transparent 60%),
+      linear-gradient(180deg, hsl(210 30% 98%) 0%, hsl(210 25% 95%) 100%);
   }
 
-  /* Rainbow gradient */
+  /* Brand gradient - Navy → Gold */
   .bg-rainbow {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--rainbow-coral)) 0%,
-      hsl(var(--rainbow-yellow)) 20%,
-      hsl(var(--rainbow-orange)) 40%,
-      hsl(var(--rainbow-pink)) 60%,
-      hsl(var(--rainbow-purple)) 80%,
-      hsl(var(--rainbow-blue)) 100%
-    );
+    background: linear-gradient(135deg, hsl(218 81% 23%) 0%, hsl(218 70% 35%) 60%, hsl(44 100% 48%) 100%);
   }
 
-  /* Footer gradient - enhanced */
+  /* Footer gradient - deep navy */
   .bg-footer-gradient {
-    background: linear-gradient(
-      135deg,
-      hsl(260 60% 50%) 0%,
-      hsl(280 60% 55%) 40%,
-      hsl(310 65% 60%) 80%,
-      hsl(330 70% 65%) 100%
-    );
+    background: linear-gradient(135deg, hsl(218 81% 18%) 0%, hsl(218 70% 25%) 100%);
   }
 
-  /* Sun rays effect */
+  /* Soft golden rays */
   .sun-rays {
-    background: 
-      repeating-conic-gradient(
-        from 0deg,
-        hsl(51 100% 75% / 0.15) 0deg 10deg,
-        transparent 10deg 20deg
-      );
+    background:
+      repeating-conic-gradient(from 0deg, hsl(44 100% 70% / 0.08) 0deg 12deg, transparent 12deg 24deg);
+  }
+
+  /* Fade-in helpers */
+  .animate-fade-in {
+    animation: fade-in 0.8s ease-out both;
+  }
+  .animate-fade-in-up {
+    animation: fade-in-up 0.9s ease-out both;
   }
 
   /* Decorative math symbols background */
