@@ -131,7 +131,7 @@ const Admin = () => {
     if (!authLoading && !user) {
       navigate('/auth');
     } else if (!authLoading && user && !isAdmin) {
-      navigate('/dashboard');
+      navigate('/');
       toast({
         title: "Accès refusé",
         description: "Vous n'avez pas les droits d'administrateur",
