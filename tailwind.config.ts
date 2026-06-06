@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['"Fredoka One"', 'cursive'],
-        body: ['Nunito', 'sans-serif'],
+        display: ['Poppins', '"Fredoka One"', 'system-ui', 'sans-serif'],
+        body: ['Inter', 'Nunito', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
