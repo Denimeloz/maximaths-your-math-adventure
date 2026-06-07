@@ -8,10 +8,12 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 
-import { Plus, Trash2, Edit, X, Upload, Loader2, FileText, Eye, EyeOff, GraduationCap, GripVertical } from 'lucide-react';
+import { Plus, Trash2, Edit, X, Upload, Loader2, FileText, Eye, EyeOff, GraduationCap, GripVertical, Link as LinkIcon } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
+
+interface ResourceLink { title: string; url: string }
 
 interface Resource {
   id: string;
@@ -21,6 +23,7 @@ interface Resource {
   file_name: string | null;
   is_published: boolean;
   order_index: number;
+  resource_links: ResourceLink[] | null;
 }
 
 export const DnbRevisionResourcesManager: React.FC = () => {
@@ -36,6 +39,7 @@ export const DnbRevisionResourcesManager: React.FC = () => {
     file_url: '',
     file_name: '',
     is_published: false,
+    resource_links: [] as ResourceLink[],
   });
 
   const sensors = useSensors(
@@ -80,7 +84,7 @@ export const DnbRevisionResourcesManager: React.FC = () => {
   const resetForm = () => {
     setShowForm(false);
     setEditing(null);
-    setForm({ title: '', description: '', file_url: '', file_name: '', is_published: false });
+    setForm({ title: '', description: '', file_url: '', file_name: '', is_published: false, resource_links: [] });
   };
 
   const handleSave = async () => {
@@ -94,6 +98,7 @@ export const DnbRevisionResourcesManager: React.FC = () => {
       file_url: form.file_url || null,
       file_name: form.file_name || null,
       is_published: form.is_published,
+      resource_links: form.resource_links.filter(l => l.url.trim()),
     };
     if (editing) {
       const { error } = await (supabase as any)
@@ -118,6 +123,7 @@ export const DnbRevisionResourcesManager: React.FC = () => {
       file_url: item.file_url || '',
       file_name: item.file_name || '',
       is_published: item.is_published,
+      resource_links: Array.isArray(item.resource_links) ? item.resource_links : [],
     });
     setShowForm(true);
   };
@@ -207,6 +213,48 @@ export const DnbRevisionResourcesManager: React.FC = () => {
                 )}
               </div>
             </div>
+
+            {/* External Links */}
+            <div>
+              <Label className="flex items-center gap-2"><LinkIcon className="w-4 h-4" /> Liens externes (Padlet, sites...)</Label>
+              <div className="mt-2 space-y-2">
+                {form.resource_links.map((link, idx) => (
+                  <div key={idx} className="flex gap-2">
+                    <Input
+                      value={link.title}
+                      onChange={(e) => {
+                        const updated = [...form.resource_links];
+                        updated[idx] = { ...updated[idx], title: e.target.value };
+                        setForm(p => ({ ...p, resource_links: updated }));
+                      }}
+                      placeholder="Titre (ex: Padlet de révision)"
+                      className="rounded-xl flex-1"
+                    />
+                    <Input
+                      value={link.url}
+                      onChange={(e) => {
+                        const updated = [...form.resource_links];
+                        updated[idx] = { ...updated[idx], url: e.target.value };
+                        setForm(p => ({ ...p, resource_links: updated }));
+                      }}
+                      placeholder="https://..."
+                      className="rounded-xl flex-1"
+                    />
+                    <Button variant="ghost" size="icon" onClick={() => {
+                      setForm(p => ({ ...p, resource_links: p.resource_links.filter((_, i) => i !== idx) }));
+                    }}>
+                      <X className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
+                <Button variant="outline" size="sm" className="rounded-xl" onClick={() => {
+                  setForm(p => ({ ...p, resource_links: [...p.resource_links, { title: '', url: '' }] }));
+                }}>
+                  <Plus className="w-4 h-4 mr-1" /> Ajouter un lien
+                </Button>
+              </div>
+            </div>
+
             <div className="flex items-center gap-3 pt-2">
               <Switch id="pub" checked={form.is_published}
                 onCheckedChange={(c) => setForm(p => ({ ...p, is_published: c }))} />
@@ -250,9 +298,14 @@ export const DnbRevisionResourcesManager: React.FC = () => {
                         )}
                         {item.file_url && (
                           <a href={item.file_url} target="_blank" rel="noopener noreferrer"
-                            className="text-xs text-rainbow-blue hover:underline inline-flex items-center gap-1 mt-1">
+                            className="text-xs text-rainbow-blue hover:underline inline-flex items-center gap-1 mt-1 mr-3">
                             <FileText className="w-3 h-3" /> {item.file_name || 'Voir le fichier'}
                           </a>
+                        )}
+                        {Array.isArray(item.resource_links) && item.resource_links.length > 0 && (
+                          <span className="text-xs text-rainbow-purple inline-flex items-center gap-1 mt-1">
+                            <LinkIcon className="w-3 h-3" /> {item.resource_links.length} lien(s)
+                          </span>
                         )}
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
