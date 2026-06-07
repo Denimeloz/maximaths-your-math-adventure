@@ -14,6 +14,7 @@ import LevelContent from "./pages/LevelContent";
 import AdminLogin from "./pages/AdminLogin";
 import ClubMaths from "./pages/ClubMaths";
 import DnbRevisionResources from "./pages/DnbRevisionResources";
+import ProgressionSpiralee from "./pages/ProgressionSpiralee";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="/club-maths" element={<ClubMaths />} />
             <Route path="/club-maths/:activitySlug" element={<ClubMaths />} />
             <Route path="/ressources-dnb" element={<DnbRevisionResources />} />
+            <Route path="/progression-spiralee" element={<ProgressionSpiralee />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

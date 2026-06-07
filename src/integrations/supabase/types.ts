@@ -495,6 +495,7 @@ export type Database = {
           id: string
           is_published: boolean
           order_index: number
+          resource_links: Json
           title: string
           updated_at: string
         }
@@ -506,6 +507,7 @@ export type Database = {
           id?: string
           is_published?: boolean
           order_index?: number
+          resource_links?: Json
           title: string
           updated_at?: string
         }
@@ -517,6 +519,7 @@ export type Database = {
           id?: string
           is_published?: boolean
           order_index?: number
+          resource_links?: Json
           title?: string
           updated_at?: string
         }
@@ -916,6 +919,51 @@ export type Database = {
           profession?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      spiral_resources: {
+        Row: {
+          created_at: string
+          description: string | null
+          external_url: string | null
+          file_name: string | null
+          file_url: string | null
+          id: string
+          is_published: boolean
+          level: string
+          order_index: number
+          resource_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          external_url?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_published?: boolean
+          level: string
+          order_index?: number
+          resource_type?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          external_url?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_published?: boolean
+          level?: string
+          order_index?: number
+          resource_type?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }

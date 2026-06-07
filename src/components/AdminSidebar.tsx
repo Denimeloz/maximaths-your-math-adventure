@@ -31,19 +31,21 @@ import {
   Megaphone,
   Camera,
   Gamepad2,
-  GraduationCap
+  GraduationCap,
+  Spline
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useState } from 'react';
 
-export type AdminCourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale' | 'club-maths';
+export type AdminCourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale' | 'club-maths' | 'spiral-progression';
 
 interface LevelConfig {
   id: AdminCourseLevel;
   label: string;
   color: string;
   isClub?: boolean;
+  isSpiral?: boolean;
 }
 
 const levels: LevelConfig[] = [
@@ -55,17 +57,31 @@ const levels: LevelConfig[] = [
   { id: 'premiere', label: 'Première', color: 'rainbow-pink' },
   { id: 'terminale', label: 'Terminale', color: 'rainbow-blue' },
   { id: 'club-maths', label: 'Club Jules Verne', color: 'rainbow-pink', isClub: true },
+  { id: 'spiral-progression', label: 'Progression Spiralée', color: 'rainbow-purple', isSpiral: true },
+];
+
+const SPIRAL_SUBSECTIONS = [
+  { id: '6eme', label: '6ème', icon: BookOpen },
+  { id: '5eme', label: '5ème', icon: BookOpen },
+  { id: '4eme', label: '4ème', icon: BookOpen },
+  { id: '3eme', label: '3ème', icon: BookOpen },
+  { id: 'seconde', label: 'Seconde', icon: BookOpen },
+  { id: 'premiere', label: 'Première', icon: BookOpen },
+  { id: 'terminale', label: 'Terminale', icon: BookOpen },
 ];
 
 const getSubSections = (level: AdminCourseLevel) => {
-  // Club de maths a ses propres sous-sections
   if (level === 'club-maths') {
     return [
       { id: 'enigmes', label: 'Énigmes hebdomadaires', icon: Puzzle },
       { id: 'projets', label: 'Projets pédagogiques', icon: BookOpen },
     ];
   }
-  
+
+  if (level === 'spiral-progression') {
+    return SPIRAL_SUBSECTIONS;
+  }
+
   const baseSections = [
     { id: 'infos', label: 'Informations pour la classe', icon: Megaphone },
     { id: 'activites', label: 'Activité de découverte', icon: Lightbulb },
@@ -184,6 +200,8 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSideb
                   <span className="flex items-center gap-2">
                     {level.isClub ? (
                       <Puzzle className={`w-4 h-4 text-${level.color}`} />
+                    ) : level.isSpiral ? (
+                      <Spline className={`w-4 h-4 text-${level.color}`} />
                     ) : (
                       <div className={`w-2 h-2 rounded-full bg-${level.color}`} />
                     )}
