@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, GraduationCap, Download, FileText, Star } from 'lucide-react';
+import { ArrowLeft, GraduationCap, Download, FileText, Star, Link as LinkIcon } from 'lucide-react';
+
+interface ResourceLink { title: string; url: string }
 
 interface Resource {
   id: string;
@@ -11,6 +13,7 @@ interface Resource {
   description: string | null;
   file_url: string | null;
   file_name: string | null;
+  resource_links: ResourceLink[] | null;
 }
 
 const DnbRevisionResources: React.FC = () => {
@@ -81,12 +84,24 @@ const DnbRevisionResources: React.FC = () => {
                 )}
                 {item.file_url ? (
                   <a href={item.file_url} target="_blank" rel="noopener noreferrer" download
-                    className="mt-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rainbow-coral text-white font-body font-semibold hover:bg-rainbow-coral/90 transition-colors shadow-btn hover:shadow-btn-hover">
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rainbow-coral text-white font-body font-semibold hover:bg-rainbow-coral/90 transition-colors shadow-btn hover:shadow-btn-hover">
                     <Download className="w-4 h-4" /> Télécharger
                   </a>
-                ) : (
-                  <div className="mt-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-muted text-muted-foreground text-sm">
-                    <FileText className="w-4 h-4" /> Aucun fichier
+                ) : null}
+                {Array.isArray(item.resource_links) && item.resource_links.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-border space-y-2">
+                    {item.resource_links.map((link, idx) => (
+                      <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-sm text-rainbow-purple hover:underline">
+                        <LinkIcon className="w-4 h-4 shrink-0" />
+                        <span className="truncate">{link.title || link.url}</span>
+                      </a>
+                    ))}
+                  </div>
+                )}
+                {!item.file_url && (!Array.isArray(item.resource_links) || item.resource_links.length === 0) && (
+                  <div className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-muted text-muted-foreground text-sm">
+                    <FileText className="w-4 h-4" /> Aucune ressource
                   </div>
                 )}
               </div>
