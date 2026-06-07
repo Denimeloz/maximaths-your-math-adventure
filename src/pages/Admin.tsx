@@ -23,6 +23,7 @@ import { ClassInfoManager } from '@/components/admin/ClassInfoManager';
 import { ClassPhotosManager } from '@/components/admin/ClassPhotosManager';
 import { GamesGeniallyManager } from '@/components/admin/GamesGeniallyManager';
 import { DnbRevisionResourcesManager } from '@/components/admin/DnbRevisionResourcesManager';
+import SpiralResourcesManager from '@/components/admin/SpiralResourcesManager';
 import PDFViewer from '@/components/PDFViewer';
 import { 
   Users, 
@@ -549,7 +550,12 @@ const Admin = () => {
           {activeLevel && (
             <div className="mb-6 p-4 rounded-xl bg-card border border-border">
             <h2 className="text-xl font-display text-foreground flex items-center gap-2">
-                {activeLevel === 'club-maths' ? 'Club Jules Verne' : getLevelLabel(activeLevel as CourseLevel)} - {
+                {activeLevel === 'club-maths'
+                  ? 'Club Jules Verne'
+                  : activeLevel === 'spiral-progression'
+                  ? `Progression Spiralée — ${getLevelLabel(activeTab as CourseLevel)}`
+                  : getLevelLabel(activeLevel as CourseLevel)
+                }{activeLevel !== 'spiral-progression' && ` - ${
                   activeTab === 'infos' ? 'Informations pour la classe' :
                   activeTab === 'cours' ? 'Cours' :
                   activeTab === 'activites' ? 'Activité de découverte' :
@@ -563,7 +569,7 @@ const Admin = () => {
                   activeTab === 'ressources-dnb' ? 'Ressources révision DNB' :
                   activeTab === 'enigmes' ? 'Énigmes hebdomadaires' :
                   activeTab === 'projets' ? 'Projets pédagogiques' : ''
-                }
+                }`}
               </h2>
             </div>
           )}
@@ -593,13 +599,18 @@ const Admin = () => {
           {activeTab === 'dashboard' && !activeLevel && <AdminDashboard />}
 
           {/* Class Info Section */}
-          {activeTab === 'infos' && activeLevel && activeLevel !== 'club-maths' && (
+          {activeTab === 'infos' && activeLevel && activeLevel !== 'club-maths' && activeLevel !== 'spiral-progression' && (
             <ClassInfoManager selectedLevel={activeLevel as CourseLevel} />
           )}
 
           {/* DNB Revision Resources */}
           {activeTab === 'ressources-dnb' && activeLevel === '3eme' && (
             <DnbRevisionResourcesManager />
+          )}
+
+          {/* Spiral Progression */}
+          {activeLevel === 'spiral-progression' && (
+            <SpiralResourcesManager selectedLevel={activeTab as CourseLevel} />
           )}
 
           {/* Club de maths Sections */}
