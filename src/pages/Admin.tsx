@@ -610,7 +610,7 @@ const Admin = () => {
 
           {/* Spiral Progression */}
           {activeLevel === 'spiral-progression' && (
-            <SpiralResourcesManager selectedLevel={activeTab as CourseLevel} />
+            <SpiralResourcesManager selectedLevel={activeTab as any} />
           )}
 
           {/* Club de maths Sections */}
