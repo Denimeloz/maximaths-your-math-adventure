@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap, Puzzle, Camera, Gamepad2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import bannerAsset from "@/assets/maximaths-banner.png.asset.json";
 
 const levels = [
   { id: '6eme', label: '6ème', isClub: false },
