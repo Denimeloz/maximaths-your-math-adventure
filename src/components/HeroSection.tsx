@@ -67,7 +67,7 @@ const HeroSection = () => {
           <div className="absolute -inset-4 md:-inset-6 bg-gradient-to-br from-primary/10 via-transparent to-secondary/20 rounded-[2.5rem] blur-2xl" />
           <div className="relative rounded-[1.75rem] md:rounded-[2.25rem] overflow-hidden ring-1 ring-border shadow-[0_20px_60px_-20px_hsl(218_81%_18%/0.25)] bg-card animate-float-slow">
             <img
-              src={bannerAsset.url}
+              src="/images/maximaths-banner.png"
               alt="MAXIMATHS — Curiosité, Assiduité, Rigueur. Comprendre, S'entraîner, Progresser."
               className="w-full h-auto block"
               loading="eager"
