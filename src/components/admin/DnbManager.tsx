@@ -8,6 +8,7 @@ import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, Star, Upload, FileText, Loade
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
+import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 interface DnbContent {
   id: string;
@@ -24,6 +25,7 @@ interface DnbContent {
 
 export const DnbManager: React.FC = () => {
   const { toast } = useToast();
+  const academicYearId = useCurrentAcademicYearId();
   const [items, setItems] = useState<DnbContent[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<DnbContent | null>(null);
@@ -48,12 +50,13 @@ export const DnbManager: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [academicYearId]);
 
   const fetchData = async () => {
     const { data } = await supabase
       .from('dnb_content')
       .select('*')
+      .eq('academic_year_id', academicYearId as any)
       .order('order_index', { ascending: true });
     if (data) setItems(data);
   };
@@ -122,6 +125,7 @@ export const DnbManager: React.FC = () => {
       correction_url: form.correction_url || null,
       category: form.category,
       year: form.year || null,
+      academic_year_id: academicYearId,
     };
 
     if (editingItem) {
