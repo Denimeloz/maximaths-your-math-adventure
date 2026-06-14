@@ -148,7 +148,7 @@ const AdminInner = () => {
     if (isAdmin) {
       fetchData();
     }
-  }, [isAdmin]);
+  }, [isAdmin, selectedYearId]);
 
   const fetchData = async () => {
     setIsLoading(true);
