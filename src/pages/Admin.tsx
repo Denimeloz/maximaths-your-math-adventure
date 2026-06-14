@@ -157,12 +157,14 @@ const AdminInner = () => {
   };
 
   const fetchCourses = async () => {
-    const { data, error } = await supabase
+    let query = supabase
       .from('courses')
       .select('*')
       .order('level', { ascending: true })
       .order('order_index', { ascending: true });
-    
+    if (selectedYearId) query = query.eq('academic_year_id', selectedYearId);
+    const { data, error } = await query;
+
     if (error) {
       toast({
         title: "Erreur",
