@@ -528,13 +528,14 @@ const AdminInner = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-hero-gradient">
-        <AdminSidebar 
-          activeTab={activeTab} 
+        <AdminSidebar
+          activeTab={activeTab}
           activeLevel={activeLevel}
-          onTabChange={(tab, level) => {
+          onTabChange={(tab, level, academicYearId) => {
             setActiveTab(tab);
             setActiveLevel(level || null);
-          }} 
+            if (academicYearId !== undefined) setSelectedYearId(academicYearId);
+          }}
         />
         
         <main className="flex-1 p-6 lg:p-8 overflow-auto">
