@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Sidebar,
@@ -12,11 +12,11 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from '@/components/ui/sidebar';
-import { 
-  LayoutDashboard, 
-  BookOpen, 
-  Users, 
-  User, 
+import {
+  LayoutDashboard,
+  BookOpen,
+  Users,
+  User,
   LogOut,
   Shield,
   ClipboardList,
@@ -32,33 +32,25 @@ import {
   Camera,
   Gamepad2,
   GraduationCap,
-  Spline
+  Spline,
+  CalendarRange,
+  CalendarPlus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAcademicYears } from '@/contexts/AcademicYearContext';
 
-export type AdminCourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale' | 'club-maths' | 'spiral-progression';
+export type AdminCourseLevel =
+  | '6eme' | '5eme' | '4eme' | '3eme'
+  | 'seconde' | 'premiere' | 'terminale'
+  | 'club-maths'
+  | 'spiral-progression';
 
-interface LevelConfig {
-  id: AdminCourseLevel;
-  label: string;
-  color: string;
-  isClub?: boolean;
-  isSpiral?: boolean;
-}
-
-const levels: LevelConfig[] = [
-  { id: '6eme', label: '6ème', color: 'rainbow-blue' },
-  { id: '5eme', label: '5ème', color: 'rainbow-green' },
-  { id: '4eme', label: '4ème', color: 'rainbow-orange' },
-  { id: '3eme', label: '3ème', color: 'rainbow-coral' },
-  { id: 'seconde', label: 'Seconde', color: 'rainbow-purple' },
-  { id: 'premiere', label: 'Première', color: 'rainbow-pink' },
-  { id: 'terminale', label: 'Terminale', color: 'rainbow-blue' },
-  { id: 'club-maths', label: 'Club Jules Verne', color: 'rainbow-pink', isClub: true },
-  { id: 'spiral-progression', label: 'Progression Spiralée', color: 'rainbow-purple', isSpiral: true },
-];
+const LEVEL_LABELS: Record<string, string> = {
+  '6eme': '6ème', '5eme': '5ème', '4eme': '4ème', '3eme': '3ème',
+  'seconde': 'Seconde', 'premiere': 'Première', 'terminale': 'Terminale',
+};
 
 const SPIRAL_SUBSECTIONS = [
   { id: '6eme', label: '6ème', icon: BookOpen },
@@ -77,33 +69,27 @@ const getSubSections = (level: AdminCourseLevel) => {
       { id: 'projets', label: 'Projets pédagogiques', icon: BookOpen },
     ];
   }
+  if (level === 'spiral-progression') return SPIRAL_SUBSECTIONS;
 
-  if (level === 'spiral-progression') {
-    return SPIRAL_SUBSECTIONS;
-  }
-
-  const baseSections = [
+  const base = [
     { id: 'infos', label: 'Informations pour la classe', icon: Megaphone },
     { id: 'activites', label: 'Activité de découverte', icon: Lightbulb },
     { id: 'cours', label: 'Cours', icon: BookOpen },
     { id: 'exercices-entrainement', label: "Exercices d'entraînement", icon: Dumbbell },
-    { id: 'tests-entrainement', label: level === '3eme' ? "Tests ou Mini DNB" : "Tests (Évaluations formatives)", icon: Target },
+    { id: 'tests-entrainement', label: level === '3eme' ? 'Tests ou Mini DNB' : 'Tests (Évaluations formatives)', icon: Target },
     { id: 'devoirs', label: 'Devoirs de niveaux', icon: ClipboardList },
     { id: 'evaluations', label: 'Évaluations', icon: FileCheck },
     { id: 'jeux-genially', label: 'Jeux et Genially', icon: Gamepad2 },
   ];
-  
   if (level === '3eme') {
-    baseSections.push({ id: 'prepa-dnb', label: 'Prépa DNB', icon: Star });
-    baseSections.push({ id: 'ressources-dnb', label: 'Ressources révision DNB', icon: GraduationCap });
-    baseSections.push({ id: 'classe-activite', label: 'Classe en activité', icon: Camera });
+    base.push({ id: 'prepa-dnb', label: 'Prépa DNB', icon: Star });
+    base.push({ id: 'ressources-dnb', label: 'Ressources révision DNB', icon: GraduationCap });
+    base.push({ id: 'classe-activite', label: 'Classe en activité', icon: Camera });
   }
-
   if (level === 'seconde') {
-    baseSections.push({ id: 'classe-activite', label: 'Classe en activité', icon: Camera });
+    base.push({ id: 'classe-activite', label: 'Classe en activité', icon: Camera });
   }
-  
-  return baseSections;
+  return base;
 };
 
 const accountItems = [
@@ -114,35 +100,32 @@ const accountItems = [
 interface AdminSidebarProps {
   activeTab?: string;
   activeLevel?: AdminCourseLevel | null;
-  onTabChange?: (tab: string, level?: AdminCourseLevel) => void;
+  onTabChange?: (tab: string, level?: AdminCourseLevel | null, academicYearId?: string | null) => void;
 }
 
 export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSidebarProps) {
   const navigate = useNavigate();
-  const location = useLocation();
   const { profile, signOut } = useAuth();
-  const [openLevels, setOpenLevels] = useState<Record<string, boolean>>({ 
-    [activeLevel || '']: true 
-  });
+  const { years, classes, selectedYearId } = useAcademicYears();
+
+  const [openYears, setOpenYears] = useState<Record<string, boolean>>({});
+  const [openLevels, setOpenLevels] = useState<Record<string, boolean>>({});
+
+  // Auto-open the currently-selected year
+  useEffect(() => {
+    if (selectedYearId) setOpenYears(prev => ({ ...prev, [selectedYearId]: true }));
+  }, [selectedYearId]);
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
   };
 
-  const handleSubSectionClick = (level: AdminCourseLevel, sectionId: string) => {
-    if (onTabChange) {
-      onTabChange(sectionId, level);
-    }
-  };
+  const toggleYear = (id: string) => setOpenYears(p => ({ ...p, [id]: !p[id] }));
+  const toggleLevel = (id: string) => setOpenLevels(p => ({ ...p, [id]: !p[id] }));
 
-  const toggleLevel = (levelId: string) => {
-    setOpenLevels(prev => ({ ...prev, [levelId]: !prev[levelId] }));
-  };
-
-  const isActiveSection = (level: AdminCourseLevel, sectionId: string) => {
-    return activeLevel === level && activeTab === sectionId;
-  };
+  const isActiveSection = (yearId: string | null, level: AdminCourseLevel, sectionId: string) =>
+    activeLevel === level && activeTab === sectionId && (yearId === null || selectedYearId === yearId);
 
   return (
     <Sidebar className="border-r border-border bg-card">
@@ -152,12 +135,8 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSideb
             <Shield className="w-5 h-5 text-secondary-foreground" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-display text-foreground truncate">
-              {profile?.first_name || 'Admin'}
-            </p>
-            <p className="text-xs text-rainbow-purple font-body font-semibold">
-              Administrateur
-            </p>
+            <p className="font-display text-foreground truncate">{profile?.first_name || 'Admin'}</p>
+            <p className="text-xs text-rainbow-purple font-body font-semibold">Administrateur</p>
           </div>
         </div>
       </SidebarHeader>
@@ -168,58 +147,113 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSideb
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton 
-                  onClick={() => onTabChange?.('dashboard')}
-                  className={`cursor-pointer transition-colors ${
-                    activeTab === 'dashboard' && !activeLevel
-                      ? 'bg-rainbow-purple/10 text-rainbow-purple font-medium' 
-                      : 'hover:bg-muted/50'
-                  }`}
+                <SidebarMenuButton
+                  onClick={() => onTabChange?.('dashboard', null, null)}
+                  className={`cursor-pointer transition-colors ${activeTab === 'dashboard' && !activeLevel ? 'bg-rainbow-purple/10 text-rainbow-purple font-medium' : 'hover:bg-muted/50'}`}
                 >
                   <LayoutDashboard className="w-4 h-4 mr-2" />
                   <span>Dashboard</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => onTabChange?.('academic-years', null, null)}
+                  className={`cursor-pointer transition-colors ${activeTab === 'academic-years' ? 'bg-rainbow-purple/10 text-rainbow-purple font-medium' : 'hover:bg-muted/50'}`}
+                >
+                  <CalendarPlus className="w-4 h-4 mr-2" />
+                  <span>Nouvelle année</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Niveaux et Club */}
+        {/* Années scolaires */}
         <SidebarGroup>
-          <SidebarGroupLabel className="font-display text-muted-foreground">Niveaux & Club</SidebarGroupLabel>
+          <SidebarGroupLabel className="font-display text-muted-foreground">Années scolaires</SidebarGroupLabel>
           <SidebarGroupContent>
-            {levels.map((level) => (
-              <Collapsible 
-                key={level.id} 
-                open={openLevels[level.id]} 
-                onOpenChange={() => toggleLevel(level.id)}
-              >
-                <CollapsibleTrigger className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-muted/50 ${
-                  activeLevel === level.id ? `text-${level.color}` : 'text-foreground'
-                }`}>
+            {years.length === 0 && (
+              <p className="px-3 py-2 text-xs text-muted-foreground italic">
+                Aucune année. Créez-en une via « Nouvelle année ».
+              </p>
+            )}
+            {years.map(year => {
+              const yClasses = classes.filter(c => c.academic_year_id === year.id);
+              return (
+                <Collapsible key={year.id} open={!!openYears[year.id]} onOpenChange={() => toggleYear(year.id)}>
+                  <CollapsibleTrigger className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-muted/50 ${selectedYearId === year.id ? 'text-rainbow-purple' : 'text-foreground'}`}>
+                    <span className="flex items-center gap-2">
+                      <CalendarRange className="w-4 h-4" />
+                      {year.label}
+                      {year.is_active && <Star className="w-3 h-3 fill-rainbow-purple text-rainbow-purple" />}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 transition-transform ${openYears[year.id] ? 'rotate-180' : ''}`} />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="ml-3 border-l-2 border-muted pl-2">
+                      {yClasses.length === 0 ? (
+                        <p className="text-xs text-muted-foreground italic px-3 py-2">Aucune classe ouverte.</p>
+                      ) : yClasses.map(c => {
+                        const lvl = c.class_level as AdminCourseLevel;
+                        const key = `${year.id}:${c.id}`;
+                        return (
+                          <Collapsible key={c.id} open={!!openLevels[key]} onOpenChange={() => toggleLevel(key)}>
+                            <CollapsibleTrigger className={`w-full flex items-center justify-between px-3 py-1.5 rounded-md text-sm transition-colors hover:bg-muted/50 ${selectedYearId === year.id && activeLevel === lvl ? 'text-rainbow-purple font-medium' : 'text-foreground'}`}>
+                              <span className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-rainbow-purple/60" />
+                                {LEVEL_LABELS[c.class_level] || c.class_level}
+                              </span>
+                              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${openLevels[key] ? 'rotate-180' : ''}`} />
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <SidebarMenu className="ml-3 mt-1 border-l border-muted/60 pl-2">
+                                {getSubSections(lvl).map(section => (
+                                  <SidebarMenuItem key={section.id}>
+                                    <SidebarMenuButton
+                                      onClick={() => onTabChange?.(section.id, lvl, year.id)}
+                                      className={`cursor-pointer transition-colors text-sm ${isActiveSection(year.id, lvl, section.id) ? 'bg-rainbow-purple/10 text-rainbow-purple font-medium' : 'hover:bg-muted/50'}`}
+                                    >
+                                      <section.icon className="w-4 h-4 mr-2" />
+                                      <span className="truncate">{section.label}</span>
+                                    </SidebarMenuButton>
+                                  </SidebarMenuItem>
+                                ))}
+                              </SidebarMenu>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        );
+                      })}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              );
+            })}
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Espaces transverses */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="font-display text-muted-foreground">Espaces transverses</SidebarGroupLabel>
+          <SidebarGroupContent>
+            {[
+              { id: 'club-maths' as AdminCourseLevel, label: 'Club Jules Verne', icon: Puzzle },
+              { id: 'spiral-progression' as AdminCourseLevel, label: 'Progression Spiralée', icon: Spline },
+            ].map(item => (
+              <Collapsible key={item.id} open={!!openLevels[item.id]} onOpenChange={() => toggleLevel(item.id)}>
+                <CollapsibleTrigger className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-muted/50 ${activeLevel === item.id ? 'text-rainbow-purple' : 'text-foreground'}`}>
                   <span className="flex items-center gap-2">
-                    {level.isClub ? (
-                      <Puzzle className={`w-4 h-4 text-${level.color}`} />
-                    ) : level.isSpiral ? (
-                      <Spline className={`w-4 h-4 text-${level.color}`} />
-                    ) : (
-                      <div className={`w-2 h-2 rounded-full bg-${level.color}`} />
-                    )}
-                    {level.label}
+                    <item.icon className="w-4 h-4" />
+                    {item.label}
                   </span>
-                  <ChevronDown className={`w-4 h-4 transition-transform ${openLevels[level.id] ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 transition-transform ${openLevels[item.id] ? 'rotate-180' : ''}`} />
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <SidebarMenu className="ml-4 mt-1 border-l-2 border-muted pl-2">
-                    {getSubSections(level.id).map((section) => (
+                    {getSubSections(item.id).map(section => (
                       <SidebarMenuItem key={section.id}>
-                        <SidebarMenuButton 
-                          onClick={() => handleSubSectionClick(level.id, section.id)}
-                          className={`cursor-pointer transition-colors text-sm ${
-                            isActiveSection(level.id, section.id)
-                              ? `bg-${level.color}/10 text-${level.color} font-medium` 
-                              : 'hover:bg-muted/50'
-                          }`}
+                        <SidebarMenuButton
+                          onClick={() => onTabChange?.(section.id, item.id, null)}
+                          className={`cursor-pointer transition-colors text-sm ${activeLevel === item.id && activeTab === section.id ? 'bg-rainbow-purple/10 text-rainbow-purple font-medium' : 'hover:bg-muted/50'}`}
                         >
                           <section.icon className="w-4 h-4 mr-2" />
                           <span className="truncate">{section.label}</span>
@@ -233,20 +267,15 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSideb
           </SidebarGroupContent>
         </SidebarGroup>
 
-
         {/* Gestion */}
         <SidebarGroup>
           <SidebarGroupLabel className="font-display text-muted-foreground">Gestion</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton 
-                  onClick={() => onTabChange?.('users')}
-                  className={`cursor-pointer transition-colors ${
-                    activeTab === 'users' && !activeLevel
-                      ? 'bg-rainbow-purple/10 text-rainbow-purple font-medium' 
-                      : 'hover:bg-muted/50'
-                  }`}
+                <SidebarMenuButton
+                  onClick={() => onTabChange?.('users', null, null)}
+                  className={`cursor-pointer transition-colors ${activeTab === 'users' && !activeLevel ? 'bg-rainbow-purple/10 text-rainbow-purple font-medium' : 'hover:bg-muted/50'}`}
                 >
                   <Users className="w-4 h-4 mr-2" />
                   <span>Utilisateurs</span>
@@ -260,12 +289,9 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSideb
           <SidebarGroupLabel className="font-display text-muted-foreground">Compte</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {accountItems.map((item) => (
+              {accountItems.map(item => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    onClick={() => navigate(item.url)}
-                    className="cursor-pointer transition-colors hover:bg-muted/50"
-                  >
+                  <SidebarMenuButton onClick={() => navigate(item.url)} className="cursor-pointer transition-colors hover:bg-muted/50">
                     <item.icon className="w-4 h-4 mr-2" />
                     <span>{item.title}</span>
                   </SidebarMenuButton>
@@ -277,8 +303,8 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSideb
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-border">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           className="w-full justify-start gap-2 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10"
           onClick={handleSignOut}
         >
