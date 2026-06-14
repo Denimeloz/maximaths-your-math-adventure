@@ -8,6 +8,7 @@ import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, FileCheck, Upload, FileText, 
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
+import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 interface Evaluation {
   id: string;
@@ -28,6 +29,7 @@ interface EvaluationManagerProps {
 
 export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLevel }) => {
   const { toast } = useToast();
+  const academicYearId = useCurrentAcademicYearId();
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingEvaluation, setEditingEvaluation] = useState<Evaluation | null>(null);
@@ -49,13 +51,14 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
 
   useEffect(() => {
     fetchData();
-  }, [filterLevel]);
+  }, [filterLevel, academicYearId]);
 
   const fetchData = async () => {
     const { data } = await supabase
       .from('evaluations')
       .select('*')
       .eq('level', filterLevel)
+      .eq('academic_year_id', academicYearId as any)
       .order('order_index');
     if (data) setEvaluations(data);
   };

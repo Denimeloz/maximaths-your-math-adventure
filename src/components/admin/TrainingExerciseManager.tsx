@@ -8,6 +8,7 @@ import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, Dumbbell, Upload, FileText, L
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
+import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 interface TrainingExercise {
   id: string;
@@ -28,6 +29,7 @@ interface TrainingExerciseManagerProps {
 
 export const TrainingExerciseManager: React.FC<TrainingExerciseManagerProps> = ({ filterLevel }) => {
   const { toast } = useToast();
+  const academicYearId = useCurrentAcademicYearId();
   const [items, setItems] = useState<TrainingExercise[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<TrainingExercise | null>(null);
@@ -49,13 +51,14 @@ export const TrainingExerciseManager: React.FC<TrainingExerciseManagerProps> = (
 
   useEffect(() => {
     fetchData();
-  }, [filterLevel]);
+  }, [filterLevel, academicYearId]);
 
   const fetchData = async () => {
     const { data } = await supabase
       .from('training_exercises')
       .select('*')
       .eq('level', filterLevel)
+      .eq('academic_year_id', academicYearId as any)
       .order('order_index');
     if (data) setItems(data);
   };
@@ -140,6 +143,7 @@ export const TrainingExerciseManager: React.FC<TrainingExerciseManagerProps> = (
         .insert({
           ...data,
           level: filterLevel,
+          academic_year_id: academicYearId,
           order_index: items.length,
         });
 
