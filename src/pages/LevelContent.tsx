@@ -214,6 +214,8 @@ interface GamesGeniallyItem {
 
 const LevelContent = () => {
   const { levelId, contentType } = useParams<{ levelId: string; contentType: string }>();
+  const [searchParams] = useSearchParams();
+  const yearId = searchParams.get('year');
   const navigate = useNavigate();
   const [courses, setCourses] = useState<Course[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -226,6 +228,7 @@ const LevelContent = () => {
   const [classPhotos, setClassPhotos] = useState<ClassPhoto[]>([]);
   const [gamesGenially, setGamesGenially] = useState<GamesGeniallyItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [resolvedYearId, setResolvedYearId] = useState<string | null>(yearId);
 
   const level = levelId as CourseLevel;
   const type = contentType as ContentType;
@@ -236,6 +239,19 @@ const LevelContent = () => {
   const Icon = config.icon;
   const color = levelColors[level] || 'rainbow-blue';
 
+  // If no year in URL, fall back to active year
+  useEffect(() => {
+    if (yearId) { setResolvedYearId(yearId); return; }
+    (async () => {
+      const { data } = await (supabase as any)
+        .from('academic_years')
+        .select('id')
+        .eq('is_active', true)
+        .maybeSingle();
+      if (data?.id) setResolvedYearId(data.id);
+    })();
+  }, [yearId]);
+
   useEffect(() => {
     if (contentType === 'ressources-dnb') {
       navigate('/ressources-dnb', { replace: true });
@@ -244,7 +260,7 @@ const LevelContent = () => {
     if (levelId && contentType) {
       fetchContent();
     }
-  }, [levelId, contentType, navigate]);
+  }, [levelId, contentType, navigate, resolvedYearId]);
 
   const fetchContent = async () => {
     setIsLoading(true);
