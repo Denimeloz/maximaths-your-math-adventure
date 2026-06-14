@@ -24,7 +24,9 @@ import { ClassPhotosManager } from '@/components/admin/ClassPhotosManager';
 import { GamesGeniallyManager } from '@/components/admin/GamesGeniallyManager';
 import { DnbRevisionResourcesManager } from '@/components/admin/DnbRevisionResourcesManager';
 import SpiralResourcesManager from '@/components/admin/SpiralResourcesManager';
+import { AcademicYearsManager } from '@/components/admin/AcademicYearsManager';
 import PDFViewer from '@/components/PDFViewer';
+import { AcademicYearProvider, useAcademicYears } from '@/contexts/AcademicYearContext';
 import { 
   Users, 
   BookOpen, 
