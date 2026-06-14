@@ -1121,4 +1121,10 @@ const AdminInner = () => {
   );
 };
 
+const Admin = () => (
+  <AcademicYearProvider>
+    <AdminInner />
+  </AcademicYearProvider>
+);
+
 export default Admin;
