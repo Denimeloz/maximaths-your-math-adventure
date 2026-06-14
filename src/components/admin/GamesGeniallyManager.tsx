@@ -8,6 +8,7 @@ import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, Gamepad2, Upload, FileText, L
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
+import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 interface LinkItem {
   title: string;
@@ -33,6 +34,7 @@ interface GamesGeniallyManagerProps {
 
 export const GamesGeniallyManager: React.FC<GamesGeniallyManagerProps> = ({ filterLevel }) => {
   const { toast } = useToast();
+  const academicYearId = useCurrentAcademicYearId();
   const [items, setItems] = useState<GamesGenially[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<GamesGenially | null>(null);
@@ -52,13 +54,14 @@ export const GamesGeniallyManager: React.FC<GamesGeniallyManagerProps> = ({ filt
 
   useEffect(() => {
     fetchData();
-  }, [filterLevel]);
+  }, [filterLevel, academicYearId]);
 
   const fetchData = async () => {
     const { data } = await (supabase as any)
       .from('games_genially')
       .select('*')
       .eq('level', filterLevel)
+      .eq('academic_year_id', academicYearId)
       .order('order_index');
     if (data) setItems(data);
   };
@@ -112,7 +115,7 @@ export const GamesGeniallyManager: React.FC<GamesGeniallyManagerProps> = ({ filt
     } else {
       const { error } = await (supabase as any)
         .from('games_genially')
-        .insert({ ...data, level: filterLevel, order_index: items.length });
+        .insert({ ...data, level: filterLevel, academic_year_id: academicYearId, order_index: items.length });
       if (!error) {
         toast({ title: "Succès", description: "Élément créé" });
         fetchData();
