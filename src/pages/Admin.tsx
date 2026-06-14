@@ -606,6 +606,9 @@ const AdminInner = () => {
           {/* Dashboard Tab */}
           {activeTab === 'dashboard' && !activeLevel && <AdminDashboard />}
 
+          {/* Academic Years Manager */}
+          {activeTab === 'academic-years' && !activeLevel && <AcademicYearsManager />}
+
           {/* Class Info Section */}
           {activeTab === 'infos' && activeLevel && activeLevel !== 'club-maths' && activeLevel !== 'spiral-progression' && (
             <ClassInfoManager selectedLevel={activeLevel as CourseLevel} />
