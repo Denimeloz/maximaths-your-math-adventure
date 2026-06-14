@@ -579,6 +579,14 @@ const AdminInner = () => {
                   activeTab === 'projets' ? 'Projets pédagogiques' : ''
                 }`}
               </h2>
+              {selectedYearId && activeLevel !== 'club-maths' && activeLevel !== 'spiral-progression' && (
+                <p className="text-sm text-muted-foreground font-body mt-1">
+                  Année scolaire&nbsp;
+                  <span className="text-rainbow-purple font-semibold">
+                    {years.find(y => y.id === selectedYearId)?.label || '—'}
+                  </span>
+                </p>
+              )}
             </div>
           )}
 
