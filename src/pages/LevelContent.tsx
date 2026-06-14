@@ -263,7 +263,8 @@ const LevelContent = () => {
   }, [levelId, contentType, navigate, resolvedYearId]);
 
   const fetchContent = async () => {
-    setIsLoading(true);
+    if (!resolvedYearId) { setIsLoading(false); return; }
+
     
     if (type === 'cours') {
       const { data } = await supabase
