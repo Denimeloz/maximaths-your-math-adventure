@@ -85,7 +85,8 @@ interface UserRole {
   role: 'admin' | 'user';
 }
 
-const Admin = () => {
+const AdminInner = () => {
+  const { selectedYearId, setSelectedYearId, years, classes } = useAcademicYears();
   const { user, isAdmin, signOut, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
