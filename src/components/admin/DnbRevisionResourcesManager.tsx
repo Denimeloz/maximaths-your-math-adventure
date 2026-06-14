@@ -12,6 +12,7 @@ import { Plus, Trash2, Edit, X, Upload, Loader2, FileText, Eye, EyeOff, Graduati
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
+import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 interface ResourceLink { title: string; url: string }
 
@@ -28,6 +29,7 @@ interface Resource {
 
 export const DnbRevisionResourcesManager: React.FC = () => {
   const { toast } = useToast();
+  const academicYearId = useCurrentAcademicYearId();
   const [items, setItems] = useState<Resource[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Resource | null>(null);
@@ -47,12 +49,13 @@ export const DnbRevisionResourcesManager: React.FC = () => {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [academicYearId]);
 
   const fetchData = async () => {
     const { data } = await (supabase as any)
       .from('dnb_revision_resources')
       .select('*')
+      .eq('academic_year_id', academicYearId)
       .order('order_index', { ascending: true });
     if (data) setItems(data);
   };
@@ -99,6 +102,7 @@ export const DnbRevisionResourcesManager: React.FC = () => {
       file_name: form.file_name || null,
       is_published: form.is_published,
       resource_links: form.resource_links.filter(l => l.url.trim()),
+      academic_year_id: academicYearId,
     };
     if (editing) {
       const { error } = await (supabase as any)

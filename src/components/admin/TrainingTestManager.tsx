@@ -8,6 +8,7 @@ import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, FlaskConical, Upload, FileTex
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
+import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 interface TrainingTest {
   id: string;
@@ -28,6 +29,7 @@ interface TrainingTestManagerProps {
 
 export const TrainingTestManager: React.FC<TrainingTestManagerProps> = ({ filterLevel }) => {
   const { toast } = useToast();
+  const academicYearId = useCurrentAcademicYearId();
   const [items, setItems] = useState<TrainingTest[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<TrainingTest | null>(null);
@@ -49,13 +51,14 @@ export const TrainingTestManager: React.FC<TrainingTestManagerProps> = ({ filter
 
   useEffect(() => {
     fetchData();
-  }, [filterLevel]);
+  }, [filterLevel, academicYearId]);
 
   const fetchData = async () => {
     const { data } = await supabase
       .from('training_tests')
       .select('*')
       .eq('level', filterLevel)
+      .eq('academic_year_id', academicYearId as any)
       .order('order_index');
     if (data) setItems(data);
   };
@@ -140,6 +143,7 @@ export const TrainingTestManager: React.FC<TrainingTestManagerProps> = ({ filter
         .insert({
           ...data,
           level: filterLevel,
+          academic_year_id: academicYearId,
           order_index: items.length,
         });
 

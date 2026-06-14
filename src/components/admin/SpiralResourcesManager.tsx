@@ -12,6 +12,7 @@ import { Plus, Trash2, Edit, X, Upload, Loader2, FileText, Eye, EyeOff, GripVert
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
+import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 type SpiralLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
@@ -50,6 +51,7 @@ interface Props { selectedLevel: SpiralLevel }
 
 export const SpiralResourcesManager: React.FC<Props> = ({ selectedLevel }) => {
   const { toast } = useToast();
+  const academicYearId = useCurrentAcademicYearId();
   const [items, setItems] = useState<SpiralResource[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<SpiralResource | null>(null);
@@ -70,13 +72,14 @@ export const SpiralResourcesManager: React.FC<Props> = ({ selectedLevel }) => {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  useEffect(() => { fetchData(); }, [selectedLevel]);
+  useEffect(() => { fetchData(); }, [selectedLevel, academicYearId]);
 
   const fetchData = async () => {
     const { data } = await (supabase as any)
       .from('spiral_resources')
       .select('*')
       .eq('level', selectedLevel)
+      .eq('academic_year_id', academicYearId as any)
       .order('order_index', { ascending: true });
     if (data) setItems(data);
   };
@@ -125,6 +128,7 @@ export const SpiralResourcesManager: React.FC<Props> = ({ selectedLevel }) => {
       file_name: form.file_name || null,
       external_url: form.external_url || null,
       is_published: form.is_published,
+      academic_year_id: academicYearId,
     };
     if (editing) {
       const { error } = await (supabase as any).from('spiral_resources').update(payload).eq('id', editing.id);

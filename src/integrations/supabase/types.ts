@@ -14,8 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      academic_years: {
+        Row: {
+          created_at: string
+          display_order: number
+          end_year: number
+          id: string
+          is_active: boolean
+          label: string
+          start_year: number
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          end_year: number
+          id?: string
+          is_active?: boolean
+          label: string
+          start_year: number
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          end_year?: number
+          id?: string
+          is_active?: boolean
+          label?: string
+          start_year?: number
+        }
+        Relationships: []
+      }
       activities: {
         Row: {
+          academic_year_id: string | null
           correction_url: string | null
           created_at: string
           description: string | null
@@ -28,6 +59,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          academic_year_id?: string | null
           correction_url?: string | null
           created_at?: string
           description?: string | null
@@ -40,6 +72,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          academic_year_id?: string | null
           correction_url?: string | null
           created_at?: string
           description?: string | null
@@ -51,10 +84,19 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "activities_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       assignments: {
         Row: {
+          academic_year_id: string | null
           allow_late_submission: boolean
           chapter_id: string | null
           correction_url: string | null
@@ -73,6 +115,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          academic_year_id?: string | null
           allow_late_submission?: boolean
           chapter_id?: string | null
           correction_url?: string | null
@@ -91,6 +134,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          academic_year_id?: string | null
           allow_late_submission?: boolean
           chapter_id?: string | null
           correction_url?: string | null
@@ -109,6 +153,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "assignments_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "assignments_chapter_id_fkey"
             columns: ["chapter_id"]
@@ -174,6 +225,7 @@ export type Database = {
       }
       class_info: {
         Row: {
+          academic_year_id: string | null
           content: string | null
           created_at: string
           file_url: string | null
@@ -186,6 +238,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          academic_year_id?: string | null
           content?: string | null
           created_at?: string
           file_url?: string | null
@@ -198,6 +251,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          academic_year_id?: string | null
           content?: string | null
           created_at?: string
           file_url?: string | null
@@ -209,10 +263,19 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "class_info_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       class_photos: {
         Row: {
+          academic_year_id: string | null
           created_at: string
           description: string | null
           id: string
@@ -224,6 +287,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          academic_year_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -235,6 +299,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          academic_year_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -245,7 +310,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "class_photos_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       club_activities: {
         Row: {
@@ -386,6 +459,7 @@ export type Database = {
       }
       courses: {
         Row: {
+          academic_year_id: string | null
           category: string
           created_at: string
           description: string | null
@@ -404,6 +478,7 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          academic_year_id?: string | null
           category?: string
           created_at?: string
           description?: string | null
@@ -422,6 +497,7 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          academic_year_id?: string | null
           category?: string
           created_at?: string
           description?: string | null
@@ -439,10 +515,19 @@ export type Database = {
           video_links?: Json | null
           video_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "courses_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       dnb_content: {
         Row: {
+          academic_year_id: string | null
           category: string
           content: string | null
           correction_url: string | null
@@ -457,6 +542,7 @@ export type Database = {
           year: number | null
         }
         Insert: {
+          academic_year_id?: string | null
           category?: string
           content?: string | null
           correction_url?: string | null
@@ -471,6 +557,7 @@ export type Database = {
           year?: number | null
         }
         Update: {
+          academic_year_id?: string | null
           category?: string
           content?: string | null
           correction_url?: string | null
@@ -484,10 +571,19 @@ export type Database = {
           updated_at?: string
           year?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "dnb_content_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       dnb_revision_resources: {
         Row: {
+          academic_year_id: string | null
           created_at: string
           description: string | null
           file_name: string | null
@@ -500,6 +596,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          academic_year_id?: string | null
           created_at?: string
           description?: string | null
           file_name?: string | null
@@ -512,6 +609,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          academic_year_id?: string | null
           created_at?: string
           description?: string | null
           file_name?: string | null
@@ -523,7 +621,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "dnb_revision_resources_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       evaluation_submissions: {
         Row: {
@@ -574,6 +680,7 @@ export type Database = {
       }
       evaluations: {
         Row: {
+          academic_year_id: string | null
           chapter_id: string | null
           correction_url: string | null
           course_id: string | null
@@ -591,6 +698,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          academic_year_id?: string | null
           chapter_id?: string | null
           correction_url?: string | null
           course_id?: string | null
@@ -608,6 +716,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          academic_year_id?: string | null
           chapter_id?: string | null
           correction_url?: string | null
           course_id?: string | null
@@ -625,6 +734,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "evaluations_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "evaluations_chapter_id_fkey"
             columns: ["chapter_id"]
@@ -712,6 +828,7 @@ export type Database = {
       }
       games_genially: {
         Row: {
+          academic_year_id: string | null
           created_at: string
           description: string | null
           file_url: string | null
@@ -724,6 +841,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          academic_year_id?: string | null
           created_at?: string
           description?: string | null
           file_url?: string | null
@@ -736,6 +854,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          academic_year_id?: string | null
           created_at?: string
           description?: string | null
           file_url?: string | null
@@ -747,7 +866,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "games_genially_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lesson_comments: {
         Row: {
@@ -924,6 +1051,7 @@ export type Database = {
       }
       spiral_resources: {
         Row: {
+          academic_year_id: string | null
           created_at: string
           description: string | null
           external_url: string | null
@@ -938,6 +1066,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          academic_year_id?: string | null
           created_at?: string
           description?: string | null
           external_url?: string | null
@@ -952,6 +1081,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          academic_year_id?: string | null
           created_at?: string
           description?: string | null
           external_url?: string | null
@@ -965,10 +1095,19 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "spiral_resources_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       training_exercises: {
         Row: {
+          academic_year_id: string | null
           correction_url: string | null
           created_at: string
           description: string | null
@@ -981,6 +1120,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          academic_year_id?: string | null
           correction_url?: string | null
           created_at?: string
           description?: string | null
@@ -993,6 +1133,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          academic_year_id?: string | null
           correction_url?: string | null
           created_at?: string
           description?: string | null
@@ -1004,10 +1145,19 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "training_exercises_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       training_tests: {
         Row: {
+          academic_year_id: string | null
           correction_url: string | null
           created_at: string
           description: string | null
@@ -1020,6 +1170,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          academic_year_id?: string | null
           correction_url?: string | null
           created_at?: string
           description?: string | null
@@ -1032,6 +1183,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          academic_year_id?: string | null
           correction_url?: string | null
           created_at?: string
           description?: string | null
@@ -1043,7 +1195,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "training_tests_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -1113,6 +1273,38 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      year_classes: {
+        Row: {
+          academic_year_id: string
+          class_level: string
+          created_at: string
+          display_order: number
+          id: string
+        }
+        Insert: {
+          academic_year_id: string
+          class_level: string
+          created_at?: string
+          display_order?: number
+          id?: string
+        }
+        Update: {
+          academic_year_id?: string
+          class_level?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "year_classes_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
             referencedColumns: ["id"]
           },
         ]

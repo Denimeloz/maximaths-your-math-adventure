@@ -8,6 +8,7 @@ import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, ClipboardList, Upload, FileTe
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
+import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 interface Assignment {
   id: string;
@@ -28,6 +29,7 @@ interface AssignmentManagerProps {
 
 export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLevel }) => {
   const { toast } = useToast();
+  const academicYearId = useCurrentAcademicYearId();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
@@ -49,13 +51,14 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
 
   useEffect(() => {
     fetchData();
-  }, [filterLevel]);
+  }, [filterLevel, academicYearId]);
 
   const fetchData = async () => {
     const { data } = await supabase
       .from('assignments')
       .select('*')
       .eq('level', filterLevel)
+      .eq('academic_year_id', academicYearId as any)
       .order('order_index');
     if (data) setAssignments(data);
   };

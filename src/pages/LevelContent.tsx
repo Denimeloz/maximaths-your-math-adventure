@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -214,6 +214,8 @@ interface GamesGeniallyItem {
 
 const LevelContent = () => {
   const { levelId, contentType } = useParams<{ levelId: string; contentType: string }>();
+  const [searchParams] = useSearchParams();
+  const yearId = searchParams.get('year');
   const navigate = useNavigate();
   const [courses, setCourses] = useState<Course[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -226,6 +228,7 @@ const LevelContent = () => {
   const [classPhotos, setClassPhotos] = useState<ClassPhoto[]>([]);
   const [gamesGenially, setGamesGenially] = useState<GamesGeniallyItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [resolvedYearId, setResolvedYearId] = useState<string | null>(yearId);
 
   const level = levelId as CourseLevel;
   const type = contentType as ContentType;
@@ -236,6 +239,19 @@ const LevelContent = () => {
   const Icon = config.icon;
   const color = levelColors[level] || 'rainbow-blue';
 
+  // If no year in URL, fall back to active year
+  useEffect(() => {
+    if (yearId) { setResolvedYearId(yearId); return; }
+    (async () => {
+      const { data } = await (supabase as any)
+        .from('academic_years')
+        .select('id')
+        .eq('is_active', true)
+        .maybeSingle();
+      if (data?.id) setResolvedYearId(data.id);
+    })();
+  }, [yearId]);
+
   useEffect(() => {
     if (contentType === 'ressources-dnb') {
       navigate('/ressources-dnb', { replace: true });
@@ -244,16 +260,21 @@ const LevelContent = () => {
     if (levelId && contentType) {
       fetchContent();
     }
-  }, [levelId, contentType, navigate]);
+  }, [levelId, contentType, navigate, resolvedYearId]);
 
   const fetchContent = async () => {
     setIsLoading(true);
+    if (!resolvedYearId) { setIsLoading(false); return; }
+
+
+
     
     if (type === 'cours') {
       const { data } = await supabase
         .from('courses')
         .select('*')
         .eq('level', level)
+        .eq('academic_year_id', resolvedYearId)
         .eq('is_published', true)
         .neq('category', 'activite')
         .order('order_index', { ascending: true });
@@ -266,6 +287,7 @@ const LevelContent = () => {
         .from('activities')
         .select('*')
         .eq('level', level)
+        .eq('academic_year_id', resolvedYearId)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       
@@ -277,6 +299,7 @@ const LevelContent = () => {
         .from('class_info')
         .select('*')
         .eq('level', level)
+        .eq('academic_year_id', resolvedYearId)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       
@@ -287,6 +310,7 @@ const LevelContent = () => {
         .from('assignments')
         .select('*')
         .eq('level', level)
+        .eq('academic_year_id', resolvedYearId)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       
@@ -297,6 +321,7 @@ const LevelContent = () => {
         .from('evaluations')
         .select('*')
         .eq('level', level)
+        .eq('academic_year_id', resolvedYearId)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       
@@ -307,6 +332,7 @@ const LevelContent = () => {
         .from('training_exercises')
         .select('*')
         .eq('level', level)
+        .eq('academic_year_id', resolvedYearId)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       
@@ -317,6 +343,7 @@ const LevelContent = () => {
         .from('training_tests')
         .select('*')
         .eq('level', level)
+        .eq('academic_year_id', resolvedYearId)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       
@@ -326,6 +353,7 @@ const LevelContent = () => {
       const { data } = await supabase
         .from('dnb_content')
         .select('*')
+        .eq('academic_year_id', resolvedYearId)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       
@@ -336,6 +364,7 @@ const LevelContent = () => {
         .from('class_photos')
         .select('*')
         .eq('level', level)
+        .eq('academic_year_id', resolvedYearId)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       
@@ -346,6 +375,7 @@ const LevelContent = () => {
         .from('games_genially')
         .select('*')
         .eq('level', level)
+        .eq('academic_year_id', resolvedYearId)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       

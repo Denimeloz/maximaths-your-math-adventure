@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Plus, Trash2, Edit, Save, X, Upload, Eye, EyeOff, Image, Loader2 } from 'lucide-react';
+import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
@@ -31,6 +32,7 @@ interface ClassPhotosManagerProps {
 
 export const ClassPhotosManager: React.FC<ClassPhotosManagerProps> = ({ selectedLevel }) => {
   const { toast } = useToast();
+  const academicYearId = useCurrentAcademicYearId();
   const [items, setItems] = useState<ClassPhoto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -45,7 +47,7 @@ export const ClassPhotosManager: React.FC<ClassPhotosManagerProps> = ({ selected
 
   useEffect(() => {
     fetchItems();
-  }, [selectedLevel]);
+  }, [selectedLevel, academicYearId]);
 
   const fetchItems = async () => {
     setIsLoading(true);
@@ -53,6 +55,7 @@ export const ClassPhotosManager: React.FC<ClassPhotosManagerProps> = ({ selected
       .from('class_photos')
       .select('*')
       .eq('level', selectedLevel)
+      .eq('academic_year_id', academicYearId as any)
       .order('order_index', { ascending: true });
 
     if (data) setItems(data);
@@ -111,6 +114,7 @@ export const ClassPhotosManager: React.FC<ClassPhotosManagerProps> = ({ selected
       level: selectedLevel,
       image_urls: formData.image_urls,
       is_published: formData.is_published,
+      academic_year_id: academicYearId,
       order_index: items.length,
     };
 

@@ -24,7 +24,9 @@ import { ClassPhotosManager } from '@/components/admin/ClassPhotosManager';
 import { GamesGeniallyManager } from '@/components/admin/GamesGeniallyManager';
 import { DnbRevisionResourcesManager } from '@/components/admin/DnbRevisionResourcesManager';
 import SpiralResourcesManager from '@/components/admin/SpiralResourcesManager';
+import { AcademicYearsManager } from '@/components/admin/AcademicYearsManager';
 import PDFViewer from '@/components/PDFViewer';
+import { AcademicYearProvider, useAcademicYears } from '@/contexts/AcademicYearContext';
 import { 
   Users, 
   BookOpen, 
@@ -83,7 +85,8 @@ interface UserRole {
   role: 'admin' | 'user';
 }
 
-const Admin = () => {
+const AdminInner = () => {
+  const { selectedYearId, setSelectedYearId, years, classes } = useAcademicYears();
   const { user, isAdmin, signOut, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -145,7 +148,7 @@ const Admin = () => {
     if (isAdmin) {
       fetchData();
     }
-  }, [isAdmin]);
+  }, [isAdmin, selectedYearId]);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -154,12 +157,14 @@ const Admin = () => {
   };
 
   const fetchCourses = async () => {
-    const { data, error } = await supabase
+    let query = supabase
       .from('courses')
       .select('*')
       .order('level', { ascending: true })
       .order('order_index', { ascending: true });
-    
+    if (selectedYearId) query = query.eq('academic_year_id', selectedYearId);
+    const { data, error } = await query;
+
     if (error) {
       toast({
         title: "Erreur",
@@ -341,6 +346,7 @@ const Admin = () => {
           video_links: courseForm.video_links.filter(l => l.url.trim()),
           game_links: courseForm.game_links.filter(l => l.url.trim()),
           resource_links: courseForm.resource_links.filter(l => l.url.trim()),
+          academic_year_id: selectedYearId,
         } as any)
         .eq('id', editingCourse.id);
 
@@ -371,6 +377,7 @@ const Admin = () => {
           video_links: courseForm.video_links.filter(l => l.url.trim()),
           game_links: courseForm.game_links.filter(l => l.url.trim()),
           resource_links: courseForm.resource_links.filter(l => l.url.trim()),
+          academic_year_id: selectedYearId,
           order_index: courses.length,
         } as any);
 
@@ -525,13 +532,14 @@ const Admin = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-hero-gradient">
-        <AdminSidebar 
-          activeTab={activeTab} 
+        <AdminSidebar
+          activeTab={activeTab}
           activeLevel={activeLevel}
-          onTabChange={(tab, level) => {
+          onTabChange={(tab, level, academicYearId) => {
             setActiveTab(tab);
             setActiveLevel(level || null);
-          }} 
+            if (academicYearId !== undefined) setSelectedYearId(academicYearId);
+          }}
         />
         
         <main className="flex-1 p-6 lg:p-8 overflow-auto">
@@ -571,6 +579,14 @@ const Admin = () => {
                   activeTab === 'projets' ? 'Projets pédagogiques' : ''
                 }`}
               </h2>
+              {selectedYearId && activeLevel !== 'club-maths' && activeLevel !== 'spiral-progression' && (
+                <p className="text-sm text-muted-foreground font-body mt-1">
+                  Année scolaire&nbsp;
+                  <span className="text-rainbow-purple font-semibold">
+                    {years.find(y => y.id === selectedYearId)?.label || '—'}
+                  </span>
+                </p>
+              )}
             </div>
           )}
 
@@ -597,6 +613,9 @@ const Admin = () => {
 
           {/* Dashboard Tab */}
           {activeTab === 'dashboard' && !activeLevel && <AdminDashboard />}
+
+          {/* Academic Years Manager */}
+          {activeTab === 'academic-years' && !activeLevel && <AcademicYearsManager />}
 
           {/* Class Info Section */}
           {activeTab === 'infos' && activeLevel && activeLevel !== 'club-maths' && activeLevel !== 'spiral-progression' && (
@@ -1117,5 +1136,11 @@ const Admin = () => {
     </SidebarProvider>
   );
 };
+
+const Admin = () => (
+  <AcademicYearProvider>
+    <AdminInner />
+  </AcademicYearProvider>
+);
 
 export default Admin;

@@ -24,6 +24,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
+import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 interface Activity {
   id: string;
@@ -54,6 +55,7 @@ interface ActivityManagerProps {
 
 const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
   const [activities, setActivities] = useState<Activity[]>([]);
+  const academicYearId = useCurrentAcademicYearId();
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
@@ -81,7 +83,7 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
 
   useEffect(() => {
     fetchActivities();
-  }, [selectedLevel]);
+  }, [selectedLevel, academicYearId]);
 
   const fetchActivities = async () => {
     setIsLoading(true);
@@ -93,6 +95,9 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
       
       if (selectedLevel) {
         query = query.eq('level', selectedLevel);
+      }
+      if (academicYearId) {
+        query = query.eq('academic_year_id', academicYearId);
       }
       
       const { data, error } = await query;
@@ -225,6 +230,7 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
       correction_url: formData.correction_url || null,
       is_published: formData.is_published,
       order_index: formData.order_index,
+      academic_year_id: academicYearId,
     };
 
     if (editingActivity) {
