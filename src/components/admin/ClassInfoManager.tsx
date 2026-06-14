@@ -35,6 +35,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
+import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
@@ -68,6 +69,7 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const academicYearId = useCurrentAcademicYearId();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -85,7 +87,7 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
 
   useEffect(() => {
     fetchInfos();
-  }, [selectedLevel]);
+  }, [selectedLevel, academicYearId]);
 
   const fetchInfos = async () => {
     setIsLoading(true);
@@ -93,6 +95,7 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
       .from('class_info')
       .select('*')
       .eq('level', selectedLevel)
+      .eq('academic_year_id', academicYearId as any)
       .order('order_index', { ascending: true });
 
     if (error) {
@@ -191,6 +194,7 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
           content: formData.content || null,
           file_urls: formData.file_urls,
           is_published: formData.is_published,
+          academic_year_id: academicYearId,
         })
         .eq('id', editingInfo.id);
 
@@ -219,6 +223,7 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
           content: formData.content || null,
           file_urls: formData.file_urls,
           is_published: formData.is_published,
+          academic_year_id: academicYearId,
           order_index: infos.length,
         });
 
