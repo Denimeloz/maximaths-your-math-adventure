@@ -176,6 +176,147 @@ export type Database = {
           },
         ]
       }
+      automatisms: {
+        Row: {
+          academic_year_id: string | null
+          canva_embed_url: string
+          chapter: string | null
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          level: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year_id?: string | null
+          canva_embed_url: string
+          chapter?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          level: string
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year_id?: string | null
+          canva_embed_url?: string
+          chapter?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          level?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automatisms_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chapter_podcasts: {
+        Row: {
+          audio_url: string
+          chapter_id: string
+          created_at: string
+          description: string | null
+          display_order: number
+          duration_seconds: number | null
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audio_url: string
+          chapter_id: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          duration_seconds?: number | null
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audio_url?: string
+          chapter_id?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          duration_seconds?: number | null
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapter_podcasts_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chapter_resources: {
+        Row: {
+          chapter_id: string
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          kind: string
+          section: string
+          title: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          chapter_id: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          kind: string
+          section: string
+          title: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          chapter_id?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          kind?: string
+          section?: string
+          title?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapter_resources_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chapters: {
         Row: {
           content: string | null
@@ -1048,6 +1189,56 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      revision_path_resources: {
+        Row: {
+          academic_year_id: string | null
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          kind: string
+          level: string
+          step: number
+          title: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          academic_year_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          kind: string
+          level: string
+          step: number
+          title: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          academic_year_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          kind?: string
+          level?: string
+          step?: number
+          title?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revision_path_resources_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       spiral_resources: {
         Row: {
