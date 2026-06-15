@@ -296,7 +296,7 @@ const Header = () => {
               className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-coral/20"
               onClick={() => { navigate('/ressources-dnb'); setMobileMenuOpen(false); }}
             >
-              <GraduationCap className="w-5 h-5 text-rainbow-coral" />
+              <GraduationCap className="w-5 h-5 text-rainbow-coral" /> Ressources DNB
             </Button>
 
             <Button 
