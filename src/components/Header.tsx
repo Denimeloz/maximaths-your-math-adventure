@@ -194,6 +194,15 @@ const Header = () => {
             </div>
           ))}
           
+          <Button variant="nav" size="sm" className="gap-2 rounded-full hover:bg-rainbow-blue/20 hover:scale-105 transition-all" onClick={() => navigate('/parcours-revision')}>
+            <Route className="w-4 h-4 text-rainbow-blue" /> Parcours
+          </Button>
+          <Button variant="nav" size="sm" className="gap-2 rounded-full hover:bg-rainbow-purple/20 hover:scale-105 transition-all" onClick={() => navigate('/cours-chapitres')}>
+            <BookOpen className="w-4 h-4 text-rainbow-purple" /> Cours
+          </Button>
+          <Button variant="nav" size="sm" className="gap-2 rounded-full hover:bg-rainbow-yellow/20 hover:scale-105 transition-all" onClick={() => navigate('/automatismes')}>
+            <Zap className="w-4 h-4 text-rainbow-yellow" /> Automatismes
+          </Button>
           <Button 
             variant="nav" 
             size="sm" 
