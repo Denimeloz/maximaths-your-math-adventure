@@ -25,6 +25,9 @@ import { GamesGeniallyManager } from '@/components/admin/GamesGeniallyManager';
 import { DnbRevisionResourcesManager } from '@/components/admin/DnbRevisionResourcesManager';
 import SpiralResourcesManager from '@/components/admin/SpiralResourcesManager';
 import { AcademicYearsManager } from '@/components/admin/AcademicYearsManager';
+import AutomatismsManager from '@/components/admin/AutomatismsManager';
+import RevisionPathManager from '@/components/admin/RevisionPathManager';
+import CourseTabsManager from '@/components/admin/CourseTabsManager';
 import PDFViewer from '@/components/PDFViewer';
 import { AcademicYearProvider, useAcademicYears } from '@/contexts/AcademicYearContext';
 import { 
