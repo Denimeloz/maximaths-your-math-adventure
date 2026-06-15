@@ -620,6 +620,17 @@ const AdminInner = () => {
           {/* Academic Years Manager */}
           {activeTab === 'academic-years' && !activeLevel && <AcademicYearsManager />}
 
+          {/* New managers (per level) */}
+          {activeTab === 'automatismes' && activeLevel && activeLevel !== 'club-maths' && activeLevel !== 'spiral-progression' && (
+            <AutomatismsManager selectedLevel={activeLevel as any} />
+          )}
+          {activeTab === 'parcours-revision' && activeLevel && activeLevel !== 'club-maths' && activeLevel !== 'spiral-progression' && (
+            <RevisionPathManager selectedLevel={activeLevel as any} />
+          )}
+          {activeTab === 'chapitres-tabs' && activeLevel && activeLevel !== 'club-maths' && activeLevel !== 'spiral-progression' && (
+            <CourseTabsManager selectedLevel={activeLevel as any} />
+          )}
+
           {/* Class Info Section */}
           {activeTab === 'infos' && activeLevel && activeLevel !== 'club-maths' && activeLevel !== 'spiral-progression' && (
             <ClassInfoManager selectedLevel={activeLevel as CourseLevel} />
