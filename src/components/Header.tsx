@@ -282,13 +282,21 @@ const Header = () => {
               </div>
             ))}
             
+            <Button variant="ghost" className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-blue/20 mt-2" onClick={() => { navigate('/parcours-revision'); setMobileMenuOpen(false); }}>
+              <Route className="w-5 h-5 text-rainbow-blue" /> Parcours de révision
+            </Button>
+            <Button variant="ghost" className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-purple/20" onClick={() => { navigate('/cours-chapitres'); setMobileMenuOpen(false); }}>
+              <BookOpen className="w-5 h-5 text-rainbow-purple" /> Cours
+            </Button>
+            <Button variant="ghost" className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-yellow/20" onClick={() => { navigate('/automatismes'); setMobileMenuOpen(false); }}>
+              <Zap className="w-5 h-5 text-rainbow-yellow" /> Automatismes
+            </Button>
             <Button 
               variant="ghost" 
-              className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-coral/20 mt-2"
+              className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-coral/20"
               onClick={() => { navigate('/ressources-dnb'); setMobileMenuOpen(false); }}
             >
               <GraduationCap className="w-5 h-5 text-rainbow-coral" />
-              Ressources DNB
             </Button>
 
             <Button 
