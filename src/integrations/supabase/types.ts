@@ -265,7 +265,7 @@ export type Database = {
             foreignKeyName: "chapter_podcasts_chapter_id_fkey"
             columns: ["chapter_id"]
             isOneToOne: false
-            referencedRelation: "chapters"
+            referencedRelation: "tab_chapters"
             referencedColumns: ["id"]
           },
         ]
@@ -312,7 +312,7 @@ export type Database = {
             foreignKeyName: "chapter_resources_chapter_id_fkey"
             columns: ["chapter_id"]
             isOneToOne: false
-            referencedRelation: "chapters"
+            referencedRelation: "tab_chapters"
             referencedColumns: ["id"]
           },
         ]
@@ -1289,6 +1289,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "spiral_resources_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tab_chapters: {
+        Row: {
+          academic_year_id: string | null
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_published: boolean
+          level: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_published?: boolean
+          level: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year_id?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_published?: boolean
+          level?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tab_chapters_academic_year_id_fkey"
             columns: ["academic_year_id"]
             isOneToOne: false
             referencedRelation: "academic_years"
