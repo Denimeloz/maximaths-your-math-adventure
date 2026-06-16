@@ -253,7 +253,10 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSideb
             {[
               { id: 'club-maths' as AdminCourseLevel, label: 'Club Jules Verne', icon: Puzzle },
               { id: 'spiral-progression' as AdminCourseLevel, label: 'Progression Spiralée', icon: Spline },
+              { id: 'automatismes' as AdminCourseLevel, label: 'Automatismes', icon: Zap },
+              { id: 'parcours-revision' as AdminCourseLevel, label: 'Parcours de révision', icon: Route },
             ].map(item => (
+
               <Collapsible key={item.id} open={!!openLevels[item.id]} onOpenChange={() => toggleLevel(item.id)}>
                 <CollapsibleTrigger className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-muted/50 ${activeLevel === item.id ? 'text-rainbow-purple' : 'text-foreground'}`}>
                   <span className="flex items-center gap-2">
