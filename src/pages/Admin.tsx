@@ -91,6 +91,9 @@ interface UserRole {
 
 const AdminInner = () => {
   const { selectedYearId, setSelectedYearId, years, classes } = useAcademicYears();
+  const selectedYear = years.find(y => y.id === selectedYearId);
+  const isNewArchitecture = !!selectedYear && selectedYear.start_year >= 2026;
+
   const { user, isAdmin, signOut, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
