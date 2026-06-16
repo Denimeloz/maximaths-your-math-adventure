@@ -44,6 +44,9 @@ const App = () => (
             <Route path="/club-maths/:activitySlug" element={<ClubMaths />} />
             <Route path="/ressources-dnb" element={<DnbRevisionResources />} />
             <Route path="/progression-spiralee" element={<ProgressionSpiralee />} />
+            <Route path="/automatismes" element={<Automatismes />} />
+            <Route path="/parcours-revision" element={<ParcoursRevision />} />
+
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
