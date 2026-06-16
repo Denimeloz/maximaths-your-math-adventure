@@ -222,7 +222,7 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSideb
                             </CollapsibleTrigger>
                             <CollapsibleContent>
                               <SidebarMenu className="ml-3 mt-1 border-l border-muted/60 pl-2">
-                                {getSubSections(lvl).map(section => (
+                                {getSubSections(lvl, year.start_year >= 2026).map(section => (
                                   <SidebarMenuItem key={section.id}>
                                     <SidebarMenuButton
                                       onClick={() => onTabChange?.(section.id, lvl, year.id)}
