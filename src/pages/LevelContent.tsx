@@ -962,7 +962,11 @@ const LevelContent = () => {
     }
 
     if (type === 'cours') {
+      if (isNewArchitecture && resolvedYearId) {
+        return <CoursChapterView level={level} academicYearId={resolvedYearId} />;
+      }
       return courses.length > 0 ? renderCourses() : renderEmptyState();
+
     } else if (type === 'infos') {
       return classInfos.length > 0 ? renderClassInfos() : renderEmptyState();
     } else if (type === 'activites') {
