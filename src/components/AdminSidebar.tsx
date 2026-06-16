@@ -68,7 +68,7 @@ const SPIRAL_SUBSECTIONS = [
   { id: 'terminale', label: 'Terminale', icon: BookOpen },
 ];
 
-const getSubSections = (level: AdminCourseLevel) => {
+const getSubSections = (level: AdminCourseLevel, isNewArchitecture: boolean = false) => {
   if (level === 'club-maths') {
     return [
       { id: 'enigmes', label: 'Énigmes hebdomadaires', icon: Puzzle },
@@ -76,17 +76,25 @@ const getSubSections = (level: AdminCourseLevel) => {
     ];
   }
   if (level === 'spiral-progression') return SPIRAL_SUBSECTIONS;
+  if (level === 'automatismes') return [{ id: 'automatismes', label: 'Gérer les supports', icon: Zap }];
+  if (level === 'parcours-revision') return [{ id: 'parcours-revision', label: 'Gérer les parcours', icon: Route }];
 
   const base = [
     { id: 'infos', label: 'Informations pour la classe', icon: Megaphone },
-    { id: 'activites', label: 'Activité de découverte', icon: Lightbulb },
-    { id: 'cours', label: 'Cours', icon: BookOpen },
-    { id: 'exercices-entrainement', label: "Exercices d'entraînement", icon: Dumbbell },
+  ];
+  if (!isNewArchitecture) {
+    base.push({ id: 'activites', label: 'Activité de découverte', icon: Lightbulb });
+  }
+  base.push({ id: 'cours', label: 'Cours', icon: BookOpen });
+  if (!isNewArchitecture) {
+    base.push({ id: 'exercices-entrainement', label: "Exercices d'entraînement", icon: Dumbbell });
+  }
+  base.push(
     { id: 'tests-entrainement', label: level === '3eme' ? 'Tests ou Mini DNB' : 'Tests (Évaluations formatives)', icon: Target },
     { id: 'devoirs', label: 'Devoirs de niveaux', icon: ClipboardList },
     { id: 'evaluations', label: 'Évaluations', icon: FileCheck },
     { id: 'jeux-genially', label: 'Jeux et Genially', icon: Gamepad2 },
-  ];
+  );
   if (level === '3eme') {
     base.push({ id: 'prepa-dnb', label: 'Prépa DNB', icon: Star });
     base.push({ id: 'ressources-dnb', label: 'Ressources révision DNB', icon: GraduationCap });
@@ -97,6 +105,7 @@ const getSubSections = (level: AdminCourseLevel) => {
   }
   return base;
 };
+
 
 const accountItems = [
   { title: 'Accueil', url: '/', icon: Home },
