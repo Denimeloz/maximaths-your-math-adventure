@@ -644,11 +644,22 @@ const AdminInner = () => {
             <ClubMathsManager selectedActivityType={activeTab} />
           )}
 
+          {/* Automatismes - transverse */}
+          {activeLevel === 'automatismes' && <AutomatismsManager />}
+
+          {/* Parcours de révision - transverse */}
+          {activeLevel === 'parcours-revision' && <RevisionPathManager />}
+
           {/* Courses Tab - filtered by level */}
-          {activeTab === 'cours' && activeLevel && activeLevel !== 'club-maths' && (
+          {activeTab === 'cours' && activeLevel && activeLevel !== 'club-maths' && activeLevel !== 'spiral-progression' && activeLevel !== 'automatismes' && activeLevel !== 'parcours-revision' && isNewArchitecture && (
+            <CoursChapterManager selectedLevel={activeLevel as CourseLevel} />
+          )}
+
+          {activeTab === 'cours' && activeLevel && activeLevel !== 'club-maths' && activeLevel !== 'spiral-progression' && activeLevel !== 'automatismes' && activeLevel !== 'parcours-revision' && !isNewArchitecture && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-display text-foreground">Cours - {getLevelLabel(activeLevel as CourseLevel)}</h2>
+
                 <Button 
                   onClick={() => {
                     setCourseForm(prev => ({ ...prev, level: activeLevel as CourseLevel }));
