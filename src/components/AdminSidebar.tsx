@@ -48,7 +48,10 @@ export type AdminCourseLevel =
   | '6eme' | '5eme' | '4eme' | '3eme'
   | 'seconde' | 'premiere' | 'terminale'
   | 'club-maths'
-  | 'spiral-progression';
+  | 'spiral-progression'
+  | 'automatismes'
+  | 'parcours-revision';
+
 
 const LEVEL_LABELS: Record<string, string> = {
   '6eme': '6ème', '5eme': '5ème', '4eme': '4ème', '3eme': '3ème',
