@@ -35,7 +35,10 @@ import {
   Spline,
   CalendarRange,
   CalendarPlus,
+  Zap,
+  Route,
 } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useState, useEffect } from 'react';
@@ -45,7 +48,10 @@ export type AdminCourseLevel =
   | '6eme' | '5eme' | '4eme' | '3eme'
   | 'seconde' | 'premiere' | 'terminale'
   | 'club-maths'
-  | 'spiral-progression';
+  | 'spiral-progression'
+  | 'automatismes'
+  | 'parcours-revision';
+
 
 const LEVEL_LABELS: Record<string, string> = {
   '6eme': '6ème', '5eme': '5ème', '4eme': '4ème', '3eme': '3ème',
@@ -62,7 +68,7 @@ const SPIRAL_SUBSECTIONS = [
   { id: 'terminale', label: 'Terminale', icon: BookOpen },
 ];
 
-const getSubSections = (level: AdminCourseLevel) => {
+const getSubSections = (level: AdminCourseLevel, isNewArchitecture: boolean = false) => {
   if (level === 'club-maths') {
     return [
       { id: 'enigmes', label: 'Énigmes hebdomadaires', icon: Puzzle },
@@ -70,17 +76,25 @@ const getSubSections = (level: AdminCourseLevel) => {
     ];
   }
   if (level === 'spiral-progression') return SPIRAL_SUBSECTIONS;
+  if (level === 'automatismes') return [{ id: 'automatismes', label: 'Gérer les supports', icon: Zap }];
+  if (level === 'parcours-revision') return [{ id: 'parcours-revision', label: 'Gérer les parcours', icon: Route }];
 
   const base = [
     { id: 'infos', label: 'Informations pour la classe', icon: Megaphone },
-    { id: 'activites', label: 'Activité de découverte', icon: Lightbulb },
-    { id: 'cours', label: 'Cours', icon: BookOpen },
-    { id: 'exercices-entrainement', label: "Exercices d'entraînement", icon: Dumbbell },
+  ];
+  if (!isNewArchitecture) {
+    base.push({ id: 'activites', label: 'Activité de découverte', icon: Lightbulb });
+  }
+  base.push({ id: 'cours', label: 'Cours', icon: BookOpen });
+  if (!isNewArchitecture) {
+    base.push({ id: 'exercices-entrainement', label: "Exercices d'entraînement", icon: Dumbbell });
+  }
+  base.push(
     { id: 'tests-entrainement', label: level === '3eme' ? 'Tests ou Mini DNB' : 'Tests (Évaluations formatives)', icon: Target },
     { id: 'devoirs', label: 'Devoirs de niveaux', icon: ClipboardList },
     { id: 'evaluations', label: 'Évaluations', icon: FileCheck },
     { id: 'jeux-genially', label: 'Jeux et Genially', icon: Gamepad2 },
-  ];
+  );
   if (level === '3eme') {
     base.push({ id: 'prepa-dnb', label: 'Prépa DNB', icon: Star });
     base.push({ id: 'ressources-dnb', label: 'Ressources révision DNB', icon: GraduationCap });
@@ -91,6 +105,7 @@ const getSubSections = (level: AdminCourseLevel) => {
   }
   return base;
 };
+
 
 const accountItems = [
   { title: 'Accueil', url: '/', icon: Home },
@@ -207,7 +222,7 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSideb
                             </CollapsibleTrigger>
                             <CollapsibleContent>
                               <SidebarMenu className="ml-3 mt-1 border-l border-muted/60 pl-2">
-                                {getSubSections(lvl).map(section => (
+                                {getSubSections(lvl, year.start_year >= 2026).map(section => (
                                   <SidebarMenuItem key={section.id}>
                                     <SidebarMenuButton
                                       onClick={() => onTabChange?.(section.id, lvl, year.id)}
@@ -238,7 +253,10 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSideb
             {[
               { id: 'club-maths' as AdminCourseLevel, label: 'Club Jules Verne', icon: Puzzle },
               { id: 'spiral-progression' as AdminCourseLevel, label: 'Progression Spiralée', icon: Spline },
+              { id: 'automatismes' as AdminCourseLevel, label: 'Automatismes', icon: Zap },
+              { id: 'parcours-revision' as AdminCourseLevel, label: 'Parcours de révision', icon: Route },
             ].map(item => (
+
               <Collapsible key={item.id} open={!!openLevels[item.id]} onOpenChange={() => toggleLevel(item.id)}>
                 <CollapsibleTrigger className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-muted/50 ${activeLevel === item.id ? 'text-rainbow-purple' : 'text-foreground'}`}>
                   <span className="flex items-center gap-2">
@@ -252,7 +270,7 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSideb
                     {getSubSections(item.id).map(section => (
                       <SidebarMenuItem key={section.id}>
                         <SidebarMenuButton
-                          onClick={() => onTabChange?.(section.id, item.id, null)}
+                          onClick={() => onTabChange?.(section.id, item.id, (item.id === 'automatismes' || item.id === 'parcours-revision') ? (selectedYearId || undefined) : null)}
                           className={`cursor-pointer transition-colors text-sm ${activeLevel === item.id && activeTab === section.id ? 'bg-rainbow-purple/10 text-rainbow-purple font-medium' : 'hover:bg-muted/50'}`}
                         >
                           <section.icon className="w-4 h-4 mr-2" />

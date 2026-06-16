@@ -3,6 +3,8 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import CoursChapterView from '@/components/CoursChapterView';
+
 import { Button } from '@/components/ui/button';
 import { 
   BookOpen, 
@@ -229,6 +231,7 @@ const LevelContent = () => {
   const [gamesGenially, setGamesGenially] = useState<GamesGeniallyItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [resolvedYearId, setResolvedYearId] = useState<string | null>(yearId);
+  const [yearStartYear, setYearStartYear] = useState<number | null>(null);
 
   const level = levelId as CourseLevel;
   const type = contentType as ContentType;
@@ -238,19 +241,31 @@ const LevelContent = () => {
   }
   const Icon = config.icon;
   const color = levelColors[level] || 'rainbow-blue';
+  const isNewArchitecture = yearStartYear !== null && yearStartYear >= 2026;
 
-  // If no year in URL, fall back to active year
+  // If no year in URL, fall back to active year; also fetch start_year of resolved year
   useEffect(() => {
-    if (yearId) { setResolvedYearId(yearId); return; }
     (async () => {
-      const { data } = await (supabase as any)
-        .from('academic_years')
-        .select('id')
-        .eq('is_active', true)
-        .maybeSingle();
-      if (data?.id) setResolvedYearId(data.id);
+      let id = yearId;
+      if (!id) {
+        const { data } = await (supabase as any).from('academic_years').select('id').eq('is_active', true).maybeSingle();
+        id = data?.id || null;
+      }
+      setResolvedYearId(id);
+      if (id) {
+        const { data: y } = await (supabase as any).from('academic_years').select('start_year').eq('id', id).maybeSingle();
+        setYearStartYear(y?.start_year ?? null);
+      }
     })();
   }, [yearId]);
+
+  // Redirect to /cours for 2026+ when accessing activites or exercices-entrainement
+  useEffect(() => {
+    if (isNewArchitecture && (type === 'activites' || type === 'exercices-entrainement')) {
+      navigate(`/niveau/${level}/cours${resolvedYearId ? `?year=${resolvedYearId}` : ''}`, { replace: true });
+    }
+  }, [isNewArchitecture, type, level, resolvedYearId, navigate]);
+
 
   useEffect(() => {
     if (contentType === 'ressources-dnb') {
@@ -949,7 +964,11 @@ const LevelContent = () => {
     }
 
     if (type === 'cours') {
+      if (isNewArchitecture && resolvedYearId) {
+        return <CoursChapterView level={level} academicYearId={resolvedYearId} />;
+      }
       return courses.length > 0 ? renderCourses() : renderEmptyState();
+
     } else if (type === 'infos') {
       return classInfos.length > 0 ? renderClassInfos() : renderEmptyState();
     } else if (type === 'activites') {

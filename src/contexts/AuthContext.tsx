@@ -22,18 +22,9 @@ interface AuthContextType {
   profile: Profile | null;
   isAdmin: boolean;
   isLoading: boolean;
-  signUp: (email: string, password: string, metadata: SignUpMetadata) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signInWithGoogle: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
-}
-
-interface SignUpMetadata {
-  first_name: string;
-  last_name: string;
-  profession: string;
-  level: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -55,88 +46,63 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
         .maybeSingle();
-      
-      if (error) {
-        console.error('Error fetching profile:', error);
-        return null;
-      }
       return data as Profile | null;
-    } catch (err) {
-      console.error('Error in fetchProfile:', err);
+    } catch {
       return null;
     }
   };
 
   const checkAdminRole = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
         .eq('role', 'admin')
         .maybeSingle();
-      
-      if (error) {
-        console.error('Error checking admin role:', error);
-        return false;
-      }
       return !!data;
-    } catch (err) {
-      console.error('Error in checkAdminRole:', err);
+    } catch {
       return false;
     }
   };
 
   const refreshProfile = async () => {
     if (user) {
-      const profileData = await fetchProfile(user.id);
-      setProfile(profileData);
-      const adminStatus = await checkAdminRole(user.id);
-      setIsAdmin(adminStatus);
+      const p = await fetchProfile(user.id);
+      setProfile(p);
+      setIsAdmin(await checkAdminRole(user.id));
     }
   };
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Defer profile fetch with setTimeout to avoid deadlock
-        if (session?.user) {
-          setTimeout(async () => {
-            const profileData = await fetchProfile(session.user.id);
-            setProfile(profileData);
-            const adminStatus = await checkAdminRole(session.user.id);
-            setIsAdmin(adminStatus);
-            setIsLoading(false);
-          }, 0);
-        } else {
-          setProfile(null);
-          setIsAdmin(false);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        setTimeout(async () => {
+          setProfile(await fetchProfile(session.user.id));
+          setIsAdmin(await checkAdminRole(session.user.id));
           setIsLoading(false);
-        }
+        }, 0);
+      } else {
+        setProfile(null);
+        setIsAdmin(false);
+        setIsLoading(false);
       }
-    );
+    });
 
-    // THEN check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-
       if (session?.user) {
-        const [profileData, adminStatus] = await Promise.all([
-          fetchProfile(session.user.id),
-          checkAdminRole(session.user.id),
-        ]);
-        setProfile(profileData);
-        setIsAdmin(adminStatus);
+        const [p, admin] = await Promise.all([fetchProfile(session.user.id), checkAdminRole(session.user.id)]);
+        setProfile(p);
+        setIsAdmin(admin);
       }
       setIsLoading(false);
     });
@@ -144,43 +110,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, metadata: SignUpMetadata) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          first_name: metadata.first_name,
-          last_name: metadata.last_name,
-          profession: metadata.profession,
-          level: metadata.level,
-        }
-      }
-    });
-    
-    return { error };
-  };
-
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    return { error };
-  };
-
-  const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/`,
-      }
-    });
-    
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error };
   };
 
@@ -193,18 +124,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      session,
-      profile,
-      isAdmin,
-      isLoading,
-      signUp,
-      signIn,
-      signInWithGoogle,
-      signOut,
-      refreshProfile,
-    }}>
+    <AuthContext.Provider value={{ user, session, profile, isAdmin, isLoading, signIn, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

@@ -15,6 +15,9 @@ import AdminLogin from "./pages/AdminLogin";
 import ClubMaths from "./pages/ClubMaths";
 import DnbRevisionResources from "./pages/DnbRevisionResources";
 import ProgressionSpiralee from "./pages/ProgressionSpiralee";
+import Automatismes from "./pages/Automatismes";
+import ParcoursRevision from "./pages/ParcoursRevision";
+
 
 const queryClient = new QueryClient();
 
@@ -41,6 +44,9 @@ const App = () => (
             <Route path="/club-maths/:activitySlug" element={<ClubMaths />} />
             <Route path="/ressources-dnb" element={<DnbRevisionResources />} />
             <Route path="/progression-spiralee" element={<ProgressionSpiralee />} />
+            <Route path="/automatismes" element={<Automatismes />} />
+            <Route path="/parcours-revision" element={<ParcoursRevision />} />
+
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
