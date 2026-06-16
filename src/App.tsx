@@ -15,9 +15,6 @@ import AdminLogin from "./pages/AdminLogin";
 import ClubMaths from "./pages/ClubMaths";
 import DnbRevisionResources from "./pages/DnbRevisionResources";
 import ProgressionSpiralee from "./pages/ProgressionSpiralee";
-import Automatismes from "./pages/Automatismes";
-import ParcoursRevision from "./pages/ParcoursRevision";
-import CoursChapitres from "./pages/CoursChapitres";
 
 const queryClient = new QueryClient();
 
@@ -44,13 +41,6 @@ const App = () => (
             <Route path="/club-maths/:activitySlug" element={<ClubMaths />} />
             <Route path="/ressources-dnb" element={<DnbRevisionResources />} />
             <Route path="/progression-spiralee" element={<ProgressionSpiralee />} />
-            <Route path="/automatismes" element={<Automatismes />} />
-            <Route path="/automatismes/:id" element={<Automatismes />} />
-            <Route path="/parcours-revision" element={<ParcoursRevision />} />
-            <Route path="/parcours-revision/:level" element={<ParcoursRevision />} />
-            <Route path="/cours-chapitres" element={<CoursChapitres />} />
-            <Route path="/cours-chapitres/:level" element={<CoursChapitres />} />
-            <Route path="/cours-chapitres/:level/:chapterId" element={<CoursChapitres />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -35,8 +35,6 @@ import {
   Spline,
   CalendarRange,
   CalendarPlus,
-  Zap,
-  Route,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -77,9 +75,6 @@ const getSubSections = (level: AdminCourseLevel) => {
     { id: 'infos', label: 'Informations pour la classe', icon: Megaphone },
     { id: 'activites', label: 'Activité de découverte', icon: Lightbulb },
     { id: 'cours', label: 'Cours', icon: BookOpen },
-    { id: 'chapitres-tabs', label: 'Chapitres (5 onglets)', icon: BookOpen },
-    { id: 'automatismes', label: 'Automatismes', icon: Zap },
-    { id: 'parcours-revision', label: 'Parcours de révision', icon: Route },
     { id: 'exercices-entrainement', label: "Exercices d'entraînement", icon: Dumbbell },
     { id: 'tests-entrainement', label: level === '3eme' ? 'Tests ou Mini DNB' : 'Tests (Évaluations formatives)', icon: Target },
     { id: 'devoirs', label: 'Devoirs de niveaux', icon: ClipboardList },

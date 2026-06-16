@@ -1,4 +1,4 @@
-import { Menu, X, Home, Info, ChevronDown, ChevronUp, GraduationCap, Zap, Route, BookOpen } from "lucide-react";
+import { Menu, X, Home, Info, ChevronDown, ChevronUp, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -194,15 +194,6 @@ const Header = () => {
             </div>
           ))}
           
-          <Button variant="nav" size="sm" className="gap-2 rounded-full hover:bg-rainbow-blue/20 hover:scale-105 transition-all" onClick={() => navigate('/parcours-revision')}>
-            <Route className="w-4 h-4 text-rainbow-blue" /> Parcours
-          </Button>
-          <Button variant="nav" size="sm" className="gap-2 rounded-full hover:bg-rainbow-purple/20 hover:scale-105 transition-all" onClick={() => navigate('/cours-chapitres')}>
-            <BookOpen className="w-4 h-4 text-rainbow-purple" /> Cours
-          </Button>
-          <Button variant="nav" size="sm" className="gap-2 rounded-full hover:bg-rainbow-yellow/20 hover:scale-105 transition-all" onClick={() => navigate('/automatismes')}>
-            <Zap className="w-4 h-4 text-rainbow-yellow" /> Automatismes
-          </Button>
           <Button 
             variant="nav" 
             size="sm" 
@@ -282,21 +273,13 @@ const Header = () => {
               </div>
             ))}
             
-            <Button variant="ghost" className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-blue/20 mt-2" onClick={() => { navigate('/parcours-revision'); setMobileMenuOpen(false); }}>
-              <Route className="w-5 h-5 text-rainbow-blue" /> Parcours de révision
-            </Button>
-            <Button variant="ghost" className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-purple/20" onClick={() => { navigate('/cours-chapitres'); setMobileMenuOpen(false); }}>
-              <BookOpen className="w-5 h-5 text-rainbow-purple" /> Cours
-            </Button>
-            <Button variant="ghost" className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-yellow/20" onClick={() => { navigate('/automatismes'); setMobileMenuOpen(false); }}>
-              <Zap className="w-5 h-5 text-rainbow-yellow" /> Automatismes
-            </Button>
             <Button 
               variant="ghost" 
-              className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-coral/20"
+              className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-coral/20 mt-2"
               onClick={() => { navigate('/ressources-dnb'); setMobileMenuOpen(false); }}
             >
-              <GraduationCap className="w-5 h-5 text-rainbow-coral" /> Ressources DNB
+              <GraduationCap className="w-5 h-5 text-rainbow-coral" />
+              Ressources DNB
             </Button>
 
             <Button 

@@ -1,104 +1,123 @@
-# Plan — Évolutions MAXIMATHS
+# Plan — Gestion des années scolaires sur MAXIMATHS
 
-Trois grands chantiers, branchés sur l'architecture multi-années existante (toutes les nouvelles tables incluent `academic_year_id` + `level`).
+## 1. Suppression de l'inscription publique
 
-## 1. Rubrique « Automatismes »
+- **`src/pages/Auth.tsx`** : supprimer l'onglet "Inscription" et tout le formulaire de signup. Garder uniquement le formulaire de connexion email/mot de passe pour l'admin.
+- **`src/contexts/AuthContext.tsx`** : retirer la fonction `signUp` et `signInWithGoogle` du contexte (ou les garder inutilisées, mais préférable de les retirer).
+- **`src/pages/AdminLogin.tsx`** : rediriger directement vers `/auth` (login only).
+- **Supabase Auth** : indiquer à l'utilisateur de désactiver "Enable signups" dans le dashboard Supabase (Authentication → Providers → Email), car côté serveur le signup reste sinon possible via API.
+- **Trigger `handle_new_user`** : garder tel quel (utile si un admin est créé manuellement par Supabase Dashboard).
 
-**But** : fiches Canva (5 questions + correction) par niveau.
+## 2. Modèle de données — années scolaires
 
-**Base de données** — nouvelle table `automatisms` :
-- `title`, `chapter`, `level`, `academic_year_id`
-- `canva_embed_url` (lien d'intégration Canva)
-- `thumbnail_url` (optionnelle)
-- `description`, `display_order`, `created_at`
-- RLS : lecture publique, écriture admin uniquement
-- Storage : réutilisation du bucket `course-files` pour les miniatures
+Nouvelle migration Supabase :
 
-**Frontend** :
-- Page `/automatismes` : grille de cartes (titre, chapitre, niveau, date)
-- Page `/automatismes/:id` : iframe Canva plein écran, sans quitter le site
-- Filtre par niveau + recherche
-- Lien dans Header (desktop + mobile)
+### Tables
 
-**Admin** : `AutomatismsManager.tsx` (CRUD + reorder dnd-kit, par niveau et par année).
+```sql
+-- Années scolaires
+CREATE TABLE public.academic_years (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  label text NOT NULL UNIQUE,        -- "2025-2026"
+  start_year int NOT NULL,
+  end_year int NOT NULL,
+  is_active boolean NOT NULL DEFAULT false,
+  display_order int NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
 
-## 2. Refonte « Cours » — 5 sections par chapitre
+-- Classes ouvertes pour une année
+CREATE TABLE public.year_classes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  academic_year_id uuid NOT NULL REFERENCES public.academic_years(id) ON DELETE CASCADE,
+  class_level text NOT NULL,         -- '6eme' | '5eme' | ... | 'terminale'
+  display_order int NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (academic_year_id, class_level)   -- pas de doublon
+);
+```
 
-**But** : chaque chapitre = 5 onglets fixes :
-1. Activité de découverte
-2. Cours
-3. Exercices d'entraînement
-4. Accompagnement personnalisé
-5. Podcast
+### GRANTS + RLS
 
-**Approche** : on garde la table `chapters` existante et on enrichit le rendu côté `CourseView` / `LevelContent` (section "cours") avec un composant `ChapterTabs` à 5 onglets.
+- `GRANT SELECT` à `anon` et `authenticated` (lecture publique).
+- `GRANT ALL` à `service_role`.
+- `GRANT INSERT/UPDATE/DELETE` à `authenticated` (utilisé seulement par les admins via policy).
+- RLS :
+  - Lecture publique : `USING (true)`.
+  - Écriture admin uniquement : `USING/WITH CHECK (has_role(auth.uid(),'admin'))`.
 
-**Nouvelles tables** :
-- `chapter_resources` : `chapter_id`, `section` (enum : `decouverte` | `cours` | `exercices` | `accompagnement`), `kind` (`pdf` | `video` | `canva`), `title`, `url`, `display_order`
-- `chapter_podcasts` : `chapter_id`, `title`, `description`, `audio_url`, `duration_seconds`, `display_order`
-- Bucket Storage `chapter-media` (public) pour audios / PDF
-- RLS : lecture publique, écriture admin
+### Liaison aux contenus existants
 
-**Frontend** :
-- `ChapterTabs.tsx` (Tabs shadcn) + sous-composants `PdfList`, `VideoList`, `CanvaEmbed`, `PodcastPlayer` (audio HTML5 natif avec durée + description)
+Ajouter une colonne `academic_year_id uuid REFERENCES public.academic_years(id)` (nullable au début) sur toutes les tables de contenu liées à un niveau :
 
-**Admin** : extension de `FileVideoManager` → `ChapterContentManager.tsx` avec sélection de section + ajout de podcasts.
+`activities, courses, exercises, training_exercises, training_tests, assignments, evaluations, games_genially, dnb_content, dnb_revision_resources, class_info, class_photos, chapters, course_files, videos, lessons, spiral_resources`.
 
-## 3. Rubrique « Parcours de révision »
+(On garde la colonne `level` existante — la combinaison `(level, academic_year_id)` détermine l'affichage.)
 
-**But** : parcours par niveau, 5 étapes fixes, ressources mixtes + progression.
+### Backfill
 
-**Étapes fixes** (codées en dur, pas de table d'étapes) :
-1. Réactiver les connaissances
-2. Revoir les notions essentielles
-3. S'entraîner
-4. Vérifier ses acquis
-5. S'autoévaluer
+```sql
+INSERT INTO public.academic_years (label, start_year, end_year, is_active, display_order)
+VALUES ('2025-2026', 2025, 2026, false, 0),
+       ('2026-2027', 2026, 2027, true, 1);
 
-**Base de données** — nouvelle table `revision_path_resources` :
-- `level`, `academic_year_id`
-- `step` (smallint 1..5)
-- `kind` (`canva` | `pdf` | `video` | `podcast` | `link`)
-- `title`, `description`, `url`, `display_order`
-- RLS : lecture publique, écriture admin
+-- Rattacher tout l'existant à 2025-2026
+UPDATE public.<table> SET academic_year_id = (SELECT id FROM public.academic_years WHERE label='2025-2026')
+WHERE academic_year_id IS NULL;
 
-**Progression élève** : stockée en `localStorage` (cases cochées par ressource) — pas d'auth élève sur le site. Barre de progression = % de ressources cochées sur le parcours.
+-- Classes réellement utilisées en 2025-2026 : 3ème et Seconde
+INSERT INTO public.year_classes (academic_year_id, class_level)
+SELECT id, unnest(ARRAY['3eme','seconde']) FROM public.academic_years WHERE label='2025-2026';
+```
 
-**Frontend** :
-- Page `/parcours-revision` : cartes par niveau
-- Page `/parcours-revision/:level` : accordéon 5 étapes + barre de progression sticky en haut
+Une fois backfillé, on pourra rendre `academic_year_id` `NOT NULL` (migration séparée plus tard pour éviter les ruptures).
 
-**Admin** : `RevisionPathManager.tsx` (CRUD par niveau / étape / année).
+## 3. Frontend — accueil public
 
-## 4. Navigation — ordre du menu principal
+- **`src/components/FeaturesSection.tsx`** (section "Choisis ta classe") : charger `academic_years` + `year_classes`, afficher chaque année comme un groupe titré avec les classes disponibles en cartes. Le lien devient `/niveau/:levelId/:contentType?year=<yearId>` (ou route imbriquée — query string suffit, plus simple).
+- **`src/pages/LevelContent.tsx`** : lire `?year=` depuis l'URL, et passer `academic_year_id` aux requêtes Supabase pour filtrer chaque section. Si aucun year n'est fourni, fallback sur l'année active.
+- **`src/pages/CourseView.tsx`** : pas de changement majeur (un cours appartient déjà à une année via sa colonne).
+- Les autres sections d'accueil (`DnbRevisionSection`, `SpiralProgressionSection`, `ClassInfoSection`, `ClassPhotosSection`) : filtrer par année active par défaut, ou inclure toutes les années (à clarifier — par défaut, on filtre sur l'année active).
 
-Header réorganisé :
-`Accueil` · `Classes` (dropdown niveaux existant) · `Parcours de révision` · `Cours` · `Automatismes` · `Ressources DNB` · `À propos`
+## 4. Frontend — sidebar admin
 
-Note : la rubrique « Cours » du menu reste un raccourci vers la liste des niveaux filtrée sur le sous-onglet "cours" (cohérent avec l'architecture par niveau actuelle).
+- **`src/components/AdminSidebar.tsx`** : remplacer la liste fixe `levels` par une liste dynamique chargée depuis `academic_years` + `year_classes`. Conserver les entrées spéciales **Club Jules Verne** et **Progression Spiralée** (hors années).
+- Ajouter en haut une entrée **"Nouvelle année"** qui ouvre un panneau de gestion (création année + ajout/suppression de classes dans l'année).
+- Structure rendue :
+  ```
+  Nouvelle année
+  Années scolaires
+    2026-2027
+      6ème, 4ème, 3ème, Terminale
+    2025-2026
+      3ème, Seconde
+  Club Jules Verne
+  Progression Spiralée
+  ```
+- **`src/pages/Admin.tsx`** : étendre l'état pour stocker `(academicYearId, level, section)` au lieu de juste `(level, section)`. Passer `academicYearId` à tous les managers admin existants.
+- Chaque manager admin (ActivityManager, ExerciseManager, etc.) : recevoir `academicYearId` en prop, l'utiliser dans les `select` (filtre) et `insert` (valeur).
 
-## 5. Détails techniques
+## 5. Nouveau composant admin
 
-- Toutes les nouvelles tables suivent le pattern : `id uuid`, `created_at`, `updated_at`, `academic_year_id uuid references academic_years`, RLS admin-only en écriture
-- GRANT `SELECT` à `anon` + `authenticated`, GRANT complet à `service_role`, GRANT écritures à `authenticated` (filtré par RLS `has_role admin`)
-- Lecteur podcast : `<audio controls>` natif + affichage durée formatée (mm:ss)
-- Canva : iframe `https://www.canva.com/design/.../view?embed` avec `allowfullscreen`
-- Réutilisation des composants UI shadcn (Tabs, Card, Progress, Accordion)
-- Tous les nouveaux managers admin branchés sur `AcademicYearContext`
+- **`src/components/admin/AcademicYearsManager.tsx`** : créer / éditer / activer une année, gérer ses classes (ajout via select des niveaux, suppression). Empêche les doublons côté UI en plus de la contrainte DB.
 
-## 6. Hors scope
+## 6. Sécurité
 
-- Pas de compte élève (cohérent avec la politique actuelle : seul l'admin se connecte)
-- Pas de suppression / refonte des sections existantes (Club Jules Verne, Progression Spiralée, Ressources DNB, Classe en activité conservées)
-- Progression élève persistée uniquement en localStorage (pas de table de tracking)
+- Vérifier que toutes les RLS sur les tables de contenu sont déjà admin-only en écriture (déjà le cas a priori).
+- Désactiver le signup Supabase (action utilisateur, hors code).
+- Confirmer la suppression de tout chemin `/auth` signup.
 
-## 7. Ordre d'implémentation
+## 7. Hors scope (à signaler à l'utilisateur)
 
-1. Migration SQL (3 tables + bucket podcasts)
-2. Composants Admin (Automatismes, ChapterContent, RevisionPath) + entrées sidebar
-3. Pages publiques (`/automatismes`, `/parcours-revision`) + routes
-4. `ChapterTabs` intégré dans la vue cours
-5. Mise à jour Header (ordre + nouveaux liens)
-6. QA visuel responsive
+- Migration de la colonne `academic_year_id` en `NOT NULL` à faire dans un second temps.
+- Désactivation des signups dans Supabase Dashboard : action manuelle requise.
+- Pas de changement sur Club Jules Verne ni Progression Spiralée (transverses aux années).
 
-Confirmes-tu pour que je lance la migration et le code ?
+## Ordre d'exécution
+
+1. Migration SQL (tables + GRANT + RLS + backfill + colonnes `academic_year_id`).
+2. Suppression du signup (Auth.tsx, AuthContext.tsx).
+3. AdminSidebar dynamique + AcademicYearsManager + Admin.tsx étendu.
+4. Propagation de `academicYearId` dans les managers admin (filtre + insert).
+5. FeaturesSection groupé par année + LevelContent filtré par `?year=`.
+6. QA visuel rapide.
