@@ -270,7 +270,7 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSideb
                     {getSubSections(item.id).map(section => (
                       <SidebarMenuItem key={section.id}>
                         <SidebarMenuButton
-                          onClick={() => onTabChange?.(section.id, item.id, null)}
+                          onClick={() => onTabChange?.(section.id, item.id, (item.id === 'automatismes' || item.id === 'parcours-revision') ? (selectedYearId || undefined) : null)}
                           className={`cursor-pointer transition-colors text-sm ${activeLevel === item.id && activeTab === section.id ? 'bg-rainbow-purple/10 text-rainbow-purple font-medium' : 'hover:bg-muted/50'}`}
                         >
                           <section.icon className="w-4 h-4 mr-2" />
