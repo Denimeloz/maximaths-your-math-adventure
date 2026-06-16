@@ -35,7 +35,10 @@ import {
   Spline,
   CalendarRange,
   CalendarPlus,
+  Zap,
+  Route,
 } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useState, useEffect } from 'react';
