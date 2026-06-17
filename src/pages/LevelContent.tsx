@@ -497,7 +497,7 @@ const LevelContent = () => {
           <div className="flex items-center gap-2 mb-3">
             <Lightbulb className={`w-5 h-5 text-${color}`} />
             <span className="text-xs font-body text-muted-foreground">
-              Activité de découverte
+              {isNewArchitecture ? "Espace d'approfondissement" : 'Activité de découverte'}
             </span>
           </div>
           
