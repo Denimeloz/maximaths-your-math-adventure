@@ -8,7 +8,7 @@ import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, Dumbbell, Upload, FileText, L
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
-import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
+import { useCurrentAcademicYearId, useAcademicYears } from '@/contexts/AcademicYearContext';
 
 interface TrainingExercise {
   id: string;
@@ -30,6 +30,9 @@ interface TrainingExerciseManagerProps {
 export const TrainingExerciseManager: React.FC<TrainingExerciseManagerProps> = ({ filterLevel }) => {
   const { toast } = useToast();
   const academicYearId = useCurrentAcademicYearId();
+  const { years } = useAcademicYears();
+  const selectedYear = years.find(y => y.id === academicYearId);
+  const isNewArchitecture = !!selectedYear && selectedYear.start_year >= 2026;
   const [items, setItems] = useState<TrainingExercise[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<TrainingExercise | null>(null);
@@ -216,7 +219,7 @@ export const TrainingExerciseManager: React.FC<TrainingExerciseManagerProps> = (
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-display text-foreground">Exercices d'entraînement</h2>
+        <h2 className="text-2xl font-display text-foreground">{isNewArchitecture ? 'Devoirs de maison' : "Exercices d'entraînement"}</h2>
         <Button onClick={() => setShowForm(true)} className="btn-3d bg-primary rounded-xl">
           <Plus className="w-4 h-4 mr-2" />
           Nouvel exercice

@@ -573,8 +573,8 @@ const AdminInner = () => {
                 }{activeLevel !== 'spiral-progression' && ` - ${
                   activeTab === 'infos' ? 'Informations pour la classe' :
                   activeTab === 'cours' ? 'Cours' :
-                  activeTab === 'activites' ? 'Activité de découverte' :
-                  activeTab === 'exercices-entrainement' ? "Exercices d'entraînement" :
+                  activeTab === 'activites' ? (isNewArchitecture ? "Espace d'approfondissement" : 'Activité de découverte') :
+                  activeTab === 'exercices-entrainement' ? (isNewArchitecture ? 'Devoirs de maison' : "Exercices d'entraînement") :
                   activeTab === 'tests-entrainement' ? "Tests (Évaluations formatives)" :
                   activeTab === 'devoirs' ? 'Devoirs de niveaux' :
                   activeTab === 'evaluations' ? 'Évaluations' :
