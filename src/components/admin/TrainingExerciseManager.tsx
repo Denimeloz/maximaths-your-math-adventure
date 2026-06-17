@@ -8,7 +8,7 @@ import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, Dumbbell, Upload, FileText, L
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
-import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
+import { useCurrentAcademicYearId, useAcademicYears } from '@/contexts/AcademicYearContext';
 
 interface TrainingExercise {
   id: string;
