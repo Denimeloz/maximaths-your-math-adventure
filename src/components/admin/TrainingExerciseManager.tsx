@@ -30,6 +30,9 @@ interface TrainingExerciseManagerProps {
 export const TrainingExerciseManager: React.FC<TrainingExerciseManagerProps> = ({ filterLevel }) => {
   const { toast } = useToast();
   const academicYearId = useCurrentAcademicYearId();
+  const { years } = useAcademicYears();
+  const selectedYear = years.find(y => y.id === academicYearId);
+  const isNewArchitecture = !!selectedYear && selectedYear.start_year >= 2026;
   const [items, setItems] = useState<TrainingExercise[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<TrainingExercise | null>(null);
