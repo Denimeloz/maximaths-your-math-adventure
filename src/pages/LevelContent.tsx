@@ -242,6 +242,14 @@ const LevelContent = () => {
   const Icon = config.icon;
   const color = levelColors[level] || 'rainbow-blue';
   const isNewArchitecture = yearStartYear !== null && yearStartYear >= 2026;
+  if (isNewArchitecture && type === 'activites') {
+    config.title = "Espace d'approfondissement";
+    config.description = "Ressources pour aller plus loin et approfondir les notions";
+  }
+  if (isNewArchitecture && type === 'exercices-entrainement') {
+    config.title = 'Devoirs de maison';
+    config.description = 'Devoirs à réaliser à la maison pour consolider les apprentissages';
+  }
 
   // If no year in URL, fall back to active year; also fetch start_year of resolved year
   useEffect(() => {
@@ -259,12 +267,7 @@ const LevelContent = () => {
     })();
   }, [yearId]);
 
-  // Redirect to /cours for 2026+ when accessing activites or exercices-entrainement
-  useEffect(() => {
-    if (isNewArchitecture && (type === 'activites' || type === 'exercices-entrainement')) {
-      navigate(`/niveau/${level}/cours${resolvedYearId ? `?year=${resolvedYearId}` : ''}`, { replace: true });
-    }
-  }, [isNewArchitecture, type, level, resolvedYearId, navigate]);
+
 
 
   useEffect(() => {

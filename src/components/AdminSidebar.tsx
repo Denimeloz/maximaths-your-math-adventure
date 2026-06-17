@@ -82,13 +82,17 @@ const getSubSections = (level: AdminCourseLevel, isNewArchitecture: boolean = fa
   const base = [
     { id: 'infos', label: 'Informations pour la classe', icon: Megaphone },
   ];
-  if (!isNewArchitecture) {
-    base.push({ id: 'activites', label: 'Activité de découverte', icon: Lightbulb });
-  }
+  base.push({
+    id: 'activites',
+    label: isNewArchitecture ? "Espace d'approfondissement" : 'Activité de découverte',
+    icon: Lightbulb,
+  });
   base.push({ id: 'cours', label: 'Cours', icon: BookOpen });
-  if (!isNewArchitecture) {
-    base.push({ id: 'exercices-entrainement', label: "Exercices d'entraînement", icon: Dumbbell });
-  }
+  base.push({
+    id: 'exercices-entrainement',
+    label: isNewArchitecture ? 'Devoirs de maison' : "Exercices d'entraînement",
+    icon: Dumbbell,
+  });
   base.push(
     { id: 'tests-entrainement', label: level === '3eme' ? 'Tests ou Mini DNB' : 'Tests (Évaluations formatives)', icon: Target },
     { id: 'devoirs', label: 'Devoirs de niveaux', icon: ClipboardList },
