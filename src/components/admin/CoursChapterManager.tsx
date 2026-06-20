@@ -18,7 +18,7 @@ interface Podcast { id: string; chapter_id: string; title: string; description: 
 
 const SUBSECTIONS = [
   { id: 'activite_decouverte', label: 'Activité de découverte', icon: Lightbulb },
-  { id: 'cours', label: 'Cours', icon: BookOpen },
+    { id: 'cours', label: 'Cours', icon: BookOpen },
   { id: 'exercices_entrainement', label: "Exercices d'entraînement", icon: Dumbbell },
   { id: 'accompagnement_personnalise', label: 'Accompagnement personnalisé', icon: HeartHandshake },
 ] as const;
