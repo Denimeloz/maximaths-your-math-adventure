@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import newLogo from "@/assets/new-logo.png";
+import { useAcademicYears } from '@/contexts/AcademicYearContext';
+import { fetchSiteLabels } from '@/lib/siteLabels';
 
 const levels = [
   { 
@@ -99,6 +101,24 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+  const { years, selectedYearId } = useAcademicYears();
+  const selectedYear = years.find(y => y.id === selectedYearId);
+  const isNewArchitecture = !!selectedYear && selectedYear.start_year >= 2026;
+  const [labelMap, setLabelMap] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      if (isNewArchitecture) {
+        const labels = await fetchSiteLabels(selectedYearId);
+        if (mounted) setLabelMap(labels || {});
+      } else {
+        setLabelMap({});
+      }
+    }
+    load();
+    return () => { mounted = false; };
+  }, [isNewArchitecture, selectedYearId]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -177,18 +197,21 @@ const Header = () => {
               
               {expandedLevel === level.id && (
                 <div className="absolute top-full left-0 mt-2 w-56 bg-card rounded-xl shadow-xl border border-border p-2 z-50 animate-slide-up">
-                  {getSubMenuForLevel(level.id).map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => handleSubMenuClick(level.id, item.id)}
-                      className="block w-full text-left select-none rounded-lg p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
-                    >
-                      <div className="text-sm font-semibold font-body">{item.label}</div>
-                      <p className="text-xs text-muted-foreground font-body mt-1">
-                        {item.description}
-                      </p>
-                    </button>
-                  ))}
+                  {getSubMenuForLevel(level.id).map((item) => {
+                    const displayLabel = labelMap[item.id] || item.label;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => handleSubMenuClick(level.id, item.id)}
+                        className="block w-full text-left select-none rounded-lg p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                      >
+                        <div className="text-sm font-semibold font-body">{displayLabel}</div>
+                        <p className="text-xs text-muted-foreground font-body mt-1">
+                          {item.description}
+                        </p>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>

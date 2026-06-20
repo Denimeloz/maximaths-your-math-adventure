@@ -487,6 +487,41 @@ const AdminInner = () => {
     }
   };
 
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) return;
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-user", {
+        body: JSON.stringify({ userId }),
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      const response = typeof data === 'string' ? JSON.parse(data) : data;
+      if (!response?.success) {
+        throw new Error(response?.error || 'Impossible de supprimer l\'utilisateur');
+      }
+
+      toast({
+        title: "Succès",
+        description: "Utilisateur supprimé",
+      });
+      await fetchUsers();
+    } catch (error) {
+      console.error('deleteUser error:', error);
+      toast({
+        title: "Erreur",
+        description: error?.message || 'Impossible de supprimer l\'utilisateur',
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const resetCourseForm = () => {
     setShowCourseForm(false);
     setEditingCourse(null);
@@ -1137,15 +1172,26 @@ const AdminInner = () => {
                       </div>
                     </div>
                     
-                    <Button
-                      variant={userItem.role === 'admin' ? 'outline' : 'default'}
-                      onClick={() => handleToggleUserRole(userItem.user_id, userItem.role || 'user')}
-                      className="rounded-xl"
-                      disabled={userItem.user_id === user?.id}
-                    >
-                      <Shield className="w-4 h-4 mr-2" />
-                      {userItem.role === 'admin' ? 'Retirer Admin' : 'Promouvoir Admin'}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant={userItem.role === 'admin' ? 'outline' : 'default'}
+                        onClick={() => handleToggleUserRole(userItem.user_id, userItem.role || 'user')}
+                        className="rounded-xl"
+                        disabled={userItem.user_id === user?.id}
+                      >
+                        <Shield className="w-4 h-4 mr-2" />
+                        {userItem.role === 'admin' ? 'Retirer Admin' : 'Promouvoir Admin'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleDeleteUser(userItem.user_id)}
+                        className="rounded-full text-destructive hover:text-destructive"
+                        disabled={userItem.user_id === user?.id}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>

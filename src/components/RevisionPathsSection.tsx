@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Route, ArrowRight } from 'lucide-react';
+import { fetchSiteLabels } from '@/lib/siteLabels';
 
 interface Year { id: string; label: string; start_year: number; is_active: boolean; }
 interface YearClass { id: string; academic_year_id: string; class_level: string; }
@@ -15,6 +16,7 @@ const RevisionPathsSection = () => {
   const navigate = useNavigate();
   const [years, setYears] = useState<Year[]>([]);
   const [classes, setClasses] = useState<YearClass[]>([]);
+  const [labelsByYear, setLabelsByYear] = useState<Record<string, Record<string,string>>>({});
 
   useEffect(() => {
     (async () => {
@@ -27,6 +29,24 @@ const RevisionPathsSection = () => {
     })();
   }, []);
 
+  useEffect(() => {
+    let mounted = true;
+    async function loadLabels() {
+      const map: Record<string, Record<string,string>> = {};
+      for (const y of years) {
+        try {
+          const labels = await fetchSiteLabels(y.id);
+          map[y.id] = labels || {};
+        } catch (e) {
+          map[y.id] = {};
+        }
+      }
+      if (mounted) setLabelsByYear(map);
+    }
+    if (years.length) loadLabels();
+    return () => { mounted = false; };
+  }, [years]);
+
   if (years.length === 0) return null;
 
   return (
@@ -35,7 +55,7 @@ const RevisionPathsSection = () => {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-rainbow-purple/10 rounded-full mb-4">
             <Route className="w-5 h-5 text-rainbow-purple" />
-            <span className="font-display text-rainbow-purple">Parcours de révision</span>
+            <span className="font-display text-rainbow-purple">{labelsByYear[years[0]?.id]?.['parcours_revision'] || 'Parcours de révision'}</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-display text-foreground mb-2">Construis ta progression</h2>
           <p className="text-muted-foreground font-body max-w-2xl mx-auto">

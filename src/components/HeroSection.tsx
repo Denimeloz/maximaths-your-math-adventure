@@ -2,6 +2,8 @@ import { ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, 
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { AcademicYearProvider, useAcademicYears } from "@/contexts/AcademicYearContext";
+import { fetchSiteLabels } from '@/lib/siteLabels';
+import { useEffect } from 'react';
 
 const LEVEL_LABELS: Record<string, string> = {
   '6eme': '6ème', '5eme': '5ème', '4eme': '4ème', '3eme': '3ème',
@@ -38,6 +40,21 @@ const getSubMenuForLevel = (levelId: string) => {
 const HeroInner = () => {
   const navigate = useNavigate();
   const { years, classes, loading, activeYear } = useAcademicYears();
+  const [labelMap, setLabelMap] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      if (activeYear && activeYear.start_year >= 2026) {
+        const labels = await fetchSiteLabels(activeYear.id);
+        if (mounted) setLabelMap(labels || {});
+      } else {
+        setLabelMap({});
+      }
+    }
+    load();
+    return () => { mounted = false; };
+  }, [activeYear]);
   const [expanded, setExpanded] = useState<string | null>(null); // key: yearId:level
 
   const handleClubClick = () => navigate('/club-maths');
@@ -144,17 +161,21 @@ const HeroInner = () => {
                   {expanded?.startsWith(`${year.id}:`) && (
                     <div className="mt-4 p-5 bg-card rounded-2xl border border-border animate-fade-in-up shadow-lg">
                       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                        {getSubMenuForLevel(expanded.split(':')[1]).map(item => (
+                        {getSubMenuForLevel(expanded.split(':')[1]).map(item => {
+                          const displayLabel = labelMap[item.id] || item.label;
+                          return (
+                        
                           <button
                             key={item.id}
                             onClick={() => handleSubMenuClick(year.id, expanded.split(':')[1], item.id)}
                             className="p-4 rounded-xl bg-muted/40 hover:bg-secondary/15 transition-all hover:-translate-y-0.5 text-left group border border-transparent hover:border-secondary"
                           >
                             <item.icon className="w-6 h-6 mb-2 text-primary group-hover:scale-110 transition-transform" />
-                            <div className="font-display text-sm text-foreground">{item.label}</div>
+                            <div className="font-display text-sm text-foreground">{displayLabel}</div>
                             <p className="text-xs text-muted-foreground font-body mt-1">{item.description}</p>
                           </button>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}

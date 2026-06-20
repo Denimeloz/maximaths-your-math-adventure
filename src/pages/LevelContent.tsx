@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CoursChapterView from '@/components/CoursChapterView';
+import { fetchSiteLabels } from '@/lib/siteLabels';
 
 import { Button } from '@/components/ui/button';
 import { 
@@ -266,6 +267,34 @@ const LevelContent = () => {
       }
     })();
   }, [yearId]);
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadLabels() {
+      if (!resolvedYearId) return;
+      try {
+        const labels = await fetchSiteLabels(resolvedYearId);
+        if (!mounted) return;
+        if (labels) {
+          if (isNewArchitecture) {
+            if (labels['exercices-entrainement']) {
+              config.title = labels['exercices-entrainement'];
+            }
+            if (labels['activites']) {
+              config.title = labels['activites'];
+            }
+          } else {
+            // for older years, apply default if present
+            if (labels[type]) config.title = labels[type];
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    loadLabels();
+    return () => { mounted = false; };
+  }, [resolvedYearId, isNewArchitecture]);
 
 
 
