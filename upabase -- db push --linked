@@ -1,0 +1,5 @@
+[33m11342a6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m feat: site_labels table + dynamic section labels for years >=2026
+[33me335652[m fix: corriger l'erreur de syntaxe JSX dans Admin.tsx
+[33m69379ba[m modified:   src/components/admin/CoursChapterManager.tsx
+[33m3d40d79[m modified:   src/pages/Levels.tsx
+[33m5e98d42[m Corrigé noms admin/public
