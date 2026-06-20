@@ -719,10 +719,12 @@ const AdminInner = () => {
                             />
                             <Button 
                               onClick={() => setCourseForm(prev => ({ ...prev, image_url: '' }))}
-                              setCourseForm(prev => ({ ...prev, level: activeLevel as CourseLevel }));
-                              setShowCourseForm(true);
+                              size="icon"
+                              variant="ghost"
+                              className="absolute top-0 right-0 h-6 w-6"
+                            >
                               <X className="w-3 h-3 text-destructive-foreground" />
-                            </button>
+                            </Button>
                           </div>
                         ) : (
                           <div className="w-24 h-24 rounded-xl border-2 border-dashed border-muted-foreground/30 flex items-center justify-center">
