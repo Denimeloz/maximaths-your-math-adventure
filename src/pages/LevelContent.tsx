@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
@@ -233,24 +233,31 @@ const LevelContent = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [resolvedYearId, setResolvedYearId] = useState<string | null>(yearId);
   const [yearStartYear, setYearStartYear] = useState<number | null>(null);
+  const [siteLabels, setSiteLabels] = useState<Record<string, string>>({});
 
   const level = levelId as CourseLevel;
   const type = contentType as ContentType;
-  const config = { ...(contentConfig[type] || contentConfig.cours) };
-  if (type === 'tests-entrainement' && level === '3eme') {
-    config.title = 'Tests ou Mini DNB';
-  }
-  const Icon = config.icon;
   const color = levelColors[level] || 'rainbow-blue';
   const isNewArchitecture = yearStartYear !== null && yearStartYear >= 2026;
-  if (isNewArchitecture && type === 'activites') {
-    config.title = "Espace d'approfondissement";
-    config.description = "Ressources pour aller plus loin et approfondir les notions";
-  }
-  if (isNewArchitecture && type === 'exercices-entrainement') {
-    config.title = 'Devoirs de maison';
-    config.description = 'Devoirs à réaliser à la maison pour consolider les apprentissages';
-  }
+
+  const displayConfig = useMemo(() => {
+    const config = { ...(contentConfig[type] || contentConfig.cours) };
+    if (type === 'tests-entrainement' && level === '3eme') {
+      config.title = 'Tests ou Mini DNB';
+    }
+    if (siteLabels[type]) {
+      config.title = siteLabels[type];
+    } else if (isNewArchitecture && type === 'activites') {
+      config.title = "Espace d'approfondissement";
+      config.description = "Ressources pour aller plus loin et approfondir les notions";
+    } else if (isNewArchitecture && type === 'exercices-entrainement') {
+      config.title = 'Devoirs de maison';
+      config.description = 'Devoirs à réaliser à la maison pour consolider les apprentissages';
+    }
+    return config;
+  }, [type, level, isNewArchitecture, siteLabels]);
+
+  const Icon = displayConfig.icon;
 
   // If no year in URL, fall back to active year; also fetch start_year of resolved year
   useEffect(() => {
@@ -271,30 +278,20 @@ const LevelContent = () => {
   useEffect(() => {
     let mounted = true;
     async function loadLabels() {
-      if (!resolvedYearId) return;
+      if (!resolvedYearId) {
+        setSiteLabels({});
+        return;
+      }
       try {
         const labels = await fetchSiteLabels(resolvedYearId);
-        if (!mounted) return;
-        if (labels) {
-          if (isNewArchitecture) {
-            if (labels['exercices-entrainement']) {
-              config.title = labels['exercices-entrainement'];
-            }
-            if (labels['activites']) {
-              config.title = labels['activites'];
-            }
-          } else {
-            // for older years, apply default if present
-            if (labels[type]) config.title = labels[type];
-          }
-        }
-      } catch (e) {
-        // ignore
+        if (mounted) setSiteLabels(labels || {});
+      } catch {
+        if (mounted) setSiteLabels({});
       }
     }
     loadLabels();
     return () => { mounted = false; };
-  }, [resolvedYearId, isNewArchitecture]);
+  }, [resolvedYearId]);
 
 
 
@@ -439,7 +436,7 @@ const LevelContent = () => {
         Contenu bientôt disponible !
       </h2>
       <p className="text-muted-foreground font-body mb-6">
-        Les {config.title.toLowerCase()} pour ce niveau seront ajoutés prochainement.
+        Les {displayConfig.title.toLowerCase()} pour ce niveau seront ajoutés prochainement.
       </p>
       <Button onClick={() => navigate('/')} className="btn-3d bg-primary rounded-xl">
         <Star className="w-4 h-4 mr-2" />
@@ -1048,17 +1045,17 @@ const LevelContent = () => {
           <div className={`inline-flex items-center gap-2 px-4 py-2 bg-${color}/20 rounded-full mb-6`}>
             <Icon className={`w-5 h-5 text-${color}`} />
             <span className={`text-${color} font-body font-semibold`}>
-              {levelLabels[level]} • {config.title}
+              {levelLabels[level]} • {displayConfig.title}
             </span>
           </div>
           
           <h1 className="text-4xl md:text-5xl font-display text-foreground mb-4">
-            {config.title}
+            {displayConfig.title}
             <span className="text-rainbow"> {levelLabels[level]}</span>
           </h1>
           
           <p className="text-xl text-muted-foreground font-body max-w-2xl mx-auto">
-            {config.description} pour le niveau {levelLabels[level]}
+            {displayConfig.description} pour le niveau {levelLabels[level]}
           </p>
         </div>
 
