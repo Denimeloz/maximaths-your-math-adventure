@@ -87,7 +87,7 @@ const getSubSections = (level: AdminCourseLevel, isNewArchitecture: boolean = fa
     label: isNewArchitecture ? "Espace d'approfondissement" : 'Activité de découverte',
     icon: Lightbulb,
   });
-  base.push({ id: 'cours', label: 'Cours', icon: BookOpen });
+  base.push({ id: 'cours', label: "Parcours d'apprentissage", icon: BookOpen });
   base.push({
     id: 'exercices-entrainement',
     label: isNewArchitecture ? 'Devoirs de maison' : "Exercices d'entraînement",

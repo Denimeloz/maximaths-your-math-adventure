@@ -59,7 +59,7 @@ const contentConfig: Record<ContentType, { icon: React.ElementType; title: strin
   },
   cours: {
     icon: BookOpen,
-    title: 'Cours',
+    title: "Parcours d'apprentissage",
     description: 'Tous les chapitres et leçons'
   },
   'exercices-entrainement': {

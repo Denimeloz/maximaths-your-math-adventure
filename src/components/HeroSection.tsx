@@ -1,7 +1,6 @@
 import { ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap, Puzzle, Camera, Gamepad2, CalendarRange, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import bannerAsset from "@/assets/maximaths-banner.png.asset.json";
 import { AcademicYearProvider, useAcademicYears } from "@/contexts/AcademicYearContext";
 
 const LEVEL_LABELS: Record<string, string> = {
@@ -11,7 +10,7 @@ const LEVEL_LABELS: Record<string, string> = {
 
 const subMenuItems = [
   { id: 'activites', label: 'Activités', description: 'Découverte et exploration', icon: Lightbulb },
-  { id: 'cours', label: 'Cours', description: 'Leçons et chapitres', icon: BookOpen },
+  { id: 'cours', label: "Parcours d'apprentissage", description: 'Leçons et chapitres', icon: BookOpen },
   { id: 'exercices-entrainement', label: 'Exercices', description: 'Entraînement', icon: ClipboardList },
   { id: 'tests-entrainement', label: 'Tests', description: 'Tests (Évaluations formatives)', icon: FileCheck },
   { id: 'devoirs', label: 'Devoirs', description: 'Devoirs de niveaux', icon: ClipboardList },
@@ -63,7 +62,7 @@ const HeroInner = () => {
           <div className="absolute -inset-4 md:-inset-6 bg-gradient-to-br from-primary/10 via-transparent to-secondary/20 rounded-[2.5rem] blur-2xl" />
           <div className="relative rounded-[1.75rem] md:rounded-[2.25rem] overflow-hidden ring-1 ring-border shadow-[0_20px_60px_-20px_hsl(218_81%_18%/0.25)] bg-card animate-float-slow">
             <img
-              src={bannerAsset.url}
+              src="/images/maximaths-banner.png"
               alt="MAXIMATHS — Curiosité, Assiduité, Rigueur."
               className="w-full h-auto block"
               loading="eager"

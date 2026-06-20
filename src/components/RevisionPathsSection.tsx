@@ -61,7 +61,7 @@ const RevisionPathsSection = () => {
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-xs text-muted-foreground">Parcours</p>
+                          <p className="text-xs text-muted-foreground">Entrée en </p>
                           <p className="font-display text-foreground">{LEVEL_LABELS[c.class_level] || c.class_level}</p>
                         </div>
                         <ArrowRight className="w-5 h-5 text-rainbow-purple group-hover:translate-x-1 transition" />
