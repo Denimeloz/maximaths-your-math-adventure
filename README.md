@@ -1,26 +1,20 @@
-# Welcome to your Lovable project
+# MAXIMATHS — Votre plateforme pédagogique
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+Ce projet est l’application MAXIMATHS, construite avec Vite, React, TypeScript et Tailwind.
 
-## How can I edit this code?
+## Comment éditer ce code ?
 
-There are several ways of editing your application.
+Vous pouvez modifier le code localement avec votre éditeur préféré.
 
-**Use Lovable**
+**Utiliser votre IDE**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+Clonez ce dépôt et travaillez localement. Les changements sont ensuite committés et poussés sur GitHub.
 
-Changes made via Lovable will be committed automatically to this repo.
+La seule exigence est d’avoir Node.js et npm installés.
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Suivez ces étapes :
 
 ```sh
 # Step 1: Clone the repository using the project's Git URL.
@@ -36,21 +30,13 @@ npm i
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+**Modifier un fichier directement sur GitHub**
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Naviguez vers le fichier.
+- Cliquez sur le bouton "Edit" (crayon).
+- Effectuez vos modifications et committez.
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
+## Quelles technologies sont utilisées ?
 
 This project is built with:
 
@@ -60,14 +46,24 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## Comment déployer ce projet ?
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Ce projet peut être déployé sur n’importe quel hébergeur statique compatible avec Vite.
 
-## Can I connect a custom domain to my Lovable project?
+Par exemple : Netlify, Vercel, Cloudflare Pages ou un serveur web classique.
 
-Yes, you can!
+### Déploiement local
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```sh
+npm run build
+npm run preview
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### Déployer sur un service externe
+
+Générez d’abord le build avec `npm run build`, puis publiez le contenu du dossier `dist`.
+
+## Comment connecter un domaine personnalisé ?
+
+La plupart des plateformes d’hébergement proposent une section Domains/Custom Domain dans les paramètres du projet.
+Suivez leur documentation pour connecter votre domaine vers l’application générée.
