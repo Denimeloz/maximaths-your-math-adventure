@@ -218,7 +218,7 @@ const Header = () => {
               
               {expandedLevel === level.id && (
                 <div className="absolute top-full left-0 mt-2 w-56 bg-card rounded-xl shadow-xl border border-border p-2 z-50 animate-slide-up">
-                  {getSubMenuForLevel(level.id).map((item) => {
+                  {getSubMenuForLevel(level.id, isNewArchitecture).map((item) => {
                     const displayLabel = labelMap[item.id] || item.label;
                     return (
                       <button
@@ -300,7 +300,7 @@ const Header = () => {
                 
                 {expandedLevel === level.id && (
                   <div className="pl-4 pb-2 space-y-1">
-                    {getSubMenuForLevel(level.id).map((item) => (
+                    {getSubMenuForLevel(level.id, isNewArchitecture).map((item) => (
                       <button
                         key={item.id}
                         onClick={() => handleSubMenuClick(level.id, item.id)}
