@@ -79,26 +79,39 @@ const getSubSections = (level: AdminCourseLevel, isNewArchitecture: boolean = fa
   if (level === 'automatismes') return [{ id: 'automatismes', label: 'Gérer les supports', icon: Zap }];
   if (level === 'parcours-revision') return [{ id: 'parcours-revision', label: 'Gérer les parcours', icon: Route }];
 
+  if (isNewArchitecture) {
+    // Ordre 2026-2027+ :
+    // Infos, Parcours d'apprentissage, Jeux et Genially, Classe en activité,
+    // Devoirs de maison, Espace d'approfondissement,
+    // Test ou mini-DNB (Test hors 3ème), Évaluations, [Prépa DNB], Devoirs de niveaux, [Ressources DNB]
+    const testLabel = level === '3eme' ? 'Tests ou Mini DNB' : 'Test';
+    const items: { id: string; label: string; icon: any }[] = [
+      { id: 'infos', label: 'Informations pour la classe', icon: Megaphone },
+      { id: 'cours', label: "Parcours d'apprentissage", icon: BookOpen },
+      { id: 'jeux-genially', label: 'Jeux et Genially', icon: Gamepad2 },
+      { id: 'classe-activite', label: 'Classe en activité', icon: Camera },
+      { id: 'exercices-entrainement', label: 'Devoirs de maison', icon: Dumbbell },
+      { id: 'activites', label: "Espace d'approfondissement", icon: Lightbulb },
+      { id: 'tests-entrainement', label: testLabel, icon: Target },
+      { id: 'evaluations', label: 'Évaluations', icon: FileCheck },
+    ];
+    if (level === '3eme') items.push({ id: 'prepa-dnb', label: 'Prépa DNB', icon: Star });
+    items.push({ id: 'devoirs', label: 'Devoirs de niveaux', icon: ClipboardList });
+    if (level === '3eme') items.push({ id: 'ressources-dnb', label: 'Ressources révision DNB', icon: GraduationCap });
+    return items;
+  }
+
+  // Ancienne architecture (≤ 2025-2026) : inchangée
   const base = [
     { id: 'infos', label: 'Informations pour la classe', icon: Megaphone },
-  ];
-  base.push({
-    id: 'activites',
-    label: isNewArchitecture ? "Espace d'approfondissement" : 'Activité de découverte',
-    icon: Lightbulb,
-  });
-  base.push({ id: 'cours', label: "Parcours d'apprentissage", icon: BookOpen });
-  base.push({
-    id: 'exercices-entrainement',
-    label: isNewArchitecture ? 'Devoirs de maison' : "Exercices d'entraînement",
-    icon: Dumbbell,
-  });
-  base.push(
+    { id: 'activites', label: 'Activité de découverte', icon: Lightbulb },
+    { id: 'cours', label: "Parcours d'apprentissage", icon: BookOpen },
+    { id: 'exercices-entrainement', label: "Exercices d'entraînement", icon: Dumbbell },
     { id: 'tests-entrainement', label: level === '3eme' ? 'Tests ou Mini DNB' : 'Tests (Évaluations formatives)', icon: Target },
     { id: 'devoirs', label: 'Devoirs de niveaux', icon: ClipboardList },
     { id: 'evaluations', label: 'Évaluations', icon: FileCheck },
     { id: 'jeux-genially', label: 'Jeux et Genially', icon: Gamepad2 },
-  );
+  ];
   if (level === '3eme') {
     base.push({ id: 'prepa-dnb', label: 'Prépa DNB', icon: Star });
     base.push({ id: 'ressources-dnb', label: 'Ressources révision DNB', icon: GraduationCap });
