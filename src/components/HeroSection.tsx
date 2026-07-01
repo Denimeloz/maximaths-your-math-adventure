@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap, Puzzle, Camera, Gamepad2, CalendarRange, Star } from "lucide-react";
+import { ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap, Puzzle, Camera, Gamepad2, CalendarRange, Star, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { AcademicYearProvider, useAcademicYears } from "@/contexts/AcademicYearContext";
@@ -10,6 +10,7 @@ const LEVEL_LABELS: Record<string, string> = {
   'seconde': 'Seconde', 'premiere': 'Première', 'terminale': 'Terminale',
 };
 
+// Legacy menus (années < 2026) — inchangées
 const subMenuItems = [
   { id: 'activites', label: 'Activités', description: 'Découverte et exploration', icon: Lightbulb },
   { id: 'cours', label: "Parcours d'apprentissage", description: 'Leçons et chapitres', icon: BookOpen },
@@ -31,7 +32,27 @@ const subMenuItems3eme = [
 
 const subMenuItemsSeconde = [...subMenuItems, classeActiviteItem];
 
-const getSubMenuForLevel = (levelId: string) => {
+// Nouvelle architecture (années >= 2026)
+const getNewArchitectureSubMenu = (levelId: string) => {
+  const is3eme = levelId === '3eme';
+  const items: any[] = [
+    { id: 'infos', label: 'Infos pour la classe', description: 'Informations importantes', icon: Info },
+    { id: 'cours', label: "Parcours d'apprentissage", description: 'Leçons et chapitres', icon: BookOpen },
+    { id: 'jeux-genially', label: 'Jeux et Genially', description: 'Jeux éducatifs et présentations', icon: Gamepad2 },
+    { id: 'classe-activite', label: 'Classe en activité', description: 'Photos et moments', icon: Camera },
+    { id: 'exercices-entrainement', label: 'Devoirs de maison', description: 'À réaliser à la maison', icon: ClipboardList },
+    { id: 'activites', label: "Espace d'approfondissement", description: 'Pour aller plus loin', icon: Lightbulb },
+    { id: 'tests-entrainement', label: is3eme ? 'Tests ou Mini DNB' : 'Test', description: 'Tests', icon: FileCheck },
+    { id: 'evaluations', label: 'Évaluations', description: 'Tests et examens', icon: FileCheck },
+  ];
+  if (is3eme) items.push({ id: 'prepa-dnb', label: 'Prépa DNB', description: 'Préparation au brevet', icon: GraduationCap });
+  items.push({ id: 'devoirs', label: 'Devoirs de niveaux', description: 'Devoirs de niveaux', icon: ClipboardList });
+  if (is3eme) items.push({ id: 'ressources-dnb', label: 'Ressources révision DNB', description: 'Fiches et supports à télécharger', icon: GraduationCap });
+  return items;
+};
+
+const getSubMenuForLevel = (levelId: string, isNewArchitecture: boolean) => {
+  if (isNewArchitecture) return getNewArchitectureSubMenu(levelId);
   if (levelId === '3eme') return subMenuItems3eme;
   if (levelId === 'seconde') return subMenuItemsSeconde;
   return subMenuItems;
