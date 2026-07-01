@@ -65,11 +65,12 @@ const levels = [
   },
 ];
 
+// Ancienne architecture (≤ 2025-2026) — INCHANGÉE
 const subMenuItems = [
   { id: 'infos', label: 'Infos pour la classe', description: 'Informations importantes' },
-  { id: 'activites', label: "Espace d'approfondissement", description: 'Pour aller plus loin' },
+  { id: 'activites', label: 'Activités', description: 'Découverte et exploration' },
   { id: 'cours', label: 'Cours', description: 'Leçons et chapitres' },
-  { id: 'exercices-entrainement', label: 'Devoirs de maison', description: 'À réaliser à la maison' },
+  { id: 'exercices-entrainement', label: "Exercices d'entraînement", description: 'Exercices à pratiquer' },
   { id: 'tests-entrainement', label: 'Tests (Évaluations formatives)', description: 'Tests' },
   { id: 'devoirs', label: 'Devoirs de niveaux', description: 'Devoirs de niveaux' },
   { id: 'evaluations', label: 'Évaluations', description: 'Tests et examens' },
@@ -88,9 +89,7 @@ const subMenuItems3eme = [
   { id: 'classe-activite', label: 'Classe en activité', description: 'Photos et moments de classe' },
 ];
 
-// Ordre 2026-2027+ (nouvelle architecture) : Parcours d'apprentissage, Jeux et Genially,
-// Classe en activité, Devoirs de maison, Espace d'approfondissement, Test(s), Évaluations,
-// [Prépa DNB], Devoirs de niveaux, [Ressources DNB]
+// Ordre 2026-2027+ (nouvelle architecture)
 const getNewArchitectureSubMenu = (levelId: string) => {
   const is3eme = levelId === '3eme';
   const items: { id: string; label: string; description: string }[] = [
@@ -109,7 +108,8 @@ const getNewArchitectureSubMenu = (levelId: string) => {
   return items;
 };
 
-const getSubMenuForLevel = (levelId: string) => {
+const getSubMenuForLevel = (levelId: string, isNewArchitecture: boolean) => {
+  if (isNewArchitecture) return getNewArchitectureSubMenu(levelId);
   if (levelId === '3eme') return subMenuItems3eme;
   if (levelId === 'seconde') return subMenuItems3emeSeconde;
   return subMenuItems;
