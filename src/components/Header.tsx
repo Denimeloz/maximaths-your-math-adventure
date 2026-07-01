@@ -88,6 +88,27 @@ const subMenuItems3eme = [
   { id: 'classe-activite', label: 'Classe en activité', description: 'Photos et moments de classe' },
 ];
 
+// Ordre 2026-2027+ (nouvelle architecture) : Parcours d'apprentissage, Jeux et Genially,
+// Classe en activité, Devoirs de maison, Espace d'approfondissement, Test(s), Évaluations,
+// [Prépa DNB], Devoirs de niveaux, [Ressources DNB]
+const getNewArchitectureSubMenu = (levelId: string) => {
+  const is3eme = levelId === '3eme';
+  const items: { id: string; label: string; description: string }[] = [
+    { id: 'infos', label: 'Infos pour la classe', description: 'Informations importantes' },
+    { id: 'cours', label: "Parcours d'apprentissage", description: 'Leçons et chapitres' },
+    { id: 'jeux-genially', label: 'Jeux et Genially', description: 'Jeux éducatifs et présentations' },
+    { id: 'classe-activite', label: 'Classe en activité', description: 'Photos et moments de classe' },
+    { id: 'exercices-entrainement', label: 'Devoirs de maison', description: 'À réaliser à la maison' },
+    { id: 'activites', label: "Espace d'approfondissement", description: 'Pour aller plus loin' },
+    { id: 'tests-entrainement', label: is3eme ? 'Tests ou Mini DNB' : 'Test', description: 'Tests' },
+    { id: 'evaluations', label: 'Évaluations', description: 'Tests et examens' },
+  ];
+  if (is3eme) items.push({ id: 'prepa-dnb', label: 'Prépa DNB', description: 'Préparation au brevet' });
+  items.push({ id: 'devoirs', label: 'Devoirs de niveaux', description: 'Devoirs de niveaux' });
+  if (is3eme) items.push({ id: 'ressources-dnb', label: 'Ressources révision DNB', description: 'Fiches et supports à télécharger' });
+  return items;
+};
+
 const getSubMenuForLevel = (levelId: string) => {
   if (levelId === '3eme') return subMenuItems3eme;
   if (levelId === 'seconde') return subMenuItems3emeSeconde;
