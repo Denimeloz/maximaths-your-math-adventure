@@ -182,7 +182,7 @@ const HeroInner = () => {
                   {expanded?.startsWith(`${year.id}:`) && (
                     <div className="mt-4 p-5 bg-card rounded-2xl border border-border animate-fade-in-up shadow-lg">
                       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                        {getSubMenuForLevel(expanded.split(':')[1]).map(item => {
+                        {getSubMenuForLevel(expanded.split(':')[1], year.start_year >= 2026).map(item => {
                           const displayLabel = labelMap[item.id] || item.label;
                           return (
                         
