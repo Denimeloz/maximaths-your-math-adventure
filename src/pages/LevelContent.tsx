@@ -242,8 +242,9 @@ const LevelContent = () => {
 
   const displayConfig = useMemo(() => {
     const config = { ...(contentConfig[type] || contentConfig.cours) };
-    if (type === 'tests-entrainement' && level === '3eme') {
-      config.title = 'Tests ou Mini DNB';
+    if (type === 'tests-entrainement') {
+      if (level === '3eme') config.title = 'Tests ou Mini DNB';
+      else if (isNewArchitecture) config.title = 'Test';
     }
     if (siteLabels[type]) {
       config.title = siteLabels[type];

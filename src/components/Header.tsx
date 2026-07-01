@@ -65,11 +65,12 @@ const levels = [
   },
 ];
 
+// Ancienne architecture (≤ 2025-2026) — INCHANGÉE
 const subMenuItems = [
   { id: 'infos', label: 'Infos pour la classe', description: 'Informations importantes' },
-  { id: 'activites', label: "Espace d'approfondissement", description: 'Pour aller plus loin' },
+  { id: 'activites', label: 'Activités', description: 'Découverte et exploration' },
   { id: 'cours', label: 'Cours', description: 'Leçons et chapitres' },
-  { id: 'exercices-entrainement', label: 'Devoirs de maison', description: 'À réaliser à la maison' },
+  { id: 'exercices-entrainement', label: "Exercices d'entraînement", description: 'Exercices à pratiquer' },
   { id: 'tests-entrainement', label: 'Tests (Évaluations formatives)', description: 'Tests' },
   { id: 'devoirs', label: 'Devoirs de niveaux', description: 'Devoirs de niveaux' },
   { id: 'evaluations', label: 'Évaluations', description: 'Tests et examens' },
@@ -88,7 +89,27 @@ const subMenuItems3eme = [
   { id: 'classe-activite', label: 'Classe en activité', description: 'Photos et moments de classe' },
 ];
 
-const getSubMenuForLevel = (levelId: string) => {
+// Ordre 2026-2027+ (nouvelle architecture)
+const getNewArchitectureSubMenu = (levelId: string) => {
+  const is3eme = levelId === '3eme';
+  const items: { id: string; label: string; description: string }[] = [
+    { id: 'infos', label: 'Infos pour la classe', description: 'Informations importantes' },
+    { id: 'cours', label: "Parcours d'apprentissage", description: 'Leçons et chapitres' },
+    { id: 'jeux-genially', label: 'Jeux et Genially', description: 'Jeux éducatifs et présentations' },
+    { id: 'classe-activite', label: 'Classe en activité', description: 'Photos et moments de classe' },
+    { id: 'exercices-entrainement', label: 'Devoirs de maison', description: 'À réaliser à la maison' },
+    { id: 'activites', label: "Espace d'approfondissement", description: 'Pour aller plus loin' },
+    { id: 'tests-entrainement', label: is3eme ? 'Tests ou Mini DNB' : 'Test', description: 'Tests' },
+    { id: 'evaluations', label: 'Évaluations', description: 'Tests et examens' },
+  ];
+  if (is3eme) items.push({ id: 'prepa-dnb', label: 'Prépa DNB', description: 'Préparation au brevet' });
+  items.push({ id: 'devoirs', label: 'Devoirs de niveaux', description: 'Devoirs de niveaux' });
+  if (is3eme) items.push({ id: 'ressources-dnb', label: 'Ressources révision DNB', description: 'Fiches et supports à télécharger' });
+  return items;
+};
+
+const getSubMenuForLevel = (levelId: string, isNewArchitecture: boolean) => {
+  if (isNewArchitecture) return getNewArchitectureSubMenu(levelId);
   if (levelId === '3eme') return subMenuItems3eme;
   if (levelId === 'seconde') return subMenuItems3emeSeconde;
   return subMenuItems;
@@ -197,7 +218,7 @@ const Header = () => {
               
               {expandedLevel === level.id && (
                 <div className="absolute top-full left-0 mt-2 w-56 bg-card rounded-xl shadow-xl border border-border p-2 z-50 animate-slide-up">
-                  {getSubMenuForLevel(level.id).map((item) => {
+                  {getSubMenuForLevel(level.id, isNewArchitecture).map((item) => {
                     const displayLabel = labelMap[item.id] || item.label;
                     return (
                       <button
@@ -279,7 +300,7 @@ const Header = () => {
                 
                 {expandedLevel === level.id && (
                   <div className="pl-4 pb-2 space-y-1">
-                    {getSubMenuForLevel(level.id).map((item) => (
+                    {getSubMenuForLevel(level.id, isNewArchitecture).map((item) => (
                       <button
                         key={item.id}
                         onClick={() => handleSubMenuClick(level.id, item.id)}
