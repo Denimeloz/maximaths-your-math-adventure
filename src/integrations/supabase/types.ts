@@ -1240,6 +1240,30 @@ export type Database = {
           },
         ]
       }
+      site_labels: {
+        Row: {
+          academic_year_id: string | null
+          created_at: string | null
+          id: string
+          key: string
+          label: string
+        }
+        Insert: {
+          academic_year_id?: string | null
+          created_at?: string | null
+          id?: string
+          key: string
+          label: string
+        }
+        Update: {
+          academic_year_id?: string | null
+          created_at?: string | null
+          id?: string
+          key?: string
+          label?: string
+        }
+        Relationships: []
+      }
       spiral_resources: {
         Row: {
           academic_year_id: string | null
