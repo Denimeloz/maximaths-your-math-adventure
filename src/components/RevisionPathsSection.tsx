@@ -57,9 +57,9 @@ const RevisionPathsSection = () => {
             <Route className="w-5 h-5 text-rainbow-purple" />
             <span className="font-display text-rainbow-purple">{labelsByYear[years[0]?.id]?.['parcours_revision'] || 'Parcours de révision'}</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-display text-foreground mb-2">Construis ta progression</h2>
+          <h2 className="text-3xl md:text-4xl font-display text-foreground mb-2">Ton parcours de révision</h2>
           <p className="text-muted-foreground font-body max-w-2xl mx-auto">
-            5 étapes pour réactiver, revoir, t'entraîner, vérifier tes acquis et t'autoévaluer.
+            Télécharge le parcours de révision adapté à ta classe.
           </p>
         </div>
 
