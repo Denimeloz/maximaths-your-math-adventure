@@ -55,6 +55,7 @@ export type Database = {
           is_published: boolean
           level: string
           order_index: number
+          resource_links: Json
           title: string
           updated_at: string
         }
@@ -68,6 +69,7 @@ export type Database = {
           is_published?: boolean
           level: string
           order_index?: number
+          resource_links?: Json
           title: string
           updated_at?: string
         }
@@ -81,6 +83,7 @@ export type Database = {
           is_published?: boolean
           level?: string
           order_index?: number
+          resource_links?: Json
           title?: string
           updated_at?: string
         }
@@ -111,6 +114,7 @@ export type Database = {
           level: string | null
           max_points: number
           order_index: number
+          resource_links: Json
           title: string
           updated_at: string
         }
@@ -130,6 +134,7 @@ export type Database = {
           level?: string | null
           max_points?: number
           order_index?: number
+          resource_links?: Json
           title: string
           updated_at?: string
         }
@@ -149,6 +154,7 @@ export type Database = {
           level?: string | null
           max_points?: number
           order_index?: number
+          resource_links?: Json
           title?: string
           updated_at?: string
         }
@@ -375,6 +381,7 @@ export type Database = {
           is_published: boolean
           level: string
           order_index: number
+          resource_links: Json
           title: string
           updated_at: string
         }
@@ -388,6 +395,7 @@ export type Database = {
           is_published?: boolean
           level: string
           order_index?: number
+          resource_links?: Json
           title: string
           updated_at?: string
         }
@@ -401,6 +409,7 @@ export type Database = {
           is_published?: boolean
           level?: string
           order_index?: number
+          resource_links?: Json
           title?: string
           updated_at?: string
         }
@@ -504,6 +513,7 @@ export type Database = {
           id: string
           is_published: boolean
           order_index: number
+          resource_links: Json
           title: string
           updated_at: string
         }
@@ -516,6 +526,7 @@ export type Database = {
           id?: string
           is_published?: boolean
           order_index?: number
+          resource_links?: Json
           title: string
           updated_at?: string
         }
@@ -528,6 +539,7 @@ export type Database = {
           id?: string
           is_published?: boolean
           order_index?: number
+          resource_links?: Json
           title?: string
           updated_at?: string
         }
@@ -678,6 +690,7 @@ export type Database = {
           id: string
           is_published: boolean
           order_index: number
+          resource_links: Json
           title: string
           updated_at: string
           year: number | null
@@ -693,6 +706,7 @@ export type Database = {
           id?: string
           is_published?: boolean
           order_index?: number
+          resource_links?: Json
           title: string
           updated_at?: string
           year?: number | null
@@ -708,6 +722,7 @@ export type Database = {
           id?: string
           is_published?: boolean
           order_index?: number
+          resource_links?: Json
           title?: string
           updated_at?: string
           year?: number | null
@@ -835,6 +850,7 @@ export type Database = {
           level: string | null
           max_points: number
           order_index: number
+          resource_links: Json
           title: string
           updated_at: string
         }
@@ -853,6 +869,7 @@ export type Database = {
           level?: string | null
           max_points?: number
           order_index?: number
+          resource_links?: Json
           title: string
           updated_at?: string
         }
@@ -871,6 +888,7 @@ export type Database = {
           level?: string | null
           max_points?: number
           order_index?: number
+          resource_links?: Json
           title?: string
           updated_at?: string
         }
@@ -913,6 +931,7 @@ export type Database = {
           order_index: number
           points: number
           question: string | null
+          resource_links: Json
           title: string
           updated_at: string
         }
@@ -930,6 +949,7 @@ export type Database = {
           order_index?: number
           points?: number
           question?: string | null
+          resource_links?: Json
           title: string
           updated_at?: string
         }
@@ -947,6 +967,7 @@ export type Database = {
           order_index?: number
           points?: number
           question?: string | null
+          resource_links?: Json
           title?: string
           updated_at?: string
         }
@@ -1148,6 +1169,59 @@ export type Database = {
           },
         ]
       }
+      parent_resources: {
+        Row: {
+          academic_year_id: string | null
+          category: string
+          created_at: string
+          description: string | null
+          file_name: string | null
+          file_url: string | null
+          id: string
+          is_published: boolean
+          order_index: number
+          resource_links: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year_id?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_published?: boolean
+          order_index?: number
+          resource_links?: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year_id?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_published?: boolean
+          order_index?: number
+          resource_links?: Json
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parent_resources_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1199,6 +1273,7 @@ export type Database = {
           file_url: string | null
           id: string
           level: string
+          resource_links: Json
           title: string | null
           updated_at: string
         }
@@ -1210,6 +1285,7 @@ export type Database = {
           file_url?: string | null
           id?: string
           level: string
+          resource_links?: Json
           title?: string | null
           updated_at?: string
         }
@@ -1221,6 +1297,7 @@ export type Database = {
           file_url?: string | null
           id?: string
           level?: string
+          resource_links?: Json
           title?: string | null
           updated_at?: string
         }
@@ -1320,6 +1397,7 @@ export type Database = {
           is_published: boolean
           level: string
           order_index: number
+          resource_links: Json
           resource_type: string
           title: string
           updated_at: string
@@ -1335,6 +1413,7 @@ export type Database = {
           is_published?: boolean
           level: string
           order_index?: number
+          resource_links?: Json
           resource_type?: string
           title: string
           updated_at?: string
@@ -1350,6 +1429,7 @@ export type Database = {
           is_published?: boolean
           level?: string
           order_index?: number
+          resource_links?: Json
           resource_type?: string
           title?: string
           updated_at?: string
@@ -1419,6 +1499,7 @@ export type Database = {
           is_published: boolean
           level: string
           order_index: number
+          resource_links: Json
           title: string
           updated_at: string
         }
@@ -1432,6 +1513,7 @@ export type Database = {
           is_published?: boolean
           level: string
           order_index?: number
+          resource_links?: Json
           title: string
           updated_at?: string
         }
@@ -1445,6 +1527,7 @@ export type Database = {
           is_published?: boolean
           level?: string
           order_index?: number
+          resource_links?: Json
           title?: string
           updated_at?: string
         }
@@ -1469,6 +1552,7 @@ export type Database = {
           is_published: boolean
           level: string
           order_index: number
+          resource_links: Json
           title: string
           updated_at: string
         }
@@ -1482,6 +1566,7 @@ export type Database = {
           is_published?: boolean
           level: string
           order_index?: number
+          resource_links?: Json
           title: string
           updated_at?: string
         }
@@ -1495,6 +1580,7 @@ export type Database = {
           is_published?: boolean
           level?: string
           order_index?: number
+          resource_links?: Json
           title?: string
           updated_at?: string
         }
