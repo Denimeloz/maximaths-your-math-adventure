@@ -6,19 +6,24 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Route, Upload, Trash2, FileText, Save } from 'lucide-react';
+import { Plus, Trash2, Route } from 'lucide-react';
 import { useAcademicYears, useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 type Level = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
-interface RevisionFile {
-  id: string;
-  academic_year_id: string;
-  level: Level;
-  title: string | null;
-  description: string | null;
-  file_url: string | null;
-  file_name: string | null;
+export const REVISION_STEPS = [
+  { id: 1, label: 'Réactiver les connaissances' },
+  { id: 2, label: 'Revoir les notions essentielles' },
+  { id: 3, label: "S'entraîner" },
+  { id: 4, label: 'Vérifier ses acquis' },
+  { id: 5, label: "S'autoévaluer" },
+];
+
+const KINDS = ['pdf', 'video', 'canva', 'podcast', 'link'];
+
+interface Resource {
+  id: string; level: Level; academic_year_id: string | null; step: number;
+  kind: string; title: string; description: string | null; url: string | null; display_order: number;
 }
 
 export const RevisionPathManager: React.FC = () => {
@@ -26,11 +31,8 @@ export const RevisionPathManager: React.FC = () => {
   const academicYearId = useCurrentAcademicYearId();
   const { classes } = useAcademicYears();
   const [level, setLevel] = useState<Level>('6eme');
-  const [current, setCurrent] = useState<RevisionFile | null>(null);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [uploading, setUploading] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [items, setItems] = useState<Resource[]>([]);
+  const [form, setForm] = useState({ step: 1, kind: 'pdf', title: '', description: '', url: '' });
 
   const availableLevels = classes.filter(c => c.academic_year_id === academicYearId).map(c => c.class_level as Level);
 
@@ -38,57 +40,31 @@ export const RevisionPathManager: React.FC = () => {
     if (availableLevels.length && !availableLevels.includes(level)) setLevel(availableLevels[0]);
   }, [academicYearId, availableLevels.join(',')]);
 
-  useEffect(() => { load(); }, [level, academicYearId]);
+  useEffect(() => { fetch(); }, [level, academicYearId]);
 
-  const load = async () => {
-    if (!academicYearId) { setCurrent(null); return; }
-    const { data } = await (supabase as any).from('revision_path_files')
-      .select('*').eq('level', level).eq('academic_year_id', academicYearId).maybeSingle();
-    setCurrent(data || null);
-    setTitle(data?.title || '');
-    setDescription(data?.description || '');
+  const fetch = async () => {
+    if (!academicYearId) { setItems([]); return; }
+    const { data } = await (supabase as any).from('revision_path_resources')
+      .select('*').eq('level', level).eq('academic_year_id', academicYearId)
+      .order('step').order('display_order');
+    setItems(data || []);
   };
 
-  const upsert = async (patch: Partial<RevisionFile>) => {
-    if (!academicYearId) return null;
-    const payload = { academic_year_id: academicYearId, level, ...patch };
-    const { data, error } = await (supabase as any).from('revision_path_files')
-      .upsert(payload, { onConflict: 'academic_year_id,level' }).select().single();
-    if (error) { toast({ title: 'Erreur', description: error.message, variant: 'destructive' }); return null; }
-    setCurrent(data);
-    return data;
+  const add = async () => {
+    if (!form.title.trim() || !academicYearId) return;
+    const stepCount = items.filter(i => i.step === form.step).length;
+    const { error } = await (supabase as any).from('revision_path_resources').insert({
+      level, academic_year_id: academicYearId, step: form.step, kind: form.kind,
+      title: form.title, description: form.description || null, url: form.url || null,
+      display_order: stepCount,
+    });
+    if (error) toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+    else { toast({ title: 'Ajouté' }); setForm({ step: form.step, kind: 'pdf', title: '', description: '', url: '' }); fetch(); }
   };
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !academicYearId) return;
-    setUploading(true);
-    try {
-      const path = `revision-path/${academicYearId}/${level}/${Date.now()}-${file.name}`;
-      const { error: upErr } = await supabase.storage.from('course-files').upload(path, file);
-      if (upErr) throw upErr;
-      const { data: { publicUrl } } = supabase.storage.from('course-files').getPublicUrl(path);
-      await upsert({ file_url: publicUrl, file_name: file.name });
-      toast({ title: 'Fichier téléversé' });
-    } catch (err: any) {
-      toast({ title: 'Erreur', description: err.message, variant: 'destructive' });
-    } finally {
-      setUploading(false);
-      e.target.value = '';
-    }
-  };
-
-  const removeFile = async () => {
-    if (!current) return;
-    await upsert({ file_url: null, file_name: null });
-    toast({ title: 'Fichier retiré' });
-  };
-
-  const saveMeta = async () => {
-    setSaving(true);
-    await upsert({ title: title || null, description: description || null });
-    setSaving(false);
-    toast({ title: 'Enregistré' });
+  const remove = async (id: string) => {
+    await (supabase as any).from('revision_path_resources').delete().eq('id', id);
+    fetch();
   };
 
   return (
@@ -109,35 +85,45 @@ export const RevisionPathManager: React.FC = () => {
         </div>
       </Card>
 
-      <Card className="p-4 space-y-3">
-        <h3 className="font-display">Fichier du parcours</h3>
-        <Input placeholder="Titre (optionnel)" value={title} onChange={e => setTitle(e.target.value)} />
-        <Textarea placeholder="Description (optionnel)" value={description} onChange={e => setDescription(e.target.value)} />
-        <Button onClick={saveMeta} disabled={saving} variant="outline">
-          <Save className="w-4 h-4 mr-2" />Enregistrer titre / description
-        </Button>
-
-        <div className="pt-3 border-t">
-          {current?.file_url ? (
-            <div className="flex items-center justify-between p-3 rounded bg-muted/40">
-              <a href={current.file_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm font-medium hover:underline">
-                <FileText className="w-4 h-4" />{current.file_name || 'Fichier'}
-              </a>
-              <Button variant="ghost" size="icon" onClick={removeFile}>
-                <Trash2 className="w-4 h-4 text-destructive" />
-              </Button>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground italic">Aucun fichier téléversé.</p>
-          )}
-          <label className="mt-3 inline-flex items-center gap-2 cursor-pointer">
-            <input type="file" className="hidden" onChange={handleUpload} disabled={uploading} />
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm hover:opacity-90">
-              <Upload className="w-4 h-4" />{uploading ? 'Téléversement…' : (current?.file_url ? 'Remplacer le fichier' : 'Téléverser un fichier')}
-            </span>
-          </label>
+      <Card className="p-4 space-y-2 bg-muted/30">
+        <h3 className="font-display">Ajouter une ressource</h3>
+        <div className="grid md:grid-cols-2 gap-2">
+          <Select value={String(form.step)} onValueChange={v => setForm(f => ({ ...f, step: parseInt(v) }))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>{REVISION_STEPS.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.id}. {s.label}</SelectItem>)}</SelectContent>
+          </Select>
+          <Select value={form.kind} onValueChange={v => setForm(f => ({ ...f, kind: v }))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>{KINDS.map(k => <SelectItem key={k} value={k}>{k}</SelectItem>)}</SelectContent>
+          </Select>
         </div>
+        <Input placeholder="Titre" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
+        <Input placeholder="URL" value={form.url} onChange={e => setForm(f => ({ ...f, url: e.target.value }))} />
+        <Textarea placeholder="Description" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+        <Button onClick={add}><Plus className="w-4 h-4 mr-1" />Ajouter</Button>
       </Card>
+
+      {REVISION_STEPS.map(step => {
+        const stepItems = items.filter(i => i.step === step.id);
+        return (
+          <Card key={step.id} className="p-4">
+            <h3 className="font-display mb-3">{step.id}. {step.label}</h3>
+            <div className="space-y-2">
+              {stepItems.map(r => (
+                <div key={r.id} className="flex items-center justify-between p-2 rounded bg-muted/40">
+                  <div>
+                    <p className="font-semibold">{r.title} <span className="text-xs text-muted-foreground">({r.kind})</span></p>
+                    {r.description && <p className="text-sm text-muted-foreground">{r.description}</p>}
+                    {r.url && <a href={r.url} target="_blank" rel="noreferrer" className="text-xs text-rainbow-blue underline">Voir</a>}
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                </div>
+              ))}
+              {stepItems.length === 0 && <p className="text-xs text-muted-foreground italic">Aucune ressource.</p>}
+            </div>
+          </Card>
+        );
+      })}
     </div>
   );
 };
