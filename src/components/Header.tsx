@@ -1,4 +1,4 @@
-import { Menu, X, Home, Info, ChevronDown, ChevronUp, GraduationCap } from "lucide-react";
+import { Menu, X, Home, Info, ChevronDown, ChevronUp, GraduationCap, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -251,6 +251,16 @@ const Header = () => {
           <Button 
             variant="nav" 
             size="sm" 
+            className="gap-2 rounded-full hover:bg-rainbow-blue/20 hover:scale-105 transition-all"
+            onClick={() => navigate('/ressources-parents')}
+          >
+            <UsersRound className="w-4 h-4 text-rainbow-blue" />
+            Parents
+          </Button>
+
+          <Button 
+            variant="nav" 
+            size="sm" 
             className="gap-2 rounded-full hover:bg-rainbow-pink/20 hover:scale-105 transition-all"
             onClick={() => navigate('/about')}
           >
@@ -324,6 +334,15 @@ const Header = () => {
             >
               <GraduationCap className="w-5 h-5 text-rainbow-coral" />
               Ressources DNB
+            </Button>
+
+            <Button 
+              variant="ghost" 
+              className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-blue/20 mt-2"
+              onClick={() => { navigate('/ressources-parents'); setMobileMenuOpen(false); }}
+            >
+              <UsersRound className="w-5 h-5 text-rainbow-blue" />
+              Ressources parents
             </Button>
 
             <Button 

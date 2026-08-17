@@ -7,6 +7,7 @@ import CoursChapterView from '@/components/CoursChapterView';
 import { fetchSiteLabels } from '@/lib/siteLabels';
 
 import { Button } from '@/components/ui/button';
+import { ResourceLinks } from '@/components/ResourceLinks';
 import { 
   BookOpen, 
   FileText, 
@@ -122,6 +123,7 @@ interface Activity {
   level: string;
   file_url: string | null;
   correction_url: string | null;
+  resource_links?: any;
 }
 
 interface FileAttachment {
@@ -149,6 +151,7 @@ interface ClassInfo {
   level: string;
   file_url: string | null;
   file_urls: FileAttachment[] | null;
+  resource_links?: any;
 }
 
 interface Activity {
@@ -158,6 +161,7 @@ interface Activity {
   level: string;
   file_url: string | null;
   correction_url: string | null;
+  resource_links?: any;
 }
 
 interface Assignment {
@@ -167,6 +171,7 @@ interface Assignment {
   level: string | null;
   file_url: string | null;
   correction_url: string | null;
+  resource_links?: any;
 }
 
 interface Evaluation {
@@ -176,6 +181,7 @@ interface Evaluation {
   level: string | null;
   file_url: string | null;
   correction_url: string | null;
+  resource_links?: any;
 }
 
 interface DnbContent {
@@ -184,6 +190,7 @@ interface DnbContent {
   description: string | null;
   file_url: string | null;
   correction_url: string | null;
+  resource_links?: any;
   category: string;
   year: number | null;
 }
@@ -195,6 +202,7 @@ interface TrainingExercise {
   level: string;
   file_url: string | null;
   correction_url: string | null;
+  resource_links?: any;
 }
 
 interface TrainingTest {
@@ -204,9 +212,11 @@ interface TrainingTest {
   level: string;
   file_url: string | null;
   correction_url: string | null;
+  resource_links?: any;
 }
 
 interface GamesGeniallyItem {
+  resource_links?: any;
   id: string;
   title: string;
   description: string | null;
@@ -538,7 +548,8 @@ const LevelContent = () => {
             </p>
           )}
           
-          <div className="flex gap-3 pt-4 border-t border-border">
+          <ResourceLinks links={activity.resource_links} className="mb-3" compact />
+          <div className="flex flex-wrap gap-3 pt-4 border-t border-border">
             {activity.file_url && (
               <a 
                 href={activity.file_url} 
@@ -591,6 +602,8 @@ const LevelContent = () => {
             </p>
           )}
           
+          <ResourceLinks links={info.resource_links} className="mb-3" compact />
+
           {((info.file_urls && info.file_urls.length > 0) || info.file_url) && (
             <div className="pt-4 border-t border-border space-y-2">
               <p className="text-xs font-medium text-muted-foreground">Pièces jointes :</p>
@@ -648,7 +661,8 @@ const LevelContent = () => {
             </p>
           )}
           
-          <div className="flex flex-wrap gap-2 pt-4 border-t border-border">
+          <ResourceLinks links={assignment.resource_links} className="mb-3" compact />
+          <div className="flex flex-wrap gap-3 pt-4 border-t border-border">
             {assignment.file_url && (
               <a 
                 href={assignment.file_url} 
@@ -701,7 +715,8 @@ const LevelContent = () => {
             </p>
           )}
           
-          <div className="flex gap-3 pt-4 border-t border-border">
+          <ResourceLinks links={exercise.resource_links} className="mb-3" compact />
+          <div className="flex flex-wrap gap-3 pt-4 border-t border-border">
             {exercise.file_url && (
               <a 
                 href={exercise.file_url} 
@@ -754,7 +769,8 @@ const LevelContent = () => {
             </p>
           )}
           
-          <div className="flex gap-3 pt-4 border-t border-border">
+          <ResourceLinks links={test.resource_links} className="mb-3" compact />
+          <div className="flex flex-wrap gap-3 pt-4 border-t border-border">
             {test.file_url && (
               <a 
                 href={test.file_url} 
@@ -807,7 +823,8 @@ const LevelContent = () => {
             </p>
           )}
 
-          <div className="flex gap-2 pt-4 border-t border-border">
+          <ResourceLinks links={evaluation.resource_links} className="mb-3" compact />
+          <div className="flex flex-wrap gap-3 pt-4 border-t border-border">
             {evaluation.file_url && (
               <a 
                 href={evaluation.file_url} 
@@ -861,7 +878,8 @@ const LevelContent = () => {
             </p>
           )}
           
-          <div className="flex gap-2 pt-4 border-t border-border">
+          <ResourceLinks links={item.resource_links} className="mb-3" compact />
+          <div className="flex flex-wrap gap-3 pt-4 border-t border-border">
             {item.file_url && (
               <a 
                 href={item.file_url} 
@@ -954,7 +972,8 @@ const LevelContent = () => {
             </p>
           )}
           
-          <div className="flex flex-wrap gap-2 pt-4 border-t border-border">
+          <ResourceLinks links={item.links as any} className="mb-3" compact />
+          <div className="flex flex-wrap gap-3 pt-4 border-t border-border">
             {item.file_url && (
               <a 
                 href={item.file_url} 

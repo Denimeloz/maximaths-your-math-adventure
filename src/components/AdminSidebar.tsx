@@ -50,7 +50,8 @@ export type AdminCourseLevel =
   | 'club-maths'
   | 'spiral-progression'
   | 'automatismes'
-  | 'parcours-revision';
+  | 'parcours-revision'
+  | 'ressources-parents';
 
 
 const LEVEL_LABELS: Record<string, string> = {
@@ -78,6 +79,7 @@ const getSubSections = (level: AdminCourseLevel, isNewArchitecture: boolean = fa
   if (level === 'spiral-progression') return SPIRAL_SUBSECTIONS;
   if (level === 'automatismes') return [{ id: 'automatismes', label: 'Gérer les supports', icon: Zap }];
   if (level === 'parcours-revision') return [{ id: 'parcours-revision', label: 'Gérer les parcours', icon: Route }];
+  if (level === 'ressources-parents') return [{ id: 'ressources-parents', label: 'Gérer les ressources', icon: Users }];
 
   if (isNewArchitecture) {
     // Ordre 2026-2027+ :
@@ -272,6 +274,7 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSideb
               { id: 'spiral-progression' as AdminCourseLevel, label: 'Progression Spiralée', icon: Spline },
               { id: 'automatismes' as AdminCourseLevel, label: 'Automatismes', icon: Zap },
               { id: 'parcours-revision' as AdminCourseLevel, label: 'Parcours de révision', icon: Route },
+              { id: 'ressources-parents' as AdminCourseLevel, label: 'Ressources pour les parents', icon: Users },
             ].map(item => (
 
               <Collapsible key={item.id} open={!!openLevels[item.id]} onOpenChange={() => toggleLevel(item.id)}>

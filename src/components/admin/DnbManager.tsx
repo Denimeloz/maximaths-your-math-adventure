@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { LinksEditor, ResourceLink } from './LinksEditor';
 import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, Star, Upload, FileText, Loader2, BookCheck } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -17,6 +18,7 @@ interface DnbContent {
   content: string | null;
   file_url: string | null;
   correction_url: string | null;
+  resource_links?: any;
   category: string;
   year: number | null;
   is_published: boolean;
@@ -39,6 +41,7 @@ export const DnbManager: React.FC = () => {
     content: '',
     file_url: '',
     correction_url: '',
+    resource_links: [] as ResourceLink[],
     category: 'exercice',
     year: new Date().getFullYear(),
   });
@@ -123,6 +126,7 @@ export const DnbManager: React.FC = () => {
       content: form.content || null,
       file_url: form.file_url || null,
       correction_url: form.correction_url || null,
+        resource_links: form.resource_links.filter(l => l.url.trim()) as any,
       category: form.category,
       year: form.year || null,
       academic_year_id: academicYearId,
@@ -175,6 +179,7 @@ export const DnbManager: React.FC = () => {
       content: item.content || '',
       file_url: item.file_url || '',
       correction_url: item.correction_url || '',
+      resource_links: Array.isArray(item.resource_links) ? item.resource_links : [],
       category: item.category,
       year: item.year || new Date().getFullYear(),
     });
@@ -190,6 +195,7 @@ export const DnbManager: React.FC = () => {
       content: '',
       file_url: '',
       correction_url: '',
+      resource_links: [] as ResourceLink[],
       category: 'exercice',
       year: new Date().getFullYear(),
     });
@@ -347,6 +353,8 @@ export const DnbManager: React.FC = () => {
                 )}
               </div>
             </div>
+
+            <LinksEditor value={form.resource_links} onChange={links => setForm(prev => ({ ...prev, resource_links: links }))} />
 
             <div className="flex gap-3 pt-4">
               <Button onClick={handleSave} className="btn-3d bg-primary rounded-xl">

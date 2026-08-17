@@ -27,6 +27,7 @@ import SpiralResourcesManager from '@/components/admin/SpiralResourcesManager';
 import { AcademicYearsManager } from '@/components/admin/AcademicYearsManager';
 import { AutomatismsManager } from '@/components/admin/AutomatismsManager';
 import { RevisionPathManager } from '@/components/admin/RevisionPathManager';
+import { ParentResourcesManager } from '@/components/admin/ParentResourcesManager';
 import { CoursChapterManager } from '@/components/admin/CoursChapterManager';
 import PDFViewer from '@/components/PDFViewer';
 import { AcademicYearProvider, useAcademicYears } from '@/contexts/AcademicYearContext';
@@ -602,10 +603,12 @@ const AdminInner = () => {
             <h2 className="text-xl font-display text-foreground flex items-center gap-2">
                 {activeLevel === 'club-maths'
                   ? 'Club Jules Verne'
+                  : activeLevel === 'ressources-parents'
+                  ? 'Ressources pour les parents'
                   : activeLevel === 'spiral-progression'
                   ? `Progression Spiralée — ${getLevelLabel(activeTab as CourseLevel)}`
                   : getLevelLabel(activeLevel as CourseLevel)
-                }{activeLevel !== 'spiral-progression' && ` - ${
+                }{activeLevel !== 'spiral-progression' && activeLevel !== 'ressources-parents' && ` - ${
                   activeTab === 'infos' ? 'Informations pour la classe' :
                   activeTab === 'cours' ? "Parcours d'apprentissage" :
                   activeTab === 'activites' ? (isNewArchitecture ? "Espace d'approfondissement" : 'Activité de découverte') :
@@ -684,6 +687,9 @@ const AdminInner = () => {
 
           {/* Parcours de révision - transverse */}
           {activeLevel === 'parcours-revision' && <RevisionPathManager />}
+
+          {/* Ressources pour les parents - transverse */}
+          {activeLevel === 'ressources-parents' && <ParentResourcesManager />}
 
           {/* Courses Tab - filtered by level */}
           {activeTab === 'cours' && activeLevel && activeLevel !== 'club-maths' && activeLevel !== 'spiral-progression' && activeLevel !== 'automatismes' && activeLevel !== 'parcours-revision' && isNewArchitecture && (

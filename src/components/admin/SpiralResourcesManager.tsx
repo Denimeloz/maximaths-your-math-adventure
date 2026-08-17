@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { LinksEditor, ResourceLink } from './LinksEditor';
 import { Plus, Trash2, Edit, X, Upload, Loader2, FileText, Eye, EyeOff, GripVertical, Spline, Link as LinkIcon, Video, Dumbbell, Download } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -43,6 +44,7 @@ interface SpiralResource {
   file_url: string | null;
   file_name: string | null;
   external_url: string | null;
+  resource_links?: any;
   is_published: boolean;
   order_index: number;
 }
@@ -64,6 +66,7 @@ export const SpiralResourcesManager: React.FC<Props> = ({ selectedLevel }) => {
     file_url: '',
     file_name: '',
     external_url: '',
+    resource_links: [] as ResourceLink[],
     is_published: false,
   });
 
@@ -111,7 +114,7 @@ export const SpiralResourcesManager: React.FC<Props> = ({ selectedLevel }) => {
   const resetForm = () => {
     setShowForm(false);
     setEditing(null);
-    setForm({ title: '', description: '', resource_type: 'fiche', file_url: '', file_name: '', external_url: '', is_published: false });
+    setForm({ title: '', description: '', resource_type: 'fiche', file_url: '', file_name: '', external_url: '', resource_links: [] as ResourceLink[], is_published: false });
   };
 
   const handleSave = async () => {
@@ -127,6 +130,7 @@ export const SpiralResourcesManager: React.FC<Props> = ({ selectedLevel }) => {
       file_url: form.file_url || null,
       file_name: form.file_name || null,
       external_url: form.external_url || null,
+      resource_links: form.resource_links.filter(l => l.url.trim()) as any,
       is_published: form.is_published,
       academic_year_id: academicYearId,
     };
@@ -152,6 +156,7 @@ export const SpiralResourcesManager: React.FC<Props> = ({ selectedLevel }) => {
       file_url: item.file_url || '',
       file_name: item.file_name || '',
       external_url: item.external_url || '',
+      resource_links: Array.isArray(item.resource_links) ? item.resource_links : [],
       is_published: item.is_published,
     });
     setShowForm(true);
@@ -259,6 +264,7 @@ export const SpiralResourcesManager: React.FC<Props> = ({ selectedLevel }) => {
                 )}
               </div>
             </div>
+            <LinksEditor value={form.resource_links} onChange={links => setForm(p => ({ ...p, resource_links: links }))} />
             <div className="flex items-center gap-3 pt-2">
               <Switch checked={form.is_published}
                 onCheckedChange={(c) => setForm(p => ({ ...p, is_published: c }))} />
