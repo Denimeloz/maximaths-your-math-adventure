@@ -972,7 +972,7 @@ const LevelContent = () => {
             </p>
           )}
           
-          <ResourceLinks links={item.resource_links} className="mb-3" compact />
+          <ResourceLinks links={item.links as any} className="mb-3" compact />
           <div className="flex flex-wrap gap-3 pt-4 border-t border-border">
             {item.file_url && (
               <a 
