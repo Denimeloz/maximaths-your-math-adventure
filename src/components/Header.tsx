@@ -338,6 +338,15 @@ const Header = () => {
 
             <Button 
               variant="ghost" 
+              className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-blue/20 mt-2"
+              onClick={() => { navigate('/ressources-parents'); setMobileMenuOpen(false); }}
+            >
+              <UsersRound className="w-5 h-5 text-rainbow-blue" />
+              Ressources parents
+            </Button>
+
+            <Button 
+              variant="ghost" 
               className="justify-start gap-3 h-12 rounded-xl hover:bg-rainbow-pink/20 mt-2"
               onClick={() => { navigate('/about'); setMobileMenuOpen(false); }}
             >
