@@ -27,6 +27,7 @@ import SpiralResourcesManager from '@/components/admin/SpiralResourcesManager';
 import { AcademicYearsManager } from '@/components/admin/AcademicYearsManager';
 import { AutomatismsManager } from '@/components/admin/AutomatismsManager';
 import { RevisionPathManager } from '@/components/admin/RevisionPathManager';
+import { ParentResourcesManager } from '@/components/admin/ParentResourcesManager';
 import { CoursChapterManager } from '@/components/admin/CoursChapterManager';
 import PDFViewer from '@/components/PDFViewer';
 import { AcademicYearProvider, useAcademicYears } from '@/contexts/AcademicYearContext';
