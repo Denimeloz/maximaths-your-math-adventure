@@ -33,6 +33,7 @@ interface Activity {
   level: string;
   file_url: string | null;
   correction_url: string | null;
+  resource_links: any;
   is_published: boolean;
   order_index: number;
   created_at: string;
@@ -77,6 +78,7 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
     level: selectedLevel || '6eme',
     file_url: '',
     correction_url: '',
+    resource_links: [] as ResourceLink[],
     is_published: false,
     order_index: 0,
   });
@@ -198,6 +200,7 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
       level: selectedLevel || '6eme',
       file_url: '',
       correction_url: '',
+      resource_links: [] as ResourceLink[],
       is_published: false,
       order_index: activities.length,
     });
@@ -213,6 +216,7 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
       level: activity.level,
       file_url: activity.file_url || '',
       correction_url: activity.correction_url || '',
+      resource_links: Array.isArray(activity.resource_links) ? activity.resource_links : [],
       is_published: activity.is_published,
       order_index: activity.order_index,
     });
@@ -228,6 +232,7 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
       level: formData.level,
       file_url: formData.file_url || null,
       correction_url: formData.correction_url || null,
+      resource_links: formData.resource_links.filter(l => l.url.trim()) as any,
       is_published: formData.is_published,
       order_index: formData.order_index,
       academic_year_id: academicYearId,
@@ -381,6 +386,8 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
               </div>
 
               <div className="flex items-center gap-4">
+                <LinksEditor value={formData.resource_links} onChange={links => setFormData(prev => ({ ...prev, resource_links: links }))} />
+
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="is_published"

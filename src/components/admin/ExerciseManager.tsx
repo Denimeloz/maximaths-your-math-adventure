@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { LinksEditor, ResourceLink } from './LinksEditor';
 import PDFViewer from '@/components/PDFViewer';
 import { SortableItem } from './SortableItem';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
@@ -17,6 +18,7 @@ interface Exercise {
   description: string | null;
   file_url: string | null;
   correction_url: string | null;
+  resource_links: any;
   difficulty: number;
   points: number;
   is_published: boolean;
@@ -50,6 +52,7 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
     points: 10,
     file_url: '',
     correction_url: '',
+    resource_links: [] as ResourceLink[],
   });
 
   const sensors = useSensors(
@@ -143,6 +146,7 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
           explanation: form.description || null,
           file_url: form.file_url || null,
           correction_url: form.correction_url || null,
+        resource_links: form.resource_links.filter(l => l.url.trim()) as any,
           difficulty: form.difficulty,
           points: form.points,
         })
@@ -165,6 +169,7 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
           explanation: form.description || null,
           file_url: form.file_url || null,
           correction_url: form.correction_url || null,
+        resource_links: form.resource_links.filter(l => l.url.trim()) as any,
           difficulty: form.difficulty,
           points: form.points,
           order_index: exercisesForCourse.length,
@@ -202,6 +207,7 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
       points: exercise.points,
       file_url: exercise.file_url || '',
       correction_url: exercise.correction_url || '',
+      resource_links: Array.isArray(exercise.resource_links) ? exercise.resource_links : [],
     });
     setShowForm(true);
   };
@@ -209,7 +215,7 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
   const resetForm = () => {
     setShowForm(false);
     setEditingExercise(null);
-    setForm({ course_id: '', title: '', description: '', difficulty: 1, points: 10, file_url: '', correction_url: '' });
+    setForm({ course_id: '', title: '', description: '', difficulty: 1, points: 10, file_url: '', correction_url: '', resource_links: [] as ResourceLink[] });
   };
 
   const filteredExercises = selectedCourse
@@ -406,6 +412,8 @@ export const ExerciseManager: React.FC<ExerciseManagerProps> = ({ courses }) => 
                 />
               </div>
             </div>
+
+            <LinksEditor value={form.resource_links} onChange={links => setForm(prev => ({ ...prev, resource_links: links }))} />
 
             <div className="flex gap-3 pt-4">
               <Button onClick={handleSave} className="btn-3d bg-primary rounded-xl">
