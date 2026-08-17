@@ -50,7 +50,8 @@ export type AdminCourseLevel =
   | 'club-maths'
   | 'spiral-progression'
   | 'automatismes'
-  | 'parcours-revision';
+  | 'parcours-revision'
+  | 'ressources-parents';
 
 
 const LEVEL_LABELS: Record<string, string> = {
