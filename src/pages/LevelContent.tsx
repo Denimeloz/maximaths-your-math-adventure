@@ -7,8 +7,8 @@ import CoursChapterView from '@/components/CoursChapterView';
 import { fetchSiteLabels } from '@/lib/siteLabels';
 
 import { Button } from '@/components/ui/button';
-import { 
 import { ResourceLinks } from '@/components/ResourceLinks';
+import { 
   BookOpen, 
   FileText, 
   ClipboardCheck,
