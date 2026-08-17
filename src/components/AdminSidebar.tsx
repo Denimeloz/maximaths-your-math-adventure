@@ -79,6 +79,7 @@ const getSubSections = (level: AdminCourseLevel, isNewArchitecture: boolean = fa
   if (level === 'spiral-progression') return SPIRAL_SUBSECTIONS;
   if (level === 'automatismes') return [{ id: 'automatismes', label: 'Gérer les supports', icon: Zap }];
   if (level === 'parcours-revision') return [{ id: 'parcours-revision', label: 'Gérer les parcours', icon: Route }];
+  if (level === 'ressources-parents') return [{ id: 'ressources-parents', label: 'Gérer les ressources', icon: Users }];
 
   if (isNewArchitecture) {
     // Ordre 2026-2027+ :
