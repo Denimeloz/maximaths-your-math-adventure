@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { LinksEditor, ResourceLink } from './LinksEditor';
 import { 
   Plus, 
   Pencil, 
@@ -51,6 +52,7 @@ interface ClassInfo {
   content: string | null;
   file_url: string | null;
   file_urls: FileAttachment[] | null;
+  resource_links?: any;
   is_published: boolean;
   order_index: number;
   created_at: string;
@@ -75,6 +77,7 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
     title: '',
     content: '',
     file_urls: [] as FileAttachment[],
+    resource_links: [] as ResourceLink[],
     is_published: false,
   });
 
@@ -193,6 +196,7 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
           title: formData.title,
           content: formData.content || null,
           file_urls: formData.file_urls,
+          resource_links: formData.resource_links.filter(l => l.url.trim()) as any,
           is_published: formData.is_published,
           academic_year_id: academicYearId,
         })
@@ -222,6 +226,7 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
           title: formData.title,
           content: formData.content || null,
           file_urls: formData.file_urls,
+          resource_links: formData.resource_links.filter(l => l.url.trim()) as any,
           is_published: formData.is_published,
           academic_year_id: academicYearId,
           order_index: infos.length,
@@ -260,6 +265,7 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
       title: info.title,
       content: info.content || '',
       file_urls: fileUrls,
+      resource_links: Array.isArray(info.resource_links) ? info.resource_links : [],
       is_published: info.is_published,
     });
     setShowForm(true);
@@ -315,6 +321,7 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
       title: '',
       content: '',
       file_urls: [],
+      resource_links: [] as ResourceLink[],
       is_published: false,
     });
   };
