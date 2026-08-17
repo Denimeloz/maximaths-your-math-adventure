@@ -216,6 +216,7 @@ interface TrainingTest {
 }
 
 interface GamesGeniallyItem {
+  resource_links?: any;
   id: string;
   title: string;
   description: string | null;
