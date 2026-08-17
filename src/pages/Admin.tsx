@@ -602,10 +602,12 @@ const AdminInner = () => {
             <h2 className="text-xl font-display text-foreground flex items-center gap-2">
                 {activeLevel === 'club-maths'
                   ? 'Club Jules Verne'
+                  : activeLevel === 'ressources-parents'
+                  ? 'Ressources pour les parents'
                   : activeLevel === 'spiral-progression'
                   ? `Progression Spiralée — ${getLevelLabel(activeTab as CourseLevel)}`
                   : getLevelLabel(activeLevel as CourseLevel)
-                }{activeLevel !== 'spiral-progression' && ` - ${
+                }{activeLevel !== 'spiral-progression' && activeLevel !== 'ressources-parents' && ` - ${
                   activeTab === 'infos' ? 'Informations pour la classe' :
                   activeTab === 'cours' ? "Parcours d'apprentissage" :
                   activeTab === 'activites' ? (isNewArchitecture ? "Espace d'approfondissement" : 'Activité de découverte') :
