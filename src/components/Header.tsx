@@ -251,6 +251,16 @@ const Header = () => {
           <Button 
             variant="nav" 
             size="sm" 
+            className="gap-2 rounded-full hover:bg-rainbow-blue/20 hover:scale-105 transition-all"
+            onClick={() => navigate('/ressources-parents')}
+          >
+            <UsersRound className="w-4 h-4 text-rainbow-blue" />
+            Parents
+          </Button>
+
+          <Button 
+            variant="nav" 
+            size="sm" 
             className="gap-2 rounded-full hover:bg-rainbow-pink/20 hover:scale-105 transition-all"
             onClick={() => navigate('/about')}
           >
