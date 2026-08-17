@@ -274,6 +274,7 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSideb
               { id: 'spiral-progression' as AdminCourseLevel, label: 'Progression Spiralée', icon: Spline },
               { id: 'automatismes' as AdminCourseLevel, label: 'Automatismes', icon: Zap },
               { id: 'parcours-revision' as AdminCourseLevel, label: 'Parcours de révision', icon: Route },
+              { id: 'ressources-parents' as AdminCourseLevel, label: 'Ressources pour les parents', icon: Users },
             ].map(item => (
 
               <Collapsible key={item.id} open={!!openLevels[item.id]} onOpenChange={() => toggleLevel(item.id)}>
