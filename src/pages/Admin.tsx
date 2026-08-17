@@ -688,6 +688,9 @@ const AdminInner = () => {
           {/* Parcours de révision - transverse */}
           {activeLevel === 'parcours-revision' && <RevisionPathManager />}
 
+          {/* Ressources pour les parents - transverse */}
+          {activeLevel === 'ressources-parents' && <ParentResourcesManager />}
+
           {/* Courses Tab - filtered by level */}
           {activeTab === 'cours' && activeLevel && activeLevel !== 'club-maths' && activeLevel !== 'spiral-progression' && activeLevel !== 'automatismes' && activeLevel !== 'parcours-revision' && isNewArchitecture && (
             <CoursChapterManager selectedLevel={activeLevel as CourseLevel} />
