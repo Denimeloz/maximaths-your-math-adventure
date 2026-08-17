@@ -18,7 +18,7 @@ interface TrainingTest {
   description: string | null;
   file_url: string | null;
   correction_url: string | null;
-  resource_links: any;
+  resource_links?: any;
   is_published: boolean;
   order_index: number;
 }

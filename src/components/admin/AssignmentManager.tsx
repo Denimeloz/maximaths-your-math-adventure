@@ -19,7 +19,7 @@ interface Assignment {
   order_index: number;
   file_url: string | null;
   correction_url: string | null;
-  resource_links: any;
+  resource_links?: any;
   level: string | null;
 }
 

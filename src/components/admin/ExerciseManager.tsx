@@ -18,7 +18,7 @@ interface Exercise {
   description: string | null;
   file_url: string | null;
   correction_url: string | null;
-  resource_links: any;
+  resource_links?: any;
   difficulty: number;
   points: number;
   is_published: boolean;

@@ -18,7 +18,7 @@ interface DnbContent {
   content: string | null;
   file_url: string | null;
   correction_url: string | null;
-  resource_links: any;
+  resource_links?: any;
   category: string;
   year: number | null;
   is_published: boolean;

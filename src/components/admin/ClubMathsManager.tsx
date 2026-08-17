@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { LinksEditor, ResourceLink } from './LinksEditor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -52,6 +53,7 @@ interface ClubSubject {
   description: string | null;
   file_url: string | null;
   correction_url: string | null;
+  resource_links?: any;
   order_index: number;
   is_published: boolean;
 }
@@ -92,6 +94,7 @@ export function ClubMathsManager({ selectedActivityType }: ClubMathsManagerProps
     description: '',
     file_url: '',
     correction_url: '',
+    resource_links: [] as ResourceLink[],
     is_published: false,
   });
   const [isUploadingFile, setIsUploadingFile] = useState(false);
@@ -194,6 +197,7 @@ export function ClubMathsManager({ selectedActivityType }: ClubMathsManagerProps
         description: form.description || null,
         file_url: form.file_url || null,
         correction_url: form.correction_url || null,
+        resource_links: form.resource_links.filter(l => l.url.trim()) as any,
         is_published: form.is_published,
       }).eq('id', editingSubject.id);
     } else {
@@ -203,6 +207,7 @@ export function ClubMathsManager({ selectedActivityType }: ClubMathsManagerProps
         description: form.description || null,
         file_url: form.file_url || null,
         correction_url: form.correction_url || null,
+        resource_links: form.resource_links.filter(l => l.url.trim()) as any,
         is_published: form.is_published,
         order_index: subjects.length,
       });
@@ -226,6 +231,7 @@ export function ClubMathsManager({ selectedActivityType }: ClubMathsManagerProps
       description: subject.description || '',
       file_url: subject.file_url || '',
       correction_url: subject.correction_url || '',
+      resource_links: Array.isArray(subject.resource_links) ? subject.resource_links : [],
       is_published: subject.is_published,
     });
     setShowForm(true);
@@ -234,7 +240,7 @@ export function ClubMathsManager({ selectedActivityType }: ClubMathsManagerProps
   const resetForm = () => {
     setShowForm(false);
     setEditingSubject(null);
-    setForm({ title: '', description: '', file_url: '', correction_url: '', is_published: false });
+    setForm({ title: '', description: '', file_url: '', correction_url: '', resource_links: [] as ResourceLink[], is_published: false });
   };
 
   if (loading) {

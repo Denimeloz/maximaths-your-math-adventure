@@ -25,6 +25,7 @@ import {
 } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
 import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
+import { LinksEditor, ResourceLink } from './LinksEditor';
 
 interface Activity {
   id: string;
@@ -33,7 +34,7 @@ interface Activity {
   level: string;
   file_url: string | null;
   correction_url: string | null;
-  resource_links: any;
+  resource_links?: any;
   is_published: boolean;
   order_index: number;
   created_at: string;
