@@ -264,6 +264,7 @@ export const SpiralResourcesManager: React.FC<Props> = ({ selectedLevel }) => {
                 )}
               </div>
             </div>
+            <LinksEditor value={form.resource_links} onChange={links => setForm(p => ({ ...p, resource_links: links }))} />
             <div className="flex items-center gap-3 pt-2">
               <Switch checked={form.is_published}
                 onCheckedChange={(c) => setForm(p => ({ ...p, is_published: c }))} />
