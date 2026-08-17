@@ -449,6 +449,8 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
               </div>
             </div>
 
+            <LinksEditor value={formData.resource_links} onChange={links => setFormData(prev => ({ ...prev, resource_links: links }))} />
+
             <div className="flex items-center gap-3 pt-2">
               <Switch
                 id="is_published"
