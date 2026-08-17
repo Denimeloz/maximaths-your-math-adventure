@@ -49,6 +49,7 @@ const App = () => (
               <Route path="/progression-spiralee" element={<ProgressionSpiralee />} />
               <Route path="/automatismes" element={<Automatismes />} />
               <Route path="/parcours-revision" element={<ParcoursRevision />} />
+              <Route path="/ressources-parents" element={<ParentResources />} />
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
