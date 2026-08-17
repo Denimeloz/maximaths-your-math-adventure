@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { LinksEditor, ResourceLink } from './LinksEditor';
 import { Plus, Trash2, Eye, EyeOff, Edit, Save, X, FileCheck, Upload, FileText, Loader2, BookCheck } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -18,6 +19,7 @@ interface Evaluation {
   order_index: number;
   file_url: string | null;
   correction_url: string | null;
+  resource_links: any;
   level: string | null;
 }
 
@@ -42,6 +44,7 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
     description: '',
     file_url: '',
     correction_url: '',
+    resource_links: [] as ResourceLink[],
   });
 
   const sensors = useSensors(
@@ -124,6 +127,7 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
       description: form.description || null,
       file_url: form.file_url || null,
       correction_url: form.correction_url || null,
+      resource_links: form.resource_links.filter(l => l.url.trim()) as any,
     };
 
     if (editingEvaluation) {
@@ -178,6 +182,7 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
       description: evaluation.description || '',
       file_url: evaluation.file_url || '',
       correction_url: evaluation.correction_url || '',
+      resource_links: Array.isArray(evaluation.resource_links) ? evaluation.resource_links : [],
     });
     setShowForm(true);
   };
@@ -190,6 +195,7 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
       description: '',
       file_url: '',
       correction_url: '',
+      resource_links: [] as ResourceLink[],
     });
   };
 
@@ -307,6 +313,8 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
                 )}
               </div>
             </div>
+
+            <LinksEditor value={form.resource_links} onChange={links => setForm(prev => ({ ...prev, resource_links: links }))} />
 
             <div className="flex gap-3 pt-4">
               <Button onClick={handleSave} className="btn-3d bg-primary rounded-xl">
