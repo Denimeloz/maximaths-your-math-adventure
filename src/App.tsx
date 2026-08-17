@@ -18,6 +18,7 @@ import DnbRevisionResources from "./pages/DnbRevisionResources";
 import ProgressionSpiralee from "./pages/ProgressionSpiralee";
 import Automatismes from "./pages/Automatismes";
 import ParcoursRevision from "./pages/ParcoursRevision";
+import ParentResources from "./pages/ParentResources";
 
 
 const queryClient = new QueryClient();
