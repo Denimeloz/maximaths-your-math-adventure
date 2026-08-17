@@ -1,4 +1,4 @@
-import { Menu, X, Home, Info, ChevronDown, ChevronUp, GraduationCap } from "lucide-react";
+import { Menu, X, Home, Info, ChevronDown, ChevronUp, GraduationCap, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
