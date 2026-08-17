@@ -290,6 +290,8 @@ export function ClubMathsManager({ selectedActivityType }: ClubMathsManagerProps
               </div>
             </div>
 
+            <LinksEditor value={form.resource_links} onChange={links => setForm(prev => ({ ...prev, resource_links: links }))} />
+
             <div className="flex items-center gap-2">
               <Switch checked={form.is_published} onCheckedChange={(checked) => setForm(prev => ({ ...prev, is_published: checked }))} />
               <Label>Publié</Label>
