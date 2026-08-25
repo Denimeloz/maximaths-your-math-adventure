@@ -318,39 +318,56 @@ const Header = () => {
               </Button>
             )}
             
-            {/* Niveaux avec accordéon */}
-            {levels.map((level) => (
-              <div key={level.id} className="border-b border-border/50 last:border-b-0">
+            {/* Collège / Lycée avec accordéons imbriqués */}
+            {groups.map((group) => (
+              <div key={group.id} className="border-b border-border/50 last:border-b-0">
                 <button
-                  onClick={() => setExpandedLevel(expandedLevel === level.id ? null : level.id)}
-                  className={`w-full flex items-center justify-between p-3 rounded-xl ${level.hoverColor} transition-colors`}
+                  onClick={() => { setOpenGroup(openGroup === group.id ? null : group.id); setExpandedLevel(null); }}
+                  className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-rainbow-blue/20 transition-colors"
                 >
-                  <span className={`font-body font-semibold ${level.textColor}`}>
-                    {level.label}
-                  </span>
-                  <ChevronDown 
-                    className={`w-5 h-5 transition-transform ${expandedLevel === level.id ? 'rotate-180' : ''}`} 
-                  />
+                  <span className="font-body font-bold text-foreground">{group.label}</span>
+                  <ChevronDown className={`w-5 h-5 transition-transform ${openGroup === group.id ? 'rotate-180' : ''}`} />
                 </button>
-                
-                {expandedLevel === level.id && (
-                  <div className="pl-4 pb-2 space-y-1">
-                    {getSubMenuForLevel(level.id, isNewArchitecture).map((item) => (
-                      <button
-                        key={item.id}
-                        onClick={() => handleSubMenuClick(level.id, item.id)}
-                        className="w-full text-left p-3 rounded-lg hover:bg-muted transition-colors"
-                      >
-                        <div className="font-body font-medium text-foreground">{item.label}</div>
-                        <p className="text-xs text-muted-foreground font-body">
-                          {item.description}
-                        </p>
-                      </button>
-                    ))}
+
+                {openGroup === group.id && (
+                  <div className="pl-3 pb-2 space-y-1">
+                    {group.levelIds.map(levelId => {
+                      const level = levels.find(l => l.id === levelId)!;
+                      const isOpen = expandedLevel === level.id;
+                      return (
+                        <div key={level.id}>
+                          <button
+                            onClick={() => setExpandedLevel(isOpen ? null : level.id)}
+                            className={`w-full flex items-center justify-between p-3 rounded-xl ${level.hoverColor} transition-colors`}
+                          >
+                            <span className={`font-body font-semibold ${level.textColor}`}>{level.label}</span>
+                            <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                          </button>
+
+                          {isOpen && (
+                            <div className="pl-4 pb-2 space-y-1">
+                              {getSubMenuForLevel(level.id, isNewArchitecture).map((item) => (
+                                <button
+                                  key={item.id}
+                                  onClick={() => handleSubMenuClick(level.id, item.id)}
+                                  className="w-full text-left p-3 rounded-lg hover:bg-muted transition-colors"
+                                >
+                                  <div className="font-body font-medium text-foreground">{labelMap[item.id] || item.label}</div>
+                                  <p className="text-xs text-muted-foreground font-body">
+                                    {item.description}
+                                  </p>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
             ))}
+
             
             <Button 
               variant="ghost" 
