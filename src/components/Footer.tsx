@@ -32,6 +32,7 @@ const Footer = () => {
           <nav className="flex flex-wrap justify-center gap-6 font-body font-semibold">
             <Link to="/niveau/6eme/cours" className="text-foreground hover:text-secondary transition-colors">Collège</Link>
             <Link to="/niveau/seconde/cours" className="text-foreground hover:text-secondary transition-colors">Lycée</Link>
+            <Link to="/ressources-parents" className="text-foreground font-semibold hover:text-secondary transition-colors">Espace parents</Link>
             <Link to="/about" className="text-foreground hover:text-secondary transition-colors">À propos</Link>
             <a href="mailto:maximathsclasse@gmail.com" className="text-foreground hover:text-secondary transition-colors">Contact</a>
             <Link to="/admin-login" className="text-muted-foreground hover:text-secondary transition-colors opacity-60 text-sm">Admin</Link>

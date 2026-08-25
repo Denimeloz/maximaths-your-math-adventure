@@ -6,6 +6,7 @@ import ClassPhotosSection from "@/components/ClassPhotosSection";
 import DnbRevisionSection from "@/components/DnbRevisionSection";
 import SpiralProgressionSection from "@/components/SpiralProgressionSection";
 import RevisionPathsSection from "@/components/RevisionPathsSection";
+import ParentResourcesSection from "@/components/ParentResourcesSection";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -14,6 +15,7 @@ const Index = () => {
       <Header />
       <main>
         <HeroSection />
+        <ParentResourcesSection />
         <RevisionPathsSection />
         <DnbRevisionSection />
         <SpiralProgressionSection />
