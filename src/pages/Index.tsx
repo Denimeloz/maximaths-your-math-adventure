@@ -15,6 +15,7 @@ const Index = () => {
       <Header />
       <main>
         <HeroSection />
+        <ParentResourcesSection />
         <RevisionPathsSection />
         <DnbRevisionSection />
         <SpiralProgressionSection />
