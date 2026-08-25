@@ -115,9 +115,15 @@ const getSubMenuForLevel = (levelId: string, isNewArchitecture: boolean) => {
   return subMenuItems;
 };
 
+const groups = [
+  { id: 'college', label: 'Collège', levelIds: ['6eme', '5eme', '4eme', '3eme'] },
+  { id: 'lycee', label: 'Lycée', levelIds: ['seconde', 'premiere', 'terminale'] },
+];
+
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedLevel, setExpandedLevel] = useState<string | null>(null);
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -146,6 +152,7 @@ const Header = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setExpandedLevel(null);
+        setOpenGroup(null);
       }
     };
 
@@ -161,7 +168,9 @@ const Header = () => {
     navigate(`/niveau/${levelId}/${subMenuId}`);
     setMobileMenuOpen(false);
     setExpandedLevel(null);
+    setOpenGroup(null);
   };
+
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-sky-cloud/95 backdrop-blur-md border-b-4 border-rainbow-blue/30">
