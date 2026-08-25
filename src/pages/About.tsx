@@ -207,15 +207,6 @@ const About = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
-                  onClick={() => navigate('/auth')}
-                  variant="hero"
-                  size="lg"
-                  className="gap-2"
-                >
-                  <Sparkles className="w-5 h-5" />
-                  Créer mon compte
-                </Button>
-                <Button 
                   onClick={() => window.location.href = 'mailto:maximathsclasse@gmail.com'}
                   variant="outline"
                   size="lg"
