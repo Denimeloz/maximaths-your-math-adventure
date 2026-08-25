@@ -209,43 +209,60 @@ const Header = () => {
             </Button>
           )}
           
-          {levels.map((level) => (
-            <div key={level.id} className="relative">
+          {groups.map((group) => (
+            <div key={group.id} className="relative">
               <button
-                onClick={() => handleLevelClick(level.id)}
-                className={`flex items-center gap-1 px-4 py-2 rounded-full font-body font-semibold transition-all ${level.hoverColor} ${
-                  expandedLevel === level.id ? `${level.color}/20` : ''
+                onClick={() => { setOpenGroup(openGroup === group.id ? null : group.id); setExpandedLevel(null); }}
+                className={`flex items-center gap-1 px-4 py-2 rounded-full font-body font-semibold transition-all hover:bg-rainbow-blue/20 ${
+                  openGroup === group.id ? 'bg-rainbow-blue/20' : ''
                 }`}
               >
-                {level.label}
-                {expandedLevel === level.id ? (
-                  <ChevronUp className="w-4 h-4" />
-                ) : (
-                  <ChevronDown className="w-4 h-4" />
-                )}
+                {group.label}
+                {openGroup === group.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
-              
-              {expandedLevel === level.id && (
-                <div className="absolute top-full left-0 mt-2 w-56 bg-card rounded-xl shadow-xl border border-border p-2 z-50 animate-slide-up">
-                  {getSubMenuForLevel(level.id, isNewArchitecture).map((item) => {
-                    const displayLabel = labelMap[item.id] || item.label;
+
+              {openGroup === group.id && (
+                <div className="absolute top-full left-0 mt-2 w-52 bg-card rounded-xl shadow-xl border border-border p-2 z-50 animate-slide-up">
+                  {group.levelIds.map(levelId => {
+                    const level = levels.find(l => l.id === levelId)!;
+                    const isOpen = expandedLevel === level.id;
                     return (
-                      <button
-                        key={item.id}
-                        onClick={() => handleSubMenuClick(level.id, item.id)}
-                        className="block w-full text-left select-none rounded-lg p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
-                      >
-                        <div className="text-sm font-semibold font-body">{displayLabel}</div>
-                        <p className="text-xs text-muted-foreground font-body mt-1">
-                          {item.description}
-                        </p>
-                      </button>
+                      <div key={level.id} className="relative">
+                        <button
+                          onClick={() => handleLevelClick(level.id)}
+                          className={`w-full flex items-center justify-between rounded-lg px-3 py-2 font-body font-semibold text-sm transition-colors ${level.hoverColor} ${isOpen ? 'bg-muted' : ''}`}
+                        >
+                          <span className={level.textColor}>{level.label}</span>
+                          <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180 lg:-rotate-90' : ''}`} />
+                        </button>
+
+                        {isOpen && (
+                          <div className="lg:absolute lg:left-full lg:top-0 lg:ml-2 w-full lg:w-60 bg-card rounded-xl lg:shadow-xl lg:border lg:border-border p-1 lg:p-2 z-50">
+                            {getSubMenuForLevel(level.id, isNewArchitecture).map((item) => {
+                              const displayLabel = labelMap[item.id] || item.label;
+                              return (
+                                <button
+                                  key={item.id}
+                                  onClick={() => handleSubMenuClick(level.id, item.id)}
+                                  className="block w-full text-left select-none rounded-lg p-2.5 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                                >
+                                  <div className="text-sm font-semibold font-body">{displayLabel}</div>
+                                  <p className="text-xs text-muted-foreground font-body mt-1">
+                                    {item.description}
+                                  </p>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                 </div>
               )}
             </div>
           ))}
+
           
           <Button 
             variant="nav" 
