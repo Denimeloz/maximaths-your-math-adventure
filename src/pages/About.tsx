@@ -7,7 +7,6 @@ import {
   Heart, 
   Target, 
   Users, 
-  Sparkles, 
   GraduationCap,
   BookOpen,
   Star,
