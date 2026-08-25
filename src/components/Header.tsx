@@ -115,9 +115,15 @@ const getSubMenuForLevel = (levelId: string, isNewArchitecture: boolean) => {
   return subMenuItems;
 };
 
+const groups = [
+  { id: 'college', label: 'Collège', levelIds: ['6eme', '5eme', '4eme', '3eme'] },
+  { id: 'lycee', label: 'Lycée', levelIds: ['seconde', 'premiere', 'terminale'] },
+];
+
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedLevel, setExpandedLevel] = useState<string | null>(null);
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -146,6 +152,7 @@ const Header = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setExpandedLevel(null);
+        setOpenGroup(null);
       }
     };
 
@@ -161,7 +168,9 @@ const Header = () => {
     navigate(`/niveau/${levelId}/${subMenuId}`);
     setMobileMenuOpen(false);
     setExpandedLevel(null);
+    setOpenGroup(null);
   };
+
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-sky-cloud/95 backdrop-blur-md border-b-4 border-rainbow-blue/30">
@@ -200,43 +209,60 @@ const Header = () => {
             </Button>
           )}
           
-          {levels.map((level) => (
-            <div key={level.id} className="relative">
+          {groups.map((group) => (
+            <div key={group.id} className="relative">
               <button
-                onClick={() => handleLevelClick(level.id)}
-                className={`flex items-center gap-1 px-4 py-2 rounded-full font-body font-semibold transition-all ${level.hoverColor} ${
-                  expandedLevel === level.id ? `${level.color}/20` : ''
+                onClick={() => { setOpenGroup(openGroup === group.id ? null : group.id); setExpandedLevel(null); }}
+                className={`flex items-center gap-1 px-4 py-2 rounded-full font-body font-semibold transition-all hover:bg-rainbow-blue/20 ${
+                  openGroup === group.id ? 'bg-rainbow-blue/20' : ''
                 }`}
               >
-                {level.label}
-                {expandedLevel === level.id ? (
-                  <ChevronUp className="w-4 h-4" />
-                ) : (
-                  <ChevronDown className="w-4 h-4" />
-                )}
+                {group.label}
+                {openGroup === group.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
-              
-              {expandedLevel === level.id && (
-                <div className="absolute top-full left-0 mt-2 w-56 bg-card rounded-xl shadow-xl border border-border p-2 z-50 animate-slide-up">
-                  {getSubMenuForLevel(level.id, isNewArchitecture).map((item) => {
-                    const displayLabel = labelMap[item.id] || item.label;
+
+              {openGroup === group.id && (
+                <div className="absolute top-full left-0 mt-2 w-52 bg-card rounded-xl shadow-xl border border-border p-2 z-50 animate-slide-up">
+                  {group.levelIds.map(levelId => {
+                    const level = levels.find(l => l.id === levelId)!;
+                    const isOpen = expandedLevel === level.id;
                     return (
-                      <button
-                        key={item.id}
-                        onClick={() => handleSubMenuClick(level.id, item.id)}
-                        className="block w-full text-left select-none rounded-lg p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
-                      >
-                        <div className="text-sm font-semibold font-body">{displayLabel}</div>
-                        <p className="text-xs text-muted-foreground font-body mt-1">
-                          {item.description}
-                        </p>
-                      </button>
+                      <div key={level.id} className="relative">
+                        <button
+                          onClick={() => handleLevelClick(level.id)}
+                          className={`w-full flex items-center justify-between rounded-lg px-3 py-2 font-body font-semibold text-sm transition-colors ${level.hoverColor} ${isOpen ? 'bg-muted' : ''}`}
+                        >
+                          <span className={level.textColor}>{level.label}</span>
+                          <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180 lg:-rotate-90' : ''}`} />
+                        </button>
+
+                        {isOpen && (
+                          <div className="lg:absolute lg:left-full lg:top-0 lg:ml-2 w-full lg:w-60 bg-card rounded-xl lg:shadow-xl lg:border lg:border-border p-1 lg:p-2 z-50">
+                            {getSubMenuForLevel(level.id, isNewArchitecture).map((item) => {
+                              const displayLabel = labelMap[item.id] || item.label;
+                              return (
+                                <button
+                                  key={item.id}
+                                  onClick={() => handleSubMenuClick(level.id, item.id)}
+                                  className="block w-full text-left select-none rounded-lg p-2.5 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                                >
+                                  <div className="text-sm font-semibold font-body">{displayLabel}</div>
+                                  <p className="text-xs text-muted-foreground font-body mt-1">
+                                    {item.description}
+                                  </p>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                 </div>
               )}
             </div>
           ))}
+
           
           <Button 
             variant="nav" 
@@ -292,39 +318,56 @@ const Header = () => {
               </Button>
             )}
             
-            {/* Niveaux avec accordéon */}
-            {levels.map((level) => (
-              <div key={level.id} className="border-b border-border/50 last:border-b-0">
+            {/* Collège / Lycée avec accordéons imbriqués */}
+            {groups.map((group) => (
+              <div key={group.id} className="border-b border-border/50 last:border-b-0">
                 <button
-                  onClick={() => setExpandedLevel(expandedLevel === level.id ? null : level.id)}
-                  className={`w-full flex items-center justify-between p-3 rounded-xl ${level.hoverColor} transition-colors`}
+                  onClick={() => { setOpenGroup(openGroup === group.id ? null : group.id); setExpandedLevel(null); }}
+                  className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-rainbow-blue/20 transition-colors"
                 >
-                  <span className={`font-body font-semibold ${level.textColor}`}>
-                    {level.label}
-                  </span>
-                  <ChevronDown 
-                    className={`w-5 h-5 transition-transform ${expandedLevel === level.id ? 'rotate-180' : ''}`} 
-                  />
+                  <span className="font-body font-bold text-foreground">{group.label}</span>
+                  <ChevronDown className={`w-5 h-5 transition-transform ${openGroup === group.id ? 'rotate-180' : ''}`} />
                 </button>
-                
-                {expandedLevel === level.id && (
-                  <div className="pl-4 pb-2 space-y-1">
-                    {getSubMenuForLevel(level.id, isNewArchitecture).map((item) => (
-                      <button
-                        key={item.id}
-                        onClick={() => handleSubMenuClick(level.id, item.id)}
-                        className="w-full text-left p-3 rounded-lg hover:bg-muted transition-colors"
-                      >
-                        <div className="font-body font-medium text-foreground">{item.label}</div>
-                        <p className="text-xs text-muted-foreground font-body">
-                          {item.description}
-                        </p>
-                      </button>
-                    ))}
+
+                {openGroup === group.id && (
+                  <div className="pl-3 pb-2 space-y-1">
+                    {group.levelIds.map(levelId => {
+                      const level = levels.find(l => l.id === levelId)!;
+                      const isOpen = expandedLevel === level.id;
+                      return (
+                        <div key={level.id}>
+                          <button
+                            onClick={() => setExpandedLevel(isOpen ? null : level.id)}
+                            className={`w-full flex items-center justify-between p-3 rounded-xl ${level.hoverColor} transition-colors`}
+                          >
+                            <span className={`font-body font-semibold ${level.textColor}`}>{level.label}</span>
+                            <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                          </button>
+
+                          {isOpen && (
+                            <div className="pl-4 pb-2 space-y-1">
+                              {getSubMenuForLevel(level.id, isNewArchitecture).map((item) => (
+                                <button
+                                  key={item.id}
+                                  onClick={() => handleSubMenuClick(level.id, item.id)}
+                                  className="w-full text-left p-3 rounded-lg hover:bg-muted transition-colors"
+                                >
+                                  <div className="font-body font-medium text-foreground">{labelMap[item.id] || item.label}</div>
+                                  <p className="text-xs text-muted-foreground font-body">
+                                    {item.description}
+                                  </p>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
             ))}
+
             
             <Button 
               variant="ghost" 
