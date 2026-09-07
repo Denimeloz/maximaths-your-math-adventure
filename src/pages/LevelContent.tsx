@@ -106,6 +106,26 @@ const contentConfig: Record<ContentType, { icon: React.ElementType; title: strin
     icon: Gamepad2,
     title: 'Jeux et Genially',
     description: 'Jeux éducatifs et présentations interactives'
+  },
+  'chap-activite': {
+    icon: Lightbulb,
+    title: 'Activité de découverte',
+    description: 'Découverte des notions, chapitre par chapitre'
+  },
+  'chap-cours': {
+    icon: BookOpen,
+    title: 'Cours',
+    description: 'Leçons et supports de cours, chapitre par chapitre'
+  },
+  'chap-exercices': {
+    icon: Dumbbell,
+    title: "Exercices d'entraînement",
+    description: "Exercices pour pratiquer, chapitre par chapitre"
+  },
+  'chap-accompagnement': {
+    icon: Target,
+    title: 'Accompagnement personnalisé',
+    description: 'Soutien et approfondissement, chapitre par chapitre'
   }
 };
 
