@@ -1040,11 +1040,17 @@ const LevelContent = () => {
       );
     }
 
+    if (CHAPTER_SECTIONS[type]) {
+      if (!resolvedYearId) return renderEmptyState();
+      return <CoursChapterView level={level} academicYearId={resolvedYearId} section={CHAPTER_SECTIONS[type]} />;
+    }
+
     if (type === 'cours') {
       if (isNewArchitecture && resolvedYearId) {
         return <CoursChapterView level={level} academicYearId={resolvedYearId} />;
       }
       return courses.length > 0 ? renderCourses() : renderEmptyState();
+
 
     } else if (type === 'infos') {
       return classInfos.length > 0 ? renderClassInfos() : renderEmptyState();
