@@ -89,7 +89,7 @@ const getSubSections = (level: AdminCourseLevel, isNewArchitecture: boolean = fa
     const testLabel = level === '3eme' ? 'Tests ou Mini DNB' : 'Test';
     const items: { id: string; label: string; icon: any }[] = [
       { id: 'infos', label: 'Informations pour la classe', icon: Megaphone },
-      { id: 'cours', label: "Parcours d'apprentissage", icon: BookOpen },
+      { id: 'cours', label: 'Cours et chapitres', icon: BookOpen },
       { id: 'jeux-genially', label: 'Jeux et Genially', icon: Gamepad2 },
       { id: 'classe-activite', label: 'Classe en activité', icon: Camera },
       { id: 'exercices-entrainement', label: 'Devoirs de maison', icon: Dumbbell },
