@@ -25,7 +25,15 @@ import {
   ExternalLink
 } from 'lucide-react';
 
-type ContentType = 'cours' | 'activites' | 'infos' | 'exercices-entrainement' | 'tests-entrainement' | 'devoirs' | 'evaluations' | 'prepa-dnb' | 'classe-activite' | 'jeux-genially';
+type ContentType = 'cours' | 'activites' | 'infos' | 'exercices-entrainement' | 'tests-entrainement' | 'devoirs' | 'evaluations' | 'prepa-dnb' | 'classe-activite' | 'jeux-genially' | 'chap-activite' | 'chap-cours' | 'chap-exercices' | 'chap-accompagnement';
+
+// Rubriques de chapitre (nouvelle architecture) -> section en base
+const CHAPTER_SECTIONS: Record<string, string> = {
+  'chap-activite': 'activite_decouverte',
+  'chap-cours': 'cours',
+  'chap-exercices': 'exercices_entrainement',
+  'chap-accompagnement': 'accompagnement_personnalise',
+};
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
 const levelLabels: Record<CourseLevel, string> = {
