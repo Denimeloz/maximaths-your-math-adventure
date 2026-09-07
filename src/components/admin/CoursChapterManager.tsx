@@ -213,14 +213,21 @@ const ResourceForm: React.FC<{ onAdd: (kind: string, title: string, url: string,
   const [desc, setDesc] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const [fileName, setFileName] = useState('');
+
   const handleFile = async (f: File) => {
     const u = await onUpload(f);
-    if (u) setUrl(u);
+    if (u) {
+      setUrl(u);
+      setFileName(f.name);
+      if (f.name.toLowerCase().endsWith('.pdf')) setKind('pdf');
+      if (!title.trim()) setTitle(f.name.replace(/\.[^.]+$/, ''));
+    }
   };
 
   const submit = () => {
     onAdd(kind, title, url, desc);
-    setTitle(''); setUrl(''); setDesc('');
+    setTitle(''); setUrl(''); setDesc(''); setFileName('');
   };
 
   return (
