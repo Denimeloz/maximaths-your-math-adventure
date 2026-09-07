@@ -25,7 +25,15 @@ import {
   ExternalLink
 } from 'lucide-react';
 
-type ContentType = 'cours' | 'activites' | 'infos' | 'exercices-entrainement' | 'tests-entrainement' | 'devoirs' | 'evaluations' | 'prepa-dnb' | 'classe-activite' | 'jeux-genially';
+type ContentType = 'cours' | 'activites' | 'infos' | 'exercices-entrainement' | 'tests-entrainement' | 'devoirs' | 'evaluations' | 'prepa-dnb' | 'classe-activite' | 'jeux-genially' | 'chap-activite' | 'chap-cours' | 'chap-exercices' | 'chap-accompagnement';
+
+// Rubriques de chapitre (nouvelle architecture) -> section en base
+const CHAPTER_SECTIONS: Record<string, string> = {
+  'chap-activite': 'activite_decouverte',
+  'chap-cours': 'cours',
+  'chap-exercices': 'exercices_entrainement',
+  'chap-accompagnement': 'accompagnement_personnalise',
+};
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
 const levelLabels: Record<CourseLevel, string> = {
@@ -98,6 +106,26 @@ const contentConfig: Record<ContentType, { icon: React.ElementType; title: strin
     icon: Gamepad2,
     title: 'Jeux et Genially',
     description: 'Jeux éducatifs et présentations interactives'
+  },
+  'chap-activite': {
+    icon: Lightbulb,
+    title: 'Activité de découverte',
+    description: 'Découverte des notions, chapitre par chapitre'
+  },
+  'chap-cours': {
+    icon: BookOpen,
+    title: 'Cours',
+    description: 'Leçons et supports de cours, chapitre par chapitre'
+  },
+  'chap-exercices': {
+    icon: Dumbbell,
+    title: "Exercices d'entraînement",
+    description: "Exercices pour pratiquer, chapitre par chapitre"
+  },
+  'chap-accompagnement': {
+    icon: Target,
+    title: 'Accompagnement personnalisé',
+    description: 'Soutien et approfondissement, chapitre par chapitre'
   }
 };
 
@@ -1012,11 +1040,17 @@ const LevelContent = () => {
       );
     }
 
+    if (CHAPTER_SECTIONS[type]) {
+      if (!resolvedYearId) return renderEmptyState();
+      return <CoursChapterView level={level} academicYearId={resolvedYearId} section={CHAPTER_SECTIONS[type]} />;
+    }
+
     if (type === 'cours') {
       if (isNewArchitecture && resolvedYearId) {
         return <CoursChapterView level={level} academicYearId={resolvedYearId} />;
       }
       return courses.length > 0 ? renderCourses() : renderEmptyState();
+
 
     } else if (type === 'infos') {
       return classInfos.length > 0 ? renderClassInfos() : renderEmptyState();

@@ -37,7 +37,10 @@ const getNewArchitectureSubMenu = (levelId: string) => {
   const is3eme = levelId === '3eme';
   const items: any[] = [
     { id: 'infos', label: 'Infos pour la classe', description: 'Informations importantes', icon: Info },
-    { id: 'cours', label: "Parcours d'apprentissage", description: 'Leçons et chapitres', icon: BookOpen },
+    { id: 'chap-activite', label: 'Activité de découverte', description: 'Découverte des notions', icon: Lightbulb },
+    { id: 'chap-cours', label: 'Cours', description: 'Leçons et chapitres', icon: BookOpen },
+    { id: 'chap-exercices', label: "Exercices d'entraînement", description: 'Pour pratiquer', icon: ClipboardList },
+    { id: 'chap-accompagnement', label: 'Accompagnement personnalisé', description: 'Soutien et approfondissement', icon: Lightbulb },
     { id: 'jeux-genially', label: 'Jeux et Genially', description: 'Jeux éducatifs et présentations', icon: Gamepad2 },
     { id: 'classe-activite', label: 'Classe en activité', description: 'Photos et moments', icon: Camera },
     { id: 'exercices-entrainement', label: 'Devoirs de maison', description: 'À réaliser à la maison', icon: ClipboardList },
