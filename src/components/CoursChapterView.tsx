@@ -18,9 +18,9 @@ const SECTIONS = [
 
 const ICONS: Record<string, any> = { pdf: FileText, video: Video, canva: ExternalLink, link: LinkIcon, lesson: BookOpen };
 
-interface Props { level: string; academicYearId: string; }
+interface Props { level: string; academicYearId: string; section?: string; }
 
-export const CoursChapterView: React.FC<Props> = ({ level, academicYearId }) => {
+export const CoursChapterView: React.FC<Props> = ({ level, academicYearId, section }) => {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
   const [podcasts, setPodcasts] = useState<Podcast[]>([]);
