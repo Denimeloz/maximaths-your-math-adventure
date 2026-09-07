@@ -96,7 +96,7 @@ const getNewArchitectureSubMenu = (levelId: string) => {
     { id: 'infos', label: 'Infos pour la classe', description: 'Informations importantes' },
     { id: 'chap-activite', label: 'Activité de découverte', description: 'Découverte des notions' },
     { id: 'chap-cours', label: 'Cours', description: 'Leçons et chapitres' },
-    { id: 'chap-exercices', label: "Exercices d'entraînement", icon: undefined as any, description: 'Pour pratiquer' },
+    { id: 'chap-exercices', label: "Exercices d'entraînement", description: 'Pour pratiquer' },
     { id: 'chap-accompagnement', label: 'Accompagnement personnalisé', description: 'Soutien et approfondissement' },
     { id: 'jeux-genially', label: 'Jeux et Genially', description: 'Jeux éducatifs et présentations' },
     { id: 'classe-activite', label: 'Classe en activité', description: 'Photos et moments de classe' },
