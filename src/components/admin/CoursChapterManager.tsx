@@ -213,14 +213,21 @@ const ResourceForm: React.FC<{ onAdd: (kind: string, title: string, url: string,
   const [desc, setDesc] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const [fileName, setFileName] = useState('');
+
   const handleFile = async (f: File) => {
     const u = await onUpload(f);
-    if (u) setUrl(u);
+    if (u) {
+      setUrl(u);
+      setFileName(f.name);
+      if (f.name.toLowerCase().endsWith('.pdf')) setKind('pdf');
+      if (!title.trim()) setTitle(f.name.replace(/\.[^.]+$/, ''));
+    }
   };
 
   const submit = () => {
     onAdd(kind, title, url, desc);
-    setTitle(''); setUrl(''); setDesc('');
+    setTitle(''); setUrl(''); setDesc(''); setFileName('');
   };
 
   return (
@@ -234,12 +241,13 @@ const ResourceForm: React.FC<{ onAdd: (kind: string, title: string, url: string,
       </div>
       <Input placeholder="URL (ou téléverser)" value={url} onChange={e => setUrl(e.target.value)} />
       <Textarea placeholder="Description (optionnel)" value={desc} onChange={e => setDesc(e.target.value)} />
-      <div className="flex gap-2">
-        <input ref={fileRef} type="file" hidden onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
+      <div className="flex flex-wrap items-center gap-2">
+        <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,image/*" hidden onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
         <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading}>
-          {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />} Téléverser
+          {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />} Téléverser un PDF
         </Button>
-        <Button onClick={submit}><Plus className="w-4 h-4 mr-1" /> Ajouter</Button>
+        <Button onClick={submit} disabled={uploading}><Plus className="w-4 h-4 mr-1" /> Ajouter</Button>
+        {fileName && <span className="text-xs text-muted-foreground truncate max-w-[220px]">{fileName}</span>}
       </div>
     </Card>
   );
