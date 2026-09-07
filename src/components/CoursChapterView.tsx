@@ -46,6 +46,51 @@ export const CoursChapterView: React.FC<Props> = ({ level, academicYearId, secti
     return <p className="text-center text-muted-foreground italic py-12">Aucun chapitre publié pour cette classe.</p>;
   }
 
+  const renderItems = (items: Resource[]) => (
+    <div className="space-y-2">
+      {items.length === 0 ? (
+        <p className="text-sm italic text-muted-foreground">Aucune ressource.</p>
+      ) : items.map(r => {
+        const Icon = ICONS[r.kind] || LinkIcon;
+        const isPdf = r.kind === 'pdf' || (r.url || '').toLowerCase().includes('.pdf');
+        return (
+          <div key={r.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted/70 transition">
+            <Icon className="w-5 h-5 text-rainbow-blue mt-0.5 shrink-0" />
+            <div className="min-w-0 flex-1">
+              <a href={r.url || '#'} target="_blank" rel="noreferrer" className="font-semibold text-sm hover:underline">{r.title}</a>
+              {r.description && <p className="text-xs text-muted-foreground">{r.description}</p>}
+              {isPdf && r.url && (
+                <a href={r.url} download className="inline-flex items-center gap-1 text-xs text-rainbow-purple hover:underline mt-1">
+                  <Download className="w-3 h-3" /> Télécharger le PDF
+                </a>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  if (section) {
+    return (
+      <Accordion type="single" collapsible className="space-y-4">
+        {chapters.map(ch => (
+          <AccordionItem key={ch.id} value={ch.id} className="card-sticker bg-card border-rainbow-blue/30 px-4">
+            <AccordionTrigger className="font-display text-lg hover:no-underline">
+              <div className="text-left">
+                <div>{ch.title}</div>
+                {ch.description && <p className="text-xs font-body text-muted-foreground font-normal">{ch.description}</p>}
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              {renderItems(resources.filter(r => r.chapter_id === ch.id && r.section === section))}
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    );
+  }
+
   return (
     <Accordion type="single" collapsible className="space-y-4">
       {chapters.map(ch => {
