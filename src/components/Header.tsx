@@ -170,7 +170,12 @@ const Header = () => {
   };
 
   const handleSubMenuClick = (levelId: string, subMenuId: string) => {
-    navigate(`/niveau/${levelId}/${subMenuId}`);
+    if (subMenuId === 'parcours-revision') {
+      navigate(`/parcours-revision?year=${selectedYearId || ''}&level=${levelId}`);
+    } else {
+      navigate(`/niveau/${levelId}/${subMenuId}`);
+    }
+
     setMobileMenuOpen(false);
     setExpandedLevel(null);
     setOpenGroup(null);
