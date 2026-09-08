@@ -19,7 +19,15 @@ export const REVISION_STEPS = [
   { id: 5, label: "S'autoévaluer" },
 ];
 
-const KINDS = ['pdf', 'video', 'canva', 'podcast', 'link'];
+const KINDS = ['pdf', 'word', 'powerpoint', 'image', 'video', 'canva', 'podcast', 'link'];
+const UPLOAD_KINDS = ['pdf', 'word', 'powerpoint', 'image', 'podcast'];
+const ACCEPTS: Record<string, string> = {
+  pdf: '.pdf',
+  word: '.doc,.docx',
+  powerpoint: '.ppt,.pptx',
+  image: 'image/*',
+  podcast: 'audio/*',
+};
 
 interface Resource {
   id: string; level: Level; academic_year_id: string | null; step: number;
