@@ -41,6 +41,7 @@ export const RevisionPathManager: React.FC = () => {
   const [level, setLevel] = useState<Level>('6eme');
   const [items, setItems] = useState<Resource[]>([]);
   const [form, setForm] = useState({ step: 1, kind: 'pdf', title: '', description: '', url: '' });
+  const [uploading, setUploading] = useState(false);
 
   const availableLevels = classes.filter(c => c.academic_year_id === academicYearId).map(c => c.class_level as Level);
 
