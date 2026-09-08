@@ -71,6 +71,21 @@ export const RevisionPathManager: React.FC = () => {
     else { toast({ title: 'Ajouté' }); setForm({ step: form.step, kind: 'pdf', title: '', description: '', url: '' }); fetch(); }
   };
 
+  const uploadFile = async (file: File) => {
+    setUploading(true);
+    const ext = file.name.split('.').pop();
+    const path = `parcours-revision/${level}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from('course-files').upload(path, file, { upsert: true });
+    if (error) {
+      toast({ title: 'Erreur de téléversement', description: error.message, variant: 'destructive' });
+    } else {
+      const { data } = supabase.storage.from('course-files').getPublicUrl(path);
+      setForm(f => ({ ...f, url: data.publicUrl, title: f.title || file.name.replace(/\.[^.]+$/, '') }));
+      toast({ title: 'Fichier téléversé' });
+    }
+    setUploading(false);
+  };
+
   const remove = async (id: string) => {
     await (supabase as any).from('revision_path_resources').delete().eq('id', id);
     fetch();
