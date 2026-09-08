@@ -104,6 +104,8 @@ const getNewArchitectureSubMenu = (levelId: string) => {
     { id: 'activites', label: "Espace d'approfondissement", description: 'Pour aller plus loin' },
     { id: 'tests-entrainement', label: is3eme ? 'Tests ou Mini DNB' : 'Test', description: 'Tests' },
     { id: 'evaluations', label: 'Évaluations', description: 'Tests et examens' },
+    { id: 'parcours-revision', label: 'Parcours de révision', description: '5 étapes pour réviser' },
+
   ];
   if (is3eme) items.push({ id: 'prepa-dnb', label: 'Prépa DNB', description: 'Préparation au brevet' });
   items.push({ id: 'devoirs', label: 'Devoirs de niveaux', description: 'Devoirs de niveaux' });
