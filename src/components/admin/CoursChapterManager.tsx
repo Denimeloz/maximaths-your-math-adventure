@@ -25,6 +25,10 @@ const SUBSECTIONS = [
 
 const KINDS = [
   { id: 'pdf', label: 'PDF' },
+  { id: 'word', label: 'Word' },
+  { id: 'powerpoint', label: 'PowerPoint' },
+  { id: 'image', label: 'Image' },
+  { id: 'audio', label: 'Audio' },
   { id: 'video', label: 'Vidéo' },
   { id: 'canva', label: 'Canva' },
   { id: 'link', label: 'Lien externe' },
