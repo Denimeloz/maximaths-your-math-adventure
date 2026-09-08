@@ -19,7 +19,15 @@ export const REVISION_STEPS = [
   { id: 5, label: "S'autoévaluer" },
 ];
 
-const KINDS = ['pdf', 'video', 'canva', 'podcast', 'link'];
+const KINDS = ['pdf', 'word', 'powerpoint', 'image', 'video', 'canva', 'podcast', 'link'];
+const UPLOAD_KINDS = ['pdf', 'word', 'powerpoint', 'image', 'podcast'];
+const ACCEPTS: Record<string, string> = {
+  pdf: '.pdf',
+  word: '.doc,.docx',
+  powerpoint: '.ppt,.pptx',
+  image: 'image/*',
+  podcast: 'audio/*',
+};
 
 interface Resource {
   id: string; level: Level; academic_year_id: string | null; step: number;
@@ -33,6 +41,7 @@ export const RevisionPathManager: React.FC = () => {
   const [level, setLevel] = useState<Level>('6eme');
   const [items, setItems] = useState<Resource[]>([]);
   const [form, setForm] = useState({ step: 1, kind: 'pdf', title: '', description: '', url: '' });
+  const [uploading, setUploading] = useState(false);
 
   const availableLevels = classes.filter(c => c.academic_year_id === academicYearId).map(c => c.class_level as Level);
 
@@ -60,6 +69,21 @@ export const RevisionPathManager: React.FC = () => {
     });
     if (error) toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     else { toast({ title: 'Ajouté' }); setForm({ step: form.step, kind: 'pdf', title: '', description: '', url: '' }); fetch(); }
+  };
+
+  const uploadFile = async (file: File) => {
+    setUploading(true);
+    const ext = file.name.split('.').pop();
+    const path = `parcours-revision/${level}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from('course-files').upload(path, file, { upsert: true });
+    if (error) {
+      toast({ title: 'Erreur de téléversement', description: error.message, variant: 'destructive' });
+    } else {
+      const { data } = supabase.storage.from('course-files').getPublicUrl(path);
+      setForm(f => ({ ...f, url: data.publicUrl, title: f.title || file.name.replace(/\.[^.]+$/, '') }));
+      toast({ title: 'Fichier téléversé' });
+    }
+    setUploading(false);
   };
 
   const remove = async (id: string) => {
@@ -98,7 +122,19 @@ export const RevisionPathManager: React.FC = () => {
           </Select>
         </div>
         <Input placeholder="Titre" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
-        <Input placeholder="URL" value={form.url} onChange={e => setForm(f => ({ ...f, url: e.target.value }))} />
+        {UPLOAD_KINDS.includes(form.kind) ? (
+          <div className="space-y-2">
+            <label className="text-sm font-body text-muted-foreground">Téléverser le fichier</label>
+            <Input type="file" accept={ACCEPTS[form.kind]} disabled={uploading}
+              onChange={e => e.target.files?.[0] && uploadFile(e.target.files[0])} />
+            {uploading && <p className="text-xs text-muted-foreground">Téléversement en cours…</p>}
+            {form.url && !uploading && (
+              <p className="text-xs text-rainbow-green truncate">Fichier prêt : <a href={form.url} target="_blank" rel="noreferrer" className="underline">voir</a></p>
+            )}
+          </div>
+        ) : (
+          <Input placeholder="URL / lien" value={form.url} onChange={e => setForm(f => ({ ...f, url: e.target.value }))} />
+        )}
         <Textarea placeholder="Description" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
         <Button onClick={add}><Plus className="w-4 h-4 mr-1" />Ajouter</Button>
       </Card>
