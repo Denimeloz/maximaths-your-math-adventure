@@ -106,7 +106,19 @@ export const RevisionPathManager: React.FC = () => {
           </Select>
         </div>
         <Input placeholder="Titre" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
-        <Input placeholder="URL" value={form.url} onChange={e => setForm(f => ({ ...f, url: e.target.value }))} />
+        {UPLOAD_KINDS.includes(form.kind) ? (
+          <div className="space-y-2">
+            <label className="text-sm font-body text-muted-foreground">Téléverser le fichier</label>
+            <Input type="file" accept={ACCEPTS[form.kind]} disabled={uploading}
+              onChange={e => e.target.files?.[0] && uploadFile(e.target.files[0])} />
+            {uploading && <p className="text-xs text-muted-foreground">Téléversement en cours…</p>}
+            {form.url && !uploading && (
+              <p className="text-xs text-rainbow-green truncate">Fichier prêt : <a href={form.url} target="_blank" rel="noreferrer" className="underline">voir</a></p>
+            )}
+          </div>
+        ) : (
+          <Input placeholder="URL / lien" value={form.url} onChange={e => setForm(f => ({ ...f, url: e.target.value }))} />
+        )}
         <Textarea placeholder="Description" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
         <Button onClick={add}><Plus className="w-4 h-4 mr-1" />Ajouter</Button>
       </Card>
