@@ -85,8 +85,13 @@ const HeroInner = () => {
 
   const handleClubClick = () => navigate('/club-maths');
   const handleSubMenuClick = (yearId: string, levelId: string, subMenuId: string) => {
+    if (subMenuId === 'parcours-revision') {
+      navigate(`/parcours-revision?year=${yearId}&level=${levelId}`);
+      return;
+    }
     navigate(`/niveau/${levelId}/${subMenuId}?year=${yearId}`);
   };
+
 
   // Sort years: active first, then by display order descending (newer years on top)
   const sortedYears = [...years].sort((a, b) => {
