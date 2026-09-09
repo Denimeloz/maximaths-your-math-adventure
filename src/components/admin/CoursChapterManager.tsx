@@ -246,9 +246,9 @@ const ResourceForm: React.FC<{ onAdd: (kind: string, title: string, url: string,
       <Input placeholder="URL (ou téléverser)" value={url} onChange={e => setUrl(e.target.value)} />
       <Textarea placeholder="Description (optionnel)" value={desc} onChange={e => setDesc(e.target.value)} />
       <div className="flex flex-wrap items-center gap-2">
-        <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,image/*" hidden onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
+        <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,image/*,audio/*" hidden onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
         <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading}>
-          {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />} Téléverser un PDF
+          {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />} Téléverser un fichier
         </Button>
         <Button onClick={submit} disabled={uploading}><Plus className="w-4 h-4 mr-1" /> Ajouter</Button>
         {fileName && <span className="text-xs text-muted-foreground truncate max-w-[220px]">{fileName}</span>}
