@@ -6,7 +6,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
-import { Route, ArrowLeft, FileText, Video, Mic, Link as LinkIcon, ExternalLink } from 'lucide-react';
+import { Route, ArrowLeft, FileText, Video, Mic, Link as LinkIcon, ExternalLink, Download, Image as ImageIcon, FileType, Presentation } from 'lucide-react';
 
 const STEPS = [
   { id: 1, label: 'Réactiver les connaissances' },
@@ -21,7 +21,9 @@ const LEVEL_LABELS: Record<string, string> = {
   'seconde': 'Seconde', 'premiere': 'Première', 'terminale': 'Terminale',
 };
 
-const ICONS: Record<string, any> = { pdf: FileText, video: Video, podcast: Mic, canva: ExternalLink, link: LinkIcon };
+const ICONS: Record<string, any> = { pdf: FileText, word: FileType, powerpoint: Presentation, image: ImageIcon, audio: Mic, podcast: Mic, video: Video, canva: ExternalLink, link: LinkIcon, lesson: FileText };
+const FILE_KINDS = ['pdf', 'word', 'powerpoint', 'image', 'audio', 'podcast'];
+const isFileResource = (kind: string, url: string | null) => FILE_KINDS.includes(kind) || /\.(pdf|docx?|pptx?|png|jpe?g|gif|webp|mp3|m4a|wav)(\?|$)/i.test(url || '');
 
 interface Year { id: string; label: string; start_year: number; }
 interface YearClass { academic_year_id: string; class_level: string; }

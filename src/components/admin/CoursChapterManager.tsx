@@ -219,12 +219,24 @@ const ResourceForm: React.FC<{ onAdd: (kind: string, title: string, url: string,
 
   const [fileName, setFileName] = useState('');
 
+  const detectKind = (name: string) => {
+    const n = name.toLowerCase();
+    if (n.endsWith('.pdf')) return 'pdf';
+    if (/\.(docx?|odt)$/.test(n)) return 'word';
+    if (/\.(pptx?|odp)$/.test(n)) return 'powerpoint';
+    if (/\.(png|jpe?g|gif|webp|svg)$/.test(n)) return 'image';
+    if (/\.(mp3|m4a|wav|ogg)$/.test(n)) return 'audio';
+    if (/\.(mp4|mov|webm)$/.test(n)) return 'video';
+    return null;
+  };
+
   const handleFile = async (f: File) => {
     const u = await onUpload(f);
     if (u) {
       setUrl(u);
       setFileName(f.name);
-      if (f.name.toLowerCase().endsWith('.pdf')) setKind('pdf');
+      const k = detectKind(f.name);
+      if (k) setKind(k);
       if (!title.trim()) setTitle(f.name.replace(/\.[^.]+$/, ''));
     }
   };
