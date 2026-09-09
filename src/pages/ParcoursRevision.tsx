@@ -6,7 +6,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
-import { Route, ArrowLeft, FileText, Video, Mic, Link as LinkIcon, ExternalLink } from 'lucide-react';
+import { Route, ArrowLeft, FileText, Video, Mic, Link as LinkIcon, ExternalLink, Download, Image as ImageIcon, FileType, Presentation } from 'lucide-react';
 
 const STEPS = [
   { id: 1, label: 'Réactiver les connaissances' },
@@ -21,7 +21,9 @@ const LEVEL_LABELS: Record<string, string> = {
   'seconde': 'Seconde', 'premiere': 'Première', 'terminale': 'Terminale',
 };
 
-const ICONS: Record<string, any> = { pdf: FileText, video: Video, podcast: Mic, canva: ExternalLink, link: LinkIcon };
+const ICONS: Record<string, any> = { pdf: FileText, word: FileType, powerpoint: Presentation, image: ImageIcon, audio: Mic, podcast: Mic, video: Video, canva: ExternalLink, link: LinkIcon, lesson: FileText };
+const FILE_KINDS = ['pdf', 'word', 'powerpoint', 'image', 'audio', 'podcast'];
+const isFileResource = (kind: string, url: string | null) => FILE_KINDS.includes(kind) || /\.(pdf|docx?|pptx?|png|jpe?g|gif|webp|mp3|m4a|wav)(\?|$)/i.test(url || '');
 
 interface Year { id: string; label: string; start_year: number; }
 interface YearClass { academic_year_id: string; class_level: string; }
@@ -127,14 +129,20 @@ const ParcoursRevision = () => {
                     <p className="text-xs text-muted-foreground italic ml-13">Aucune ressource.</p>
                   ) : stepItems.map(r => {
                     const Icon = ICONS[r.kind] || LinkIcon;
+                    const isFile = isFileResource(r.kind, r.url);
                     return (
-                      <a key={r.id} href={r.url || '#'} target={r.url ? '_blank' : undefined} rel="noreferrer" className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted/70 transition">
+                      <div key={r.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted/70 transition">
                         <Icon className="w-5 h-5 text-rainbow-purple mt-0.5 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm">{r.title}</p>
+                          <a href={r.url || '#'} target={r.url ? '_blank' : undefined} rel="noreferrer" className="font-semibold text-sm hover:underline">{r.title}</a>
                           {r.description && <p className="text-xs text-muted-foreground">{r.description}</p>}
+                          {isFile && r.url && (
+                            <a href={r.url} download className="inline-flex items-center gap-1 text-xs text-rainbow-purple hover:underline mt-1">
+                              <Download className="w-3 h-3" /> Télécharger le fichier
+                            </a>
+                          )}
                         </div>
-                      </a>
+                      </div>
                     );
                   })}
                 </div>

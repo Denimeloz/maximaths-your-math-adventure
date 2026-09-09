@@ -219,12 +219,24 @@ const ResourceForm: React.FC<{ onAdd: (kind: string, title: string, url: string,
 
   const [fileName, setFileName] = useState('');
 
+  const detectKind = (name: string) => {
+    const n = name.toLowerCase();
+    if (n.endsWith('.pdf')) return 'pdf';
+    if (/\.(docx?|odt)$/.test(n)) return 'word';
+    if (/\.(pptx?|odp)$/.test(n)) return 'powerpoint';
+    if (/\.(png|jpe?g|gif|webp|svg)$/.test(n)) return 'image';
+    if (/\.(mp3|m4a|wav|ogg)$/.test(n)) return 'audio';
+    if (/\.(mp4|mov|webm)$/.test(n)) return 'video';
+    return null;
+  };
+
   const handleFile = async (f: File) => {
     const u = await onUpload(f);
     if (u) {
       setUrl(u);
       setFileName(f.name);
-      if (f.name.toLowerCase().endsWith('.pdf')) setKind('pdf');
+      const k = detectKind(f.name);
+      if (k) setKind(k);
       if (!title.trim()) setTitle(f.name.replace(/\.[^.]+$/, ''));
     }
   };
@@ -246,9 +258,9 @@ const ResourceForm: React.FC<{ onAdd: (kind: string, title: string, url: string,
       <Input placeholder="URL (ou téléverser)" value={url} onChange={e => setUrl(e.target.value)} />
       <Textarea placeholder="Description (optionnel)" value={desc} onChange={e => setDesc(e.target.value)} />
       <div className="flex flex-wrap items-center gap-2">
-        <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,image/*" hidden onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
+        <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,image/*,audio/*" hidden onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
         <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading}>
-          {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />} Téléverser un PDF
+          {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />} Téléverser un fichier
         </Button>
         <Button onClick={submit} disabled={uploading}><Plus className="w-4 h-4 mr-1" /> Ajouter</Button>
         {fileName && <span className="text-xs text-muted-foreground truncate max-w-[220px]">{fileName}</span>}

@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { BookOpen, Lightbulb, Dumbbell, HeartHandshake, Mic, FileText, Video, ExternalLink, Download, Link as LinkIcon } from 'lucide-react';
+import { BookOpen, Lightbulb, Dumbbell, HeartHandshake, Mic, FileText, Video, ExternalLink, Download, Link as LinkIcon, Image as ImageIcon, FileType, Presentation } from 'lucide-react';
 
 interface Chapter { id: string; title: string; description: string | null; display_order: number; }
 interface Resource { id: string; chapter_id: string; section: string; kind: string; title: string; url: string | null; description: string | null; }
@@ -16,7 +16,11 @@ const SECTIONS = [
   { id: 'accompagnement_personnalise', label: 'Accompagnement personnalisé', icon: HeartHandshake },
 ];
 
-const ICONS: Record<string, any> = { pdf: FileText, video: Video, canva: ExternalLink, link: LinkIcon, lesson: BookOpen };
+const ICONS: Record<string, any> = { pdf: FileText, word: FileType, powerpoint: Presentation, image: ImageIcon, audio: Mic, podcast: Mic, video: Video, canva: ExternalLink, link: LinkIcon, lesson: BookOpen };
+const FILE_KINDS = ['pdf', 'word', 'powerpoint', 'image', 'audio', 'podcast'];
+const DOWNLOAD_LABEL: Record<string, string> = { pdf: 'Télécharger le PDF', word: 'Télécharger le document Word', powerpoint: 'Télécharger le PowerPoint', image: "Télécharger l'image", audio: 'Télécharger le fichier audio', podcast: 'Télécharger le podcast' };
+const isFileResource = (kind: string, url: string | null) => FILE_KINDS.includes(kind) || /\.(pdf|docx?|pptx?|png|jpe?g|gif|webp|mp3|m4a|wav)(\?|$)/i.test(url || '');
+const downloadLabel = (kind: string) => DOWNLOAD_LABEL[kind] || 'Télécharger le fichier';
 
 interface Props { level: string; academicYearId: string; section?: string; }
 
@@ -52,16 +56,16 @@ export const CoursChapterView: React.FC<Props> = ({ level, academicYearId, secti
         <p className="text-sm italic text-muted-foreground">Aucune ressource.</p>
       ) : items.map(r => {
         const Icon = ICONS[r.kind] || LinkIcon;
-        const isPdf = r.kind === 'pdf' || (r.url || '').toLowerCase().includes('.pdf');
+        const isFile = isFileResource(r.kind, r.url);
         return (
           <div key={r.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted/70 transition">
             <Icon className="w-5 h-5 text-rainbow-blue mt-0.5 shrink-0" />
             <div className="min-w-0 flex-1">
               <a href={r.url || '#'} target="_blank" rel="noreferrer" className="font-semibold text-sm hover:underline">{r.title}</a>
               {r.description && <p className="text-xs text-muted-foreground">{r.description}</p>}
-              {isPdf && r.url && (
+              {isFile && r.url && (
                 <a href={r.url} download className="inline-flex items-center gap-1 text-xs text-rainbow-purple hover:underline mt-1">
-                  <Download className="w-3 h-3" /> Télécharger le PDF
+                  <Download className="w-3 h-3" /> {downloadLabel(r.kind)}
                 </a>
               )}
             </div>
@@ -120,16 +124,16 @@ export const CoursChapterView: React.FC<Props> = ({ level, academicYearId, secti
                         <p className="text-sm italic text-muted-foreground">Aucune ressource.</p>
                       ) : items.map(r => {
                         const Icon = ICONS[r.kind] || LinkIcon;
-                        const isPdf = r.kind === 'pdf' || (r.url || '').toLowerCase().includes('.pdf');
+                        const isFile = isFileResource(r.kind, r.url);
                         return (
                           <div key={r.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted/70 transition">
                             <Icon className="w-5 h-5 text-rainbow-blue mt-0.5 shrink-0" />
                             <div className="min-w-0 flex-1">
                               <a href={r.url || '#'} target="_blank" rel="noreferrer" className="font-semibold text-sm hover:underline">{r.title}</a>
                               {r.description && <p className="text-xs text-muted-foreground">{r.description}</p>}
-                              {isPdf && r.url && (
+                              {isFile && r.url && (
                                 <a href={r.url} download className="inline-flex items-center gap-1 text-xs text-rainbow-purple hover:underline mt-1">
-                                  <Download className="w-3 h-3" /> Télécharger le PDF
+                                  <Download className="w-3 h-3" /> {downloadLabel(r.kind)}
                                 </a>
                               )}
                             </div>
