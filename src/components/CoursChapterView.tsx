@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { BookOpen, Lightbulb, Dumbbell, HeartHandshake, Mic, FileText, Video, ExternalLink, Download, Link as LinkIcon } from 'lucide-react';
+import { BookOpen, Lightbulb, Dumbbell, HeartHandshake, Mic, FileText, Video, ExternalLink, Download, Link as LinkIcon, Image as ImageIcon, FileType, Presentation } from 'lucide-react';
 
 interface Chapter { id: string; title: string; description: string | null; display_order: number; }
 interface Resource { id: string; chapter_id: string; section: string; kind: string; title: string; url: string | null; description: string | null; }
@@ -16,7 +16,11 @@ const SECTIONS = [
   { id: 'accompagnement_personnalise', label: 'Accompagnement personnalisé', icon: HeartHandshake },
 ];
 
-const ICONS: Record<string, any> = { pdf: FileText, video: Video, canva: ExternalLink, link: LinkIcon, lesson: BookOpen };
+const ICONS: Record<string, any> = { pdf: FileText, word: FileType, powerpoint: Presentation, image: ImageIcon, audio: Mic, podcast: Mic, video: Video, canva: ExternalLink, link: LinkIcon, lesson: BookOpen };
+const FILE_KINDS = ['pdf', 'word', 'powerpoint', 'image', 'audio', 'podcast'];
+const DOWNLOAD_LABEL: Record<string, string> = { pdf: 'Télécharger le PDF', word: 'Télécharger le document Word', powerpoint: 'Télécharger le PowerPoint', image: "Télécharger l'image", audio: 'Télécharger le fichier audio', podcast: 'Télécharger le podcast' };
+const isFileResource = (kind: string, url: string | null) => FILE_KINDS.includes(kind) || /\.(pdf|docx?|pptx?|png|jpe?g|gif|webp|mp3|m4a|wav)(\?|$)/i.test(url || '');
+const downloadLabel = (kind: string) => DOWNLOAD_LABEL[kind] || 'Télécharger le fichier';
 
 interface Props { level: string; academicYearId: string; section?: string; }
 
