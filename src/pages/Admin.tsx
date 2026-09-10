@@ -718,7 +718,7 @@ const AdminInner = () => {
                 <div className="card-sticker bg-card border-rainbow-purple/30 p-6">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-display text-foreground">
-                      {editingCourse ? "Modifier le cours et chapitres" : "Nouveau cours et chapitres"}
+                      {editingCourse ? "Modifier le chapitre" : "Nouveau chapitre"}
                     </h3>
                     <Button variant="ghost" size="icon" onClick={resetCourseForm}>
                       <X className="w-5 h-5" />
