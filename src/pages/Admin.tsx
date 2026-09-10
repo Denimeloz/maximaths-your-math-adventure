@@ -610,7 +610,7 @@ const AdminInner = () => {
                   : getLevelLabel(activeLevel as CourseLevel)
                 }{activeLevel !== 'spiral-progression' && activeLevel !== 'ressources-parents' && ` - ${
                   activeTab === 'infos' ? 'Informations pour la classe' :
-                  activeTab === 'cours' ? "Parcours d'apprentissage" :
+                  activeTab === 'cours' ? "Cours et chapitres" :
                   activeTab === 'activites' ? (isNewArchitecture ? "Espace d'approfondissement" : 'Activité de découverte') :
                   activeTab === 'exercices-entrainement' ? (isNewArchitecture ? 'Devoirs de maison' : "Exercices d'entraînement") :
                   activeTab === 'tests-entrainement' ? "Tests (Évaluations formatives)" :
@@ -699,7 +699,7 @@ const AdminInner = () => {
           {activeTab === 'cours' && activeLevel && activeLevel !== 'club-maths' && activeLevel !== 'spiral-progression' && activeLevel !== 'automatismes' && activeLevel !== 'parcours-revision' && !isNewArchitecture && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-display text-foreground">Parcours d'apprentissage - {getLevelLabel(activeLevel as CourseLevel)}</h2>
+                <h2 className="text-2xl font-display text-foreground">Cours et chapitres - {getLevelLabel(activeLevel as CourseLevel)}</h2>
 
                 <Button 
                   onClick={() => {
@@ -718,7 +718,7 @@ const AdminInner = () => {
                 <div className="card-sticker bg-card border-rainbow-purple/30 p-6">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-display text-foreground">
-                      {editingCourse ? "Modifier le parcours d'apprentissage" : "Nouveau parcours d'apprentissage"}
+                      {editingCourse ? "Modifier le cours et chapitres" : "Nouveau cours et chapitres"}
                     </h3>
                     <Button variant="ghost" size="icon" onClick={resetCourseForm}>
                       <X className="w-5 h-5" />

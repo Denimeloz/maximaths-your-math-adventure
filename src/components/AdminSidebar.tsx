@@ -83,7 +83,7 @@ const getSubSections = (level: AdminCourseLevel, isNewArchitecture: boolean = fa
 
   if (isNewArchitecture) {
     // Ordre 2026-2027+ :
-    // Infos, Parcours d'apprentissage, Jeux et Genially, Classe en activité,
+    // Infos, Cours et chapitres, Jeux et Genially, Classe en activité,
     // Devoirs de maison, Espace d'approfondissement,
     // Test ou mini-DNB (Test hors 3ème), Évaluations, [Prépa DNB], Devoirs de niveaux, [Ressources DNB]
     const testLabel = level === '3eme' ? 'Tests ou Mini DNB' : 'Test';
@@ -107,7 +107,7 @@ const getSubSections = (level: AdminCourseLevel, isNewArchitecture: boolean = fa
   const base = [
     { id: 'infos', label: 'Informations pour la classe', icon: Megaphone },
     { id: 'activites', label: 'Activité de découverte', icon: Lightbulb },
-    { id: 'cours', label: "Parcours d'apprentissage", icon: BookOpen },
+    { id: 'cours', label: "Cours et chapitres", icon: BookOpen },
     { id: 'exercices-entrainement', label: "Exercices d'entraînement", icon: Dumbbell },
     { id: 'tests-entrainement', label: level === '3eme' ? 'Tests ou Mini DNB' : 'Tests (Évaluations formatives)', icon: Target },
     { id: 'devoirs', label: 'Devoirs de niveaux', icon: ClipboardList },
