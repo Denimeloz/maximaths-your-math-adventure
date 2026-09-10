@@ -92,7 +92,15 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
   const uploadFile = async (file: File): Promise<string | null> => {
     setUploading(true);
     try {
-      const path = `chapters/${Date.now()}-${file.name}`;
+      const ext = file.name.includes('.') ? file.name.split('.').pop()!.toLowerCase() : 'bin';
+      const base = file.name
+        .replace(/\.[^.]+$/, '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 60) || 'fichier';
+      const path = `chapters/${Date.now()}-${base}.${ext}`;
       const { error } = await supabase.storage.from('course-files').upload(path, file);
       if (error) throw error;
       return supabase.storage.from('course-files').getPublicUrl(path).data.publicUrl;
