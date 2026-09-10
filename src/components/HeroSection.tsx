@@ -13,7 +13,7 @@ const LEVEL_LABELS: Record<string, string> = {
 // Legacy menus (années < 2026) — inchangées
 const subMenuItems = [
   { id: 'activites', label: 'Activités', description: 'Découverte et exploration', icon: Lightbulb },
-  { id: 'cours', label: "Parcours d'apprentissage", description: 'Leçons et chapitres', icon: BookOpen },
+  { id: 'cours', label: "Cours et chapitres", description: 'Leçons et chapitres', icon: BookOpen },
   { id: 'exercices-entrainement', label: 'Exercices', description: 'Entraînement', icon: ClipboardList },
   { id: 'tests-entrainement', label: 'Tests', description: 'Tests (Évaluations formatives)', icon: FileCheck },
   { id: 'devoirs', label: 'Devoirs', description: 'Devoirs de niveaux', icon: ClipboardList },
