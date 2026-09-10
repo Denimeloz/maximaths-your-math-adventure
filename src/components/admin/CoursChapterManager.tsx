@@ -7,13 +7,13 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Upload, Loader2, BookOpen, Lightbulb, Dumbbell, HeartHandshake, Mic } from 'lucide-react';
+import { Plus, Trash2, Upload, Loader2, BookOpen, Lightbulb, Dumbbell, HeartHandshake, Mic, Pencil, Save, X, CheckCircle2 } from 'lucide-react';
 import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 type Level = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
 interface Chapter { id: string; title: string; description: string | null; display_order: number; }
-interface Resource { id: string; chapter_id: string; section: string; kind: string; title: string; url: string | null; description: string | null; display_order: number; }
+interface Resource { id: string; chapter_id: string; section: string; kind: string; title: string; url: string | null; correction_url: string | null; description: string | null; display_order: number; }
 interface Podcast { id: string; chapter_id: string; title: string; description: string | null; audio_url: string; duration_seconds: number | null; display_order: number; }
 
 const SUBSECTIONS = [
@@ -35,6 +35,8 @@ const KINDS = [
   { id: 'lesson', label: 'Leçon' },
 ];
 
+const FILE_ACCEPT = '.pdf,.doc,.docx,.ppt,.pptx,image/*,audio/*';
+
 interface Props { selectedLevel: Level }
 
 export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
@@ -46,9 +48,8 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
   const [podcasts, setPodcasts] = useState<Podcast[]>([]);
   const [showNewChapter, setShowNewChapter] = useState(false);
   const [chapterForm, setChapterForm] = useState({ title: '', description: '' });
-  const podcastFileRef = useRef<HTMLInputElement>(null);
-  const resourceFileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => { fetchChapters(); }, [selectedLevel, academicYearId]);
   useEffect(() => { if (selectedChapter) fetchResources(); }, [selectedChapter]);
@@ -110,15 +111,25 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
     } finally { setUploading(false); }
   };
 
-  const addResource = async (section: string, kind: string, title: string, url: string, description: string) => {
+  const addResource = async (section: string, kind: string, title: string, url: string, description: string, correctionUrl: string) => {
     if (!selectedChapter || !title.trim()) return;
     const { error } = await (supabase as any).from('chapter_resources').insert({
       chapter_id: selectedChapter, section, kind, title, url: url || null,
+      correction_url: correctionUrl || null,
       description: description || null,
       display_order: resources.filter(r => r.section === section).length,
     });
     if (error) toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     else { toast({ title: 'Ajouté' }); fetchResources(); }
+  };
+
+  const updateResource = async (id: string, values: Partial<Resource>) => {
+    const { error } = await (supabase as any).from('chapter_resources').update({
+      title: values.title, kind: values.kind, url: values.url || null,
+      correction_url: values.correction_url || null, description: values.description || null,
+    }).eq('id', id);
+    if (error) toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+    else { toast({ title: 'Modifié' }); setEditingId(null); fetchResources(); }
   };
 
   const deleteResource = async (id: string) => {
@@ -178,17 +189,32 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
 
           {SUBSECTIONS.map(s => (
             <TabsContent key={s.id} value={s.id} className="space-y-4">
-              <ResourceForm onAdd={(kind, title, url, desc) => addResource(s.id, kind, title, url, desc)} onUpload={uploadFile} uploading={uploading} />
+              <ResourceForm onAdd={(kind, title, url, desc, correction) => addResource(s.id, kind, title, url, desc, correction)} onUpload={uploadFile} uploading={uploading} />
               <div className="space-y-2">
                 {resources.filter(r => r.section === s.id).map(r => (
-                  <Card key={r.id} className="p-3 flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold">{r.title} <span className="text-xs text-muted-foreground">({r.kind})</span></p>
-                      {r.description && <p className="text-sm text-muted-foreground">{r.description}</p>}
-                      {r.url && <a href={r.url} target="_blank" rel="noreferrer" className="text-xs text-rainbow-blue underline">Voir</a>}
-                    </div>
-                    <Button variant="ghost" size="icon" onClick={() => deleteResource(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                  </Card>
+                  editingId === r.id ? (
+                    <ResourceEditForm key={r.id} resource={r} onUpload={uploadFile} uploading={uploading}
+                      onCancel={() => setEditingId(null)} onSave={values => updateResource(r.id, values)} />
+                  ) : (
+                    <Card key={r.id} className="p-3 flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-semibold">{r.title} <span className="text-xs text-muted-foreground">({r.kind})</span></p>
+                        {r.description && <p className="text-sm text-muted-foreground">{r.description}</p>}
+                        <div className="flex flex-wrap gap-3 mt-1">
+                          {r.url && <a href={r.url} target="_blank" rel="noreferrer" className="text-xs text-rainbow-blue underline">Voir le fichier</a>}
+                          {r.correction_url && (
+                            <a href={r.correction_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-rainbow-green underline">
+                              <CheckCircle2 className="w-3 h-3" /> Voir le corrigé
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Button variant="ghost" size="icon" onClick={() => setEditingId(r.id)}><Pencil className="w-4 h-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => deleteResource(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                      </div>
+                    </Card>
+                  )
                 ))}
               </div>
             </TabsContent>
@@ -218,25 +244,55 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
   );
 };
 
-const ResourceForm: React.FC<{ onAdd: (kind: string, title: string, url: string, desc: string) => void; onUpload: (f: File) => Promise<string | null>; uploading: boolean }> = ({ onAdd, onUpload, uploading }) => {
+const detectKind = (name: string) => {
+  const n = name.toLowerCase();
+  if (n.endsWith('.pdf')) return 'pdf';
+  if (/\.(docx?|odt)$/.test(n)) return 'word';
+  if (/\.(pptx?|odp)$/.test(n)) return 'powerpoint';
+  if (/\.(png|jpe?g|gif|webp|svg)$/.test(n)) return 'image';
+  if (/\.(mp3|m4a|wav|ogg)$/.test(n)) return 'audio';
+  if (/\.(mp4|mov|webm)$/.test(n)) return 'video';
+  return null;
+};
+
+const CorrectionField: React.FC<{
+  value: string;
+  onChange: (v: string) => void;
+  onUpload: (f: File) => Promise<string | null>;
+  uploading: boolean;
+}> = ({ value, onChange, onUpload, uploading }) => {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [fileName, setFileName] = useState('');
+  return (
+    <div className="space-y-2 p-3 rounded-lg border border-dashed border-rainbow-green/50">
+      <p className="text-xs font-semibold text-rainbow-green flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Corrigé (optionnel)</p>
+      <Input placeholder="URL du corrigé (ou téléverser)" value={value} onChange={e => onChange(e.target.value)} />
+      <div className="flex flex-wrap items-center gap-2">
+        <input ref={fileRef} type="file" accept={FILE_ACCEPT} hidden
+          onChange={async e => {
+            const f = e.target.files?.[0];
+            if (!f) return;
+            const u = await onUpload(f);
+            if (u) { onChange(u); setFileName(f.name); }
+          }} />
+        <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} disabled={uploading}>
+          {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />} Téléverser le corrigé
+        </Button>
+        {fileName && <span className="text-xs text-muted-foreground truncate max-w-[220px]">{fileName}</span>}
+        {value && <Button type="button" variant="ghost" size="sm" onClick={() => { onChange(''); setFileName(''); }}>Retirer</Button>}
+      </div>
+    </div>
+  );
+};
+
+const ResourceForm: React.FC<{ onAdd: (kind: string, title: string, url: string, desc: string, correction: string) => void; onUpload: (f: File) => Promise<string | null>; uploading: boolean }> = ({ onAdd, onUpload, uploading }) => {
   const [kind, setKind] = useState('pdf');
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [desc, setDesc] = useState('');
+  const [correction, setCorrection] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
-
   const [fileName, setFileName] = useState('');
-
-  const detectKind = (name: string) => {
-    const n = name.toLowerCase();
-    if (n.endsWith('.pdf')) return 'pdf';
-    if (/\.(docx?|odt)$/.test(n)) return 'word';
-    if (/\.(pptx?|odp)$/.test(n)) return 'powerpoint';
-    if (/\.(png|jpe?g|gif|webp|svg)$/.test(n)) return 'image';
-    if (/\.(mp3|m4a|wav|ogg)$/.test(n)) return 'audio';
-    if (/\.(mp4|mov|webm)$/.test(n)) return 'video';
-    return null;
-  };
 
   const handleFile = async (f: File) => {
     const u = await onUpload(f);
@@ -250,8 +306,8 @@ const ResourceForm: React.FC<{ onAdd: (kind: string, title: string, url: string,
   };
 
   const submit = () => {
-    onAdd(kind, title, url, desc);
-    setTitle(''); setUrl(''); setDesc(''); setFileName('');
+    onAdd(kind, title, url, desc, correction);
+    setTitle(''); setUrl(''); setDesc(''); setFileName(''); setCorrection('');
   };
 
   return (
@@ -266,12 +322,60 @@ const ResourceForm: React.FC<{ onAdd: (kind: string, title: string, url: string,
       <Input placeholder="URL (ou téléverser)" value={url} onChange={e => setUrl(e.target.value)} />
       <Textarea placeholder="Description (optionnel)" value={desc} onChange={e => setDesc(e.target.value)} />
       <div className="flex flex-wrap items-center gap-2">
-        <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,image/*,audio/*" hidden onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
+        <input ref={fileRef} type="file" accept={FILE_ACCEPT} hidden onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
         <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading}>
           {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />} Téléverser un fichier
         </Button>
-        <Button onClick={submit} disabled={uploading}><Plus className="w-4 h-4 mr-1" /> Ajouter</Button>
         {fileName && <span className="text-xs text-muted-foreground truncate max-w-[220px]">{fileName}</span>}
+      </div>
+      <CorrectionField value={correction} onChange={setCorrection} onUpload={onUpload} uploading={uploading} />
+      <Button onClick={submit} disabled={uploading}><Plus className="w-4 h-4 mr-1" /> Ajouter</Button>
+    </Card>
+  );
+};
+
+const ResourceEditForm: React.FC<{
+  resource: Resource;
+  onSave: (values: Partial<Resource>) => void;
+  onCancel: () => void;
+  onUpload: (f: File) => Promise<string | null>;
+  uploading: boolean;
+}> = ({ resource, onSave, onCancel, onUpload, uploading }) => {
+  const [kind, setKind] = useState(resource.kind);
+  const [title, setTitle] = useState(resource.title);
+  const [url, setUrl] = useState(resource.url || '');
+  const [desc, setDesc] = useState(resource.description || '');
+  const [correction, setCorrection] = useState(resource.correction_url || '');
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <Card className="p-4 space-y-3 border-rainbow-blue/50">
+      <div className="grid md:grid-cols-2 gap-2">
+        <Select value={kind} onValueChange={setKind}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>{KINDS.map(k => <SelectItem key={k.id} value={k.id}>{k.label}</SelectItem>)}</SelectContent>
+        </Select>
+        <Input placeholder="Titre" value={title} onChange={e => setTitle(e.target.value)} />
+      </div>
+      <Input placeholder="URL du fichier" value={url} onChange={e => setUrl(e.target.value)} />
+      <Textarea placeholder="Description (optionnel)" value={desc} onChange={e => setDesc(e.target.value)} />
+      <div className="flex flex-wrap items-center gap-2">
+        <input ref={fileRef} type="file" accept={FILE_ACCEPT} hidden onChange={async e => {
+          const f = e.target.files?.[0];
+          if (!f) return;
+          const u = await onUpload(f);
+          if (u) { setUrl(u); const k = detectKind(f.name); if (k) setKind(k); }
+        }} />
+        <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()} disabled={uploading}>
+          {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />} Remplacer le fichier
+        </Button>
+      </div>
+      <CorrectionField value={correction} onChange={setCorrection} onUpload={onUpload} uploading={uploading} />
+      <div className="flex gap-2">
+        <Button onClick={() => onSave({ title, kind, url, description: desc, correction_url: correction })} disabled={uploading}>
+          <Save className="w-4 h-4 mr-1" /> Enregistrer
+        </Button>
+        <Button variant="outline" onClick={onCancel}><X className="w-4 h-4 mr-1" /> Annuler</Button>
       </div>
     </Card>
   );

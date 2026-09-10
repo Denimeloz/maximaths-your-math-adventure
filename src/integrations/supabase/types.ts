@@ -279,6 +279,7 @@ export type Database = {
       chapter_resources: {
         Row: {
           chapter_id: string
+          correction_url: string | null
           created_at: string
           description: string | null
           display_order: number
@@ -291,6 +292,7 @@ export type Database = {
         }
         Insert: {
           chapter_id: string
+          correction_url?: string | null
           created_at?: string
           description?: string | null
           display_order?: number
@@ -303,6 +305,7 @@ export type Database = {
         }
         Update: {
           chapter_id?: string
+          correction_url?: string | null
           created_at?: string
           description?: string | null
           display_order?: number
@@ -1314,6 +1317,7 @@ export type Database = {
       revision_path_resources: {
         Row: {
           academic_year_id: string | null
+          correction_url: string | null
           created_at: string
           description: string | null
           display_order: number
@@ -1327,6 +1331,7 @@ export type Database = {
         }
         Insert: {
           academic_year_id?: string | null
+          correction_url?: string | null
           created_at?: string
           description?: string | null
           display_order?: number
@@ -1340,6 +1345,7 @@ export type Database = {
         }
         Update: {
           academic_year_id?: string | null
+          correction_url?: string | null
           created_at?: string
           description?: string | null
           display_order?: number
