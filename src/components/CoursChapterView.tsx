@@ -63,11 +63,18 @@ export const CoursChapterView: React.FC<Props> = ({ level, academicYearId, secti
             <div className="min-w-0 flex-1">
               <a href={r.url || '#'} target="_blank" rel="noreferrer" className="font-semibold text-sm hover:underline">{r.title}</a>
               {r.description && <p className="text-xs text-muted-foreground">{r.description}</p>}
-              {isFile && r.url && (
-                <a href={r.url} download className="inline-flex items-center gap-1 text-xs text-rainbow-purple hover:underline mt-1">
-                  <Download className="w-3 h-3" /> {downloadLabel(r.kind)}
-                </a>
-              )}
+              <div className="flex flex-wrap items-center gap-3 mt-1">
+                {isFile && r.url && (
+                  <a href={r.url} download className="inline-flex items-center gap-1 text-xs text-rainbow-purple hover:underline">
+                    <Download className="w-3 h-3" /> {downloadLabel(r.kind)}
+                  </a>
+                )}
+                {r.correction_url && (
+                  <a href={r.correction_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-rainbow-green hover:underline">
+                    <CheckCircle2 className="w-3 h-3" /> Voir le corrigé
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         );
