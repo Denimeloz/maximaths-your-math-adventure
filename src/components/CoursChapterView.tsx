@@ -3,10 +3,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { BookOpen, Lightbulb, Dumbbell, HeartHandshake, Mic, FileText, Video, ExternalLink, Download, Link as LinkIcon, Image as ImageIcon, FileType, Presentation } from 'lucide-react';
+import { BookOpen, Lightbulb, Dumbbell, HeartHandshake, Mic, FileText, Video, ExternalLink, Download, Link as LinkIcon, Image as ImageIcon, FileType, Presentation, CheckCircle2 } from 'lucide-react';
 
 interface Chapter { id: string; title: string; description: string | null; display_order: number; }
-interface Resource { id: string; chapter_id: string; section: string; kind: string; title: string; url: string | null; description: string | null; }
+interface Resource { id: string; chapter_id: string; section: string; kind: string; title: string; url: string | null; correction_url: string | null; description: string | null; }
 interface Podcast { id: string; chapter_id: string; title: string; description: string | null; audio_url: string; duration_seconds: number | null; }
 
 const SECTIONS = [
@@ -63,11 +63,18 @@ export const CoursChapterView: React.FC<Props> = ({ level, academicYearId, secti
             <div className="min-w-0 flex-1">
               <a href={r.url || '#'} target="_blank" rel="noreferrer" className="font-semibold text-sm hover:underline">{r.title}</a>
               {r.description && <p className="text-xs text-muted-foreground">{r.description}</p>}
-              {isFile && r.url && (
-                <a href={r.url} download className="inline-flex items-center gap-1 text-xs text-rainbow-purple hover:underline mt-1">
-                  <Download className="w-3 h-3" /> {downloadLabel(r.kind)}
-                </a>
-              )}
+              <div className="flex flex-wrap items-center gap-3 mt-1">
+                {isFile && r.url && (
+                  <a href={r.url} download className="inline-flex items-center gap-1 text-xs text-rainbow-purple hover:underline">
+                    <Download className="w-3 h-3" /> {downloadLabel(r.kind)}
+                  </a>
+                )}
+                {r.correction_url && (
+                  <a href={r.correction_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-rainbow-green hover:underline">
+                    <CheckCircle2 className="w-3 h-3" /> Voir le corrigé
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         );
@@ -120,26 +127,7 @@ export const CoursChapterView: React.FC<Props> = ({ level, academicYearId, secti
                   const items = chResources.filter(r => r.section === s.id);
                   return (
                     <TabsContent key={s.id} value={s.id} className="space-y-2">
-                      {items.length === 0 ? (
-                        <p className="text-sm italic text-muted-foreground">Aucune ressource.</p>
-                      ) : items.map(r => {
-                        const Icon = ICONS[r.kind] || LinkIcon;
-                        const isFile = isFileResource(r.kind, r.url);
-                        return (
-                          <div key={r.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted/70 transition">
-                            <Icon className="w-5 h-5 text-rainbow-blue mt-0.5 shrink-0" />
-                            <div className="min-w-0 flex-1">
-                              <a href={r.url || '#'} target="_blank" rel="noreferrer" className="font-semibold text-sm hover:underline">{r.title}</a>
-                              {r.description && <p className="text-xs text-muted-foreground">{r.description}</p>}
-                              {isFile && r.url && (
-                                <a href={r.url} download className="inline-flex items-center gap-1 text-xs text-rainbow-purple hover:underline mt-1">
-                                  <Download className="w-3 h-3" /> {downloadLabel(r.kind)}
-                                </a>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
+                      {renderItems(items)}
                     </TabsContent>
                   );
                 })}
