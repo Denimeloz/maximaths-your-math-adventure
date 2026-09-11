@@ -159,6 +159,17 @@ export const RevisionPathManager: React.FC = () => {
           <Input placeholder="URL / lien" value={form.url} onChange={e => setForm(f => ({ ...f, url: e.target.value }))} />
         )}
         <Textarea placeholder="Description" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+        <div className="space-y-2 p-3 rounded-lg border border-dashed border-rainbow-green/50">
+          <p className="text-xs font-semibold text-rainbow-green flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Corrigé (optionnel)</p>
+          <Input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,image/*,audio/*" disabled={uploading}
+            onChange={async e => {
+              const f = e.target.files?.[0];
+              if (!f) return;
+              const u = await uploadTo(f);
+              if (u) setForm(fr => ({ ...fr, correction_url: u }));
+            }} />
+          <Input placeholder="ou URL du corrigé" value={form.correction_url} onChange={e => setForm(f => ({ ...f, correction_url: e.target.value }))} />
+        </div>
         <Button onClick={add}><Plus className="w-4 h-4 mr-1" />Ajouter</Button>
       </Card>
 
