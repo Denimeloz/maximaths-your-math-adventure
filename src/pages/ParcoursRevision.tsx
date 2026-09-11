@@ -6,7 +6,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
-import { Route, ArrowLeft, FileText, Video, Mic, Link as LinkIcon, ExternalLink, Download, Image as ImageIcon, FileType, Presentation } from 'lucide-react';
+import { Route, ArrowLeft, FileText, Video, Mic, Link as LinkIcon, ExternalLink, Download, Image as ImageIcon, FileType, Presentation, CheckCircle2 } from 'lucide-react';
 
 const STEPS = [
   { id: 1, label: 'Réactiver les connaissances' },
@@ -27,7 +27,7 @@ const isFileResource = (kind: string, url: string | null) => FILE_KINDS.includes
 
 interface Year { id: string; label: string; start_year: number; }
 interface YearClass { academic_year_id: string; class_level: string; }
-interface Resource { id: string; step: number; kind: string; title: string; description: string | null; url: string | null; }
+interface Resource { id: string; step: number; kind: string; title: string; description: string | null; url: string | null; correction_url: string | null; }
 
 const ParcoursRevision = () => {
   const [params, setParams] = useSearchParams();
@@ -136,11 +136,18 @@ const ParcoursRevision = () => {
                         <div className="flex-1 min-w-0">
                           <a href={r.url || '#'} target={r.url ? '_blank' : undefined} rel="noreferrer" className="font-semibold text-sm hover:underline">{r.title}</a>
                           {r.description && <p className="text-xs text-muted-foreground">{r.description}</p>}
-                          {isFile && r.url && (
-                            <a href={r.url} download className="inline-flex items-center gap-1 text-xs text-rainbow-purple hover:underline mt-1">
-                              <Download className="w-3 h-3" /> Télécharger le fichier
-                            </a>
-                          )}
+                          <div className="flex flex-wrap items-center gap-3 mt-1">
+                            {isFile && r.url && (
+                              <a href={r.url} download className="inline-flex items-center gap-1 text-xs text-rainbow-purple hover:underline">
+                                <Download className="w-3 h-3" /> Télécharger le fichier
+                              </a>
+                            )}
+                            {r.correction_url && (
+                              <a href={r.correction_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-rainbow-green hover:underline">
+                                <CheckCircle2 className="w-3 h-3" /> Voir le corrigé
+                              </a>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );
