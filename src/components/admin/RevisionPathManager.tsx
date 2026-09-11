@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Route } from 'lucide-react';
+import { Plus, Trash2, Route, Pencil, Save, X, CheckCircle2 } from 'lucide-react';
 import { useAcademicYears, useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 type Level = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
@@ -31,7 +31,8 @@ const ACCEPTS: Record<string, string> = {
 
 interface Resource {
   id: string; level: Level; academic_year_id: string | null; step: number;
-  kind: string; title: string; description: string | null; url: string | null; display_order: number;
+  kind: string; title: string; description: string | null; url: string | null;
+  correction_url: string | null; display_order: number;
 }
 
 export const RevisionPathManager: React.FC = () => {
