@@ -180,14 +180,54 @@ export const RevisionPathManager: React.FC = () => {
             <h3 className="font-display mb-3">{step.id}. {step.label}</h3>
             <div className="space-y-2">
               {stepItems.map(r => (
-                <div key={r.id} className="flex items-center justify-between p-2 rounded bg-muted/40">
-                  <div>
-                    <p className="font-semibold">{r.title} <span className="text-xs text-muted-foreground">({r.kind})</span></p>
-                    {r.description && <p className="text-sm text-muted-foreground">{r.description}</p>}
-                    {r.url && <a href={r.url} target="_blank" rel="noreferrer" className="text-xs text-rainbow-blue underline">Voir</a>}
+                editingId === r.id ? (
+                  <div key={r.id} className="space-y-2 p-3 rounded border border-rainbow-blue/50">
+                    <Select value={editForm.kind} onValueChange={v => setEditForm(f => ({ ...f, kind: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>{KINDS.map(k => <SelectItem key={k} value={k}>{k}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <Input placeholder="Titre" value={editForm.title} onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))} />
+                    <Input placeholder="URL du fichier / lien" value={editForm.url} onChange={e => setEditForm(f => ({ ...f, url: e.target.value }))} />
+                    <Input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,image/*,audio/*" disabled={uploading}
+                      onChange={async e => {
+                        const f = e.target.files?.[0];
+                        if (!f) return;
+                        const u = await uploadTo(f);
+                        if (u) setEditForm(fr => ({ ...fr, url: u }));
+                      }} />
+                    <Textarea placeholder="Description" value={editForm.description} onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))} />
+                    <div className="space-y-2 p-3 rounded-lg border border-dashed border-rainbow-green/50">
+                      <p className="text-xs font-semibold text-rainbow-green flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Corrigé (optionnel)</p>
+                      <Input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,image/*,audio/*" disabled={uploading}
+                        onChange={async e => {
+                          const f = e.target.files?.[0];
+                          if (!f) return;
+                          const u = await uploadTo(f);
+                          if (u) setEditForm(fr => ({ ...fr, correction_url: u }));
+                        }} />
+                      <Input placeholder="ou URL du corrigé" value={editForm.correction_url} onChange={e => setEditForm(f => ({ ...f, correction_url: e.target.value }))} />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={saveEdit} disabled={uploading}><Save className="w-4 h-4 mr-1" />Enregistrer</Button>
+                      <Button variant="outline" onClick={() => setEditingId(null)}><X className="w-4 h-4 mr-1" />Annuler</Button>
+                    </div>
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                </div>
+                ) : (
+                  <div key={r.id} className="flex items-start justify-between gap-3 p-2 rounded bg-muted/40">
+                    <div className="min-w-0">
+                      <p className="font-semibold">{r.title} <span className="text-xs text-muted-foreground">({r.kind})</span></p>
+                      {r.description && <p className="text-sm text-muted-foreground">{r.description}</p>}
+                      <div className="flex flex-wrap gap-3">
+                        {r.url && <a href={r.url} target="_blank" rel="noreferrer" className="text-xs text-rainbow-blue underline">Voir</a>}
+                        {r.correction_url && <a href={r.correction_url} target="_blank" rel="noreferrer" className="text-xs text-rainbow-green underline">Voir le corrigé</a>}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button variant="ghost" size="icon" onClick={() => startEdit(r)}><Pencil className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                    </div>
+                  </div>
+                )
               ))}
               {stepItems.length === 0 && <p className="text-xs text-muted-foreground italic">Aucune ressource.</p>}
             </div>
