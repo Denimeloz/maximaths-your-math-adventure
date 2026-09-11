@@ -3,10 +3,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { BookOpen, Lightbulb, Dumbbell, HeartHandshake, Mic, FileText, Video, ExternalLink, Download, Link as LinkIcon, Image as ImageIcon, FileType, Presentation } from 'lucide-react';
+import { BookOpen, Lightbulb, Dumbbell, HeartHandshake, Mic, FileText, Video, ExternalLink, Download, Link as LinkIcon, Image as ImageIcon, FileType, Presentation, CheckCircle2 } from 'lucide-react';
 
 interface Chapter { id: string; title: string; description: string | null; display_order: number; }
-interface Resource { id: string; chapter_id: string; section: string; kind: string; title: string; url: string | null; description: string | null; }
+interface Resource { id: string; chapter_id: string; section: string; kind: string; title: string; url: string | null; correction_url: string | null; description: string | null; }
 interface Podcast { id: string; chapter_id: string; title: string; description: string | null; audio_url: string; duration_seconds: number | null; }
 
 const SECTIONS = [
