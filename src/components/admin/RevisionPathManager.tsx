@@ -41,8 +41,10 @@ export const RevisionPathManager: React.FC = () => {
   const { classes } = useAcademicYears();
   const [level, setLevel] = useState<Level>('6eme');
   const [items, setItems] = useState<Resource[]>([]);
-  const [form, setForm] = useState({ step: 1, kind: 'pdf', title: '', description: '', url: '' });
+  const [form, setForm] = useState({ step: 1, kind: 'pdf', title: '', description: '', url: '', correction_url: '' });
   const [uploading, setUploading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ kind: 'pdf', title: '', description: '', url: '', correction_url: '' });
 
   const availableLevels = classes.filter(c => c.academic_year_id === academicYearId).map(c => c.class_level as Level);
 
@@ -66,25 +68,45 @@ export const RevisionPathManager: React.FC = () => {
     const { error } = await (supabase as any).from('revision_path_resources').insert({
       level, academic_year_id: academicYearId, step: form.step, kind: form.kind,
       title: form.title, description: form.description || null, url: form.url || null,
+      correction_url: form.correction_url || null,
       display_order: stepCount,
     });
     if (error) toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-    else { toast({ title: 'Ajouté' }); setForm({ step: form.step, kind: 'pdf', title: '', description: '', url: '' }); fetch(); }
+    else { toast({ title: 'Ajouté' }); setForm({ step: form.step, kind: 'pdf', title: '', description: '', url: '', correction_url: '' }); fetch(); }
   };
 
-  const uploadFile = async (file: File) => {
+  const uploadTo = async (file: File): Promise<string | null> => {
     setUploading(true);
     const ext = file.name.split('.').pop();
     const path = `parcours-revision/${level}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const { error } = await supabase.storage.from('course-files').upload(path, file, { upsert: true });
+    setUploading(false);
     if (error) {
       toast({ title: 'Erreur de téléversement', description: error.message, variant: 'destructive' });
-    } else {
-      const { data } = supabase.storage.from('course-files').getPublicUrl(path);
-      setForm(f => ({ ...f, url: data.publicUrl, title: f.title || file.name.replace(/\.[^.]+$/, '') }));
-      toast({ title: 'Fichier téléversé' });
+      return null;
     }
-    setUploading(false);
+    toast({ title: 'Fichier téléversé' });
+    return supabase.storage.from('course-files').getPublicUrl(path).data.publicUrl;
+  };
+
+  const uploadFile = async (file: File) => {
+    const url = await uploadTo(file);
+    if (url) setForm(f => ({ ...f, url, title: f.title || file.name.replace(/\.[^.]+$/, '') }));
+  };
+
+  const startEdit = (r: Resource) => {
+    setEditingId(r.id);
+    setEditForm({ kind: r.kind, title: r.title, description: r.description || '', url: r.url || '', correction_url: r.correction_url || '' });
+  };
+
+  const saveEdit = async () => {
+    if (!editingId) return;
+    const { error } = await (supabase as any).from('revision_path_resources').update({
+      kind: editForm.kind, title: editForm.title, description: editForm.description || null,
+      url: editForm.url || null, correction_url: editForm.correction_url || null,
+    }).eq('id', editingId);
+    if (error) toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+    else { toast({ title: 'Modifié' }); setEditingId(null); fetch(); }
   };
 
   const remove = async (id: string) => {
