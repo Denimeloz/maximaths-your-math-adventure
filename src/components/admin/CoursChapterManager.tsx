@@ -7,7 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Upload, Loader2, BookOpen, Lightbulb, Dumbbell, HeartHandshake, Mic, Pencil, Save, X, CheckCircle2 } from 'lucide-react';
+import { Plus, Trash2, Upload, Loader2, BookOpen, Lightbulb, Dumbbell, HeartHandshake, Clapperboard, Pencil, Save, X, CheckCircle2 } from 'lucide-react';
 import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 type Level = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
@@ -35,7 +35,7 @@ const KINDS = [
   { id: 'lesson', label: 'Leçon' },
 ];
 
-const FILE_ACCEPT = '.pdf,.doc,.docx,.ppt,.pptx,image/*,audio/*';
+const FILE_ACCEPT = '.pdf,.doc,.docx,.ppt,.pptx,image/*,audio/*,video/*';
 
 interface Props { selectedLevel: Level }
 
@@ -93,7 +93,8 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
   const uploadFile = async (file: File): Promise<string | null> => {
     setUploading(true);
     try {
-      const ext = file.name.includes('.') ? file.name.split('.').pop()!.toLowerCase() : 'bin';
+      const extension = file.name.includes('.') ? file.name.split('.').pop() : null;
+      const ext = extension?.toLowerCase() || 'bin';
       const base = file.name
         .replace(/\.[^.]+$/, '')
         .normalize('NFD')
@@ -137,16 +138,6 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
     fetchResources();
   };
 
-  const addPodcast = async (title: string, audio_url: string, duration: number, description: string) => {
-    if (!selectedChapter || !title.trim() || !audio_url.trim()) return;
-    const { error } = await (supabase as any).from('chapter_podcasts').insert({
-      chapter_id: selectedChapter, title, audio_url, duration_seconds: duration || null,
-      description: description || null, display_order: podcasts.length,
-    });
-    if (error) toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-    else { toast({ title: 'Podcast ajouté' }); fetchResources(); }
-  };
-
   const deletePodcast = async (id: string) => {
     await (supabase as any).from('chapter_podcasts').delete().eq('id', id);
     fetchResources();
@@ -180,11 +171,11 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
 
       {selectedChapter && (
         <Tabs defaultValue="activite_decouverte" className="w-full">
-          <TabsList className="grid grid-cols-5 w-full">
+          <TabsList className="grid h-auto grid-cols-2 gap-1 sm:grid-cols-3 xl:grid-cols-5 w-full">
             {SUBSECTIONS.map(s => (
               <TabsTrigger key={s.id} value={s.id}><s.icon className="w-4 h-4 mr-1" />{s.label}</TabsTrigger>
             ))}
-            <TabsTrigger value="podcast"><Mic className="w-4 h-4 mr-1" />Podcast</TabsTrigger>
+            <TabsTrigger value="multimedia"><Clapperboard className="w-4 h-4 mr-1" />Vidéo, Podcast & autres</TabsTrigger>
           </TabsList>
 
           {SUBSECTIONS.map(s => (
@@ -220,9 +211,27 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
             </TabsContent>
           ))}
 
-          <TabsContent value="podcast" className="space-y-4">
-            <PodcastForm onAdd={addPodcast} onUpload={uploadFile} uploading={uploading} />
+          <TabsContent value="multimedia" className="space-y-4">
+            <ResourceForm onAdd={(kind, title, url, desc) => addResource('multimedia', kind, title, url, desc, '')} onUpload={uploadFile} uploading={uploading} showCorrection={false} />
             <div className="space-y-2">
+              {resources.filter(r => r.section === 'multimedia').map(r => (
+                editingId === r.id ? (
+                  <ResourceEditForm key={r.id} resource={r} onUpload={uploadFile} uploading={uploading}
+                    onCancel={() => setEditingId(null)} onSave={values => updateResource(r.id, values)} showCorrection={false} />
+                ) : (
+                  <Card key={r.id} className="p-3 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold">{r.title} <span className="text-xs text-muted-foreground">({r.kind})</span></p>
+                      {r.description && <p className="text-sm text-muted-foreground">{r.description}</p>}
+                      {r.url && <a href={r.url} target="_blank" rel="noreferrer" className="text-xs text-rainbow-blue underline">Voir la ressource</a>}
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button variant="ghost" size="icon" onClick={() => setEditingId(r.id)}><Pencil className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => deleteResource(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                    </div>
+                  </Card>
+                )
+              ))}
               {podcasts.map(p => (
                 <Card key={p.id} className="p-3">
                   <div className="flex items-center justify-between mb-2">
@@ -285,7 +294,7 @@ const CorrectionField: React.FC<{
   );
 };
 
-const ResourceForm: React.FC<{ onAdd: (kind: string, title: string, url: string, desc: string, correction: string) => void; onUpload: (f: File) => Promise<string | null>; uploading: boolean }> = ({ onAdd, onUpload, uploading }) => {
+const ResourceForm: React.FC<{ onAdd: (kind: string, title: string, url: string, desc: string, correction: string) => void; onUpload: (f: File) => Promise<string | null>; uploading: boolean; showCorrection?: boolean }> = ({ onAdd, onUpload, uploading, showCorrection = true }) => {
   const [kind, setKind] = useState('pdf');
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
@@ -328,7 +337,7 @@ const ResourceForm: React.FC<{ onAdd: (kind: string, title: string, url: string,
         </Button>
         {fileName && <span className="text-xs text-muted-foreground truncate max-w-[220px]">{fileName}</span>}
       </div>
-      <CorrectionField value={correction} onChange={setCorrection} onUpload={onUpload} uploading={uploading} />
+      {showCorrection && <CorrectionField value={correction} onChange={setCorrection} onUpload={onUpload} uploading={uploading} />}
       <Button onClick={submit} disabled={uploading}><Plus className="w-4 h-4 mr-1" /> Ajouter</Button>
     </Card>
   );
@@ -340,7 +349,8 @@ const ResourceEditForm: React.FC<{
   onCancel: () => void;
   onUpload: (f: File) => Promise<string | null>;
   uploading: boolean;
-}> = ({ resource, onSave, onCancel, onUpload, uploading }) => {
+  showCorrection?: boolean;
+}> = ({ resource, onSave, onCancel, onUpload, uploading, showCorrection = true }) => {
   const [kind, setKind] = useState(resource.kind);
   const [title, setTitle] = useState(resource.title);
   const [url, setUrl] = useState(resource.url || '');
@@ -370,41 +380,12 @@ const ResourceEditForm: React.FC<{
           {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />} Remplacer le fichier
         </Button>
       </div>
-      <CorrectionField value={correction} onChange={setCorrection} onUpload={onUpload} uploading={uploading} />
+      {showCorrection && <CorrectionField value={correction} onChange={setCorrection} onUpload={onUpload} uploading={uploading} />}
       <div className="flex gap-2">
         <Button onClick={() => onSave({ title, kind, url, description: desc, correction_url: correction })} disabled={uploading}>
           <Save className="w-4 h-4 mr-1" /> Enregistrer
         </Button>
         <Button variant="outline" onClick={onCancel}><X className="w-4 h-4 mr-1" /> Annuler</Button>
-      </div>
-    </Card>
-  );
-};
-
-const PodcastForm: React.FC<{ onAdd: (title: string, audio: string, dur: number, desc: string) => void; onUpload: (f: File) => Promise<string | null>; uploading: boolean }> = ({ onAdd, onUpload, uploading }) => {
-  const [title, setTitle] = useState('');
-  const [audio, setAudio] = useState('');
-  const [dur, setDur] = useState(0);
-  const [desc, setDesc] = useState('');
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const handleFile = async (f: File) => {
-    const u = await onUpload(f);
-    if (u) setAudio(u);
-  };
-
-  return (
-    <Card className="p-4 space-y-3 bg-muted/30">
-      <Input placeholder="Titre du podcast" value={title} onChange={e => setTitle(e.target.value)} />
-      <Input placeholder="URL audio (MP3) ou téléverser" value={audio} onChange={e => setAudio(e.target.value)} />
-      <Input type="number" placeholder="Durée (secondes)" value={dur || ''} onChange={e => setDur(parseInt(e.target.value) || 0)} />
-      <Textarea placeholder="Description" value={desc} onChange={e => setDesc(e.target.value)} />
-      <div className="flex gap-2">
-        <input ref={fileRef} type="file" accept="audio/*" hidden onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
-        <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading}>
-          {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />} Téléverser audio
-        </Button>
-        <Button onClick={() => { onAdd(title, audio, dur, desc); setTitle(''); setAudio(''); setDur(0); setDesc(''); }}><Plus className="w-4 h-4 mr-1" /> Ajouter</Button>
       </div>
     </Card>
   );
