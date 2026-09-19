@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap, Puzzle, Camera, Gamepad2, CalendarRange, Star, Info } from "lucide-react";
+import { ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap, Puzzle, Camera, Gamepad2, CalendarRange, Star, Info, Video } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { AcademicYearProvider, useAcademicYears } from "@/contexts/AcademicYearContext";
