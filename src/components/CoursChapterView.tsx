@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { BookOpen, Lightbulb, Dumbbell, HeartHandshake, Mic, FileText, Video, ExternalLink, Download, Link as LinkIcon, Image as ImageIcon, FileType, Presentation, CheckCircle2 } from 'lucide-react';
+import { BookOpen, Lightbulb, Dumbbell, HeartHandshake, Mic, FileText, Video, ExternalLink, Download, Link as LinkIcon, Image as ImageIcon, FileType, Presentation, CheckCircle2, Clapperboard } from 'lucide-react';
 
 interface Chapter { id: string; title: string; description: string | null; display_order: number; }
 interface Resource { id: string; chapter_id: string; section: string; kind: string; title: string; url: string | null; correction_url: string | null; description: string | null; }
@@ -17,9 +17,9 @@ const SECTIONS = [
 ];
 
 const ICONS: Record<string, any> = { pdf: FileText, word: FileType, powerpoint: Presentation, image: ImageIcon, audio: Mic, podcast: Mic, video: Video, canva: ExternalLink, link: LinkIcon, lesson: BookOpen };
-const FILE_KINDS = ['pdf', 'word', 'powerpoint', 'image', 'audio', 'podcast'];
-const DOWNLOAD_LABEL: Record<string, string> = { pdf: 'Télécharger le PDF', word: 'Télécharger le document Word', powerpoint: 'Télécharger le PowerPoint', image: "Télécharger l'image", audio: 'Télécharger le fichier audio', podcast: 'Télécharger le podcast' };
-const isFileResource = (kind: string, url: string | null) => FILE_KINDS.includes(kind) || /\.(pdf|docx?|pptx?|png|jpe?g|gif|webp|mp3|m4a|wav)(\?|$)/i.test(url || '');
+const FILE_KINDS = ['pdf', 'word', 'powerpoint', 'image', 'audio', 'podcast', 'video'];
+const DOWNLOAD_LABEL: Record<string, string> = { pdf: 'Télécharger le PDF', word: 'Télécharger le document Word', powerpoint: 'Télécharger le PowerPoint', image: "Télécharger l'image", audio: 'Télécharger le fichier audio', podcast: 'Télécharger le podcast', video: 'Télécharger la vidéo' };
+const isFileResource = (kind: string, url: string | null) => FILE_KINDS.includes(kind) || /\.(pdf|docx?|pptx?|png|jpe?g|gif|webp|mp3|m4a|wav|ogg|mp4|mov|webm)(\?|$)/i.test(url || '');
 const downloadLabel = (kind: string) => DOWNLOAD_LABEL[kind] || 'Télécharger le fichier';
 
 interface Props { level: string; academicYearId: string; section?: string; }
@@ -63,6 +63,8 @@ export const CoursChapterView: React.FC<Props> = ({ level, academicYearId, secti
             <div className="min-w-0 flex-1">
               <a href={r.url || '#'} target="_blank" rel="noreferrer" className="font-semibold text-sm hover:underline">{r.title}</a>
               {r.description && <p className="text-xs text-muted-foreground">{r.description}</p>}
+              {r.url && r.kind === 'audio' && <audio controls src={r.url} className="w-full mt-2" />}
+              {r.url && r.kind === 'video' && /\.(mp4|mov|webm)(\?|$)/i.test(r.url) && <video controls src={r.url} className="w-full max-h-80 mt-2 rounded" />}
               <div className="flex flex-wrap items-center gap-3 mt-1">
                 {isFile && r.url && (
                   <a href={r.url} download className="inline-flex items-center gap-1 text-xs text-rainbow-purple hover:underline">
@@ -121,7 +123,7 @@ export const CoursChapterView: React.FC<Props> = ({ level, academicYearId, secti
                   {SECTIONS.map(s => (
                     <TabsTrigger key={s.id} value={s.id}><s.icon className="w-4 h-4 mr-1" />{s.label}</TabsTrigger>
                   ))}
-                  <TabsTrigger value="podcast"><Mic className="w-4 h-4 mr-1" />Podcast</TabsTrigger>
+                  <TabsTrigger value="multimedia"><Clapperboard className="w-4 h-4 mr-1" />Vidéo, Podcast & autres</TabsTrigger>
                 </TabsList>
                 {SECTIONS.map(s => {
                   const items = chResources.filter(r => r.section === s.id);
@@ -131,10 +133,9 @@ export const CoursChapterView: React.FC<Props> = ({ level, academicYearId, secti
                     </TabsContent>
                   );
                 })}
-                <TabsContent value="podcast" className="space-y-3">
-                  {chPodcasts.length === 0 ? (
-                    <p className="text-sm italic text-muted-foreground">Aucun podcast.</p>
-                  ) : chPodcasts.map(p => (
+                <TabsContent value="multimedia" className="space-y-3">
+                  {renderItems(chResources.filter(r => r.section === 'multimedia'))}
+                  {chPodcasts.map(p => (
                     <Card key={p.id} className="p-3">
                       <p className="font-semibold">{p.title}</p>
                       {p.description && <p className="text-xs text-muted-foreground mb-2">{p.description}</p>}
