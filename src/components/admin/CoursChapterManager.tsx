@@ -171,7 +171,7 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
 
       {selectedChapter && (
         <Tabs defaultValue="activite_decouverte" className="w-full">
-          <TabsList className="grid grid-cols-5 w-full">
+          <TabsList className="grid h-auto grid-cols-2 gap-1 sm:grid-cols-3 xl:grid-cols-5 w-full">
             {SUBSECTIONS.map(s => (
               <TabsTrigger key={s.id} value={s.id}><s.icon className="w-4 h-4 mr-1" />{s.label}</TabsTrigger>
             ))}
