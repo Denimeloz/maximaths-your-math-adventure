@@ -127,6 +127,11 @@ const contentConfig: Record<ContentType, { icon: React.ElementType; title: strin
     icon: Target,
     title: 'Accompagnement personnalisé',
     description: 'Soutien et approfondissement, chapitre par chapitre'
+  },
+  'chap-multimedia': {
+    icon: Video,
+    title: 'Vidéo, Podcast & autres',
+    description: 'Vidéos, audios, podcasts et liens, chapitre par chapitre'
   }
 };
 
