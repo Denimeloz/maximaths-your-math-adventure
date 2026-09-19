@@ -41,6 +41,7 @@ const getNewArchitectureSubMenu = (levelId: string) => {
     { id: 'chap-cours', label: 'Cours', description: 'Leçons et chapitres', icon: BookOpen },
     { id: 'chap-exercices', label: "Exercices d'entraînement", description: 'Pour pratiquer', icon: ClipboardList },
     { id: 'chap-accompagnement', label: 'Accompagnement personnalisé', description: 'Soutien et approfondissement', icon: Lightbulb },
+    { id: 'chap-multimedia', label: 'Vidéo, Podcast & autres', description: 'Vidéos, audios et liens', icon: Video },
     { id: 'jeux-genially', label: 'Jeux et Genially', description: 'Jeux éducatifs et présentations', icon: Gamepad2 },
     { id: 'classe-activite', label: 'Classe en activité', description: 'Photos et moments', icon: Camera },
     { id: 'exercices-entrainement', label: 'Devoirs de maison', description: 'À réaliser à la maison', icon: ClipboardList },
