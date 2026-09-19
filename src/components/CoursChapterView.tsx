@@ -17,7 +17,7 @@ const SECTIONS = [
 ];
 
 const ICONS: Record<string, any> = { pdf: FileText, word: FileType, powerpoint: Presentation, image: ImageIcon, audio: Mic, podcast: Mic, video: Video, canva: ExternalLink, link: LinkIcon, lesson: BookOpen };
-const FILE_KINDS = ['pdf', 'word', 'powerpoint', 'image', 'audio', 'podcast', 'video'];
+const FILE_KINDS = ['pdf', 'word', 'powerpoint', 'image', 'audio', 'podcast'];
 const DOWNLOAD_LABEL: Record<string, string> = { pdf: 'Télécharger le PDF', word: 'Télécharger le document Word', powerpoint: 'Télécharger le PowerPoint', image: "Télécharger l'image", audio: 'Télécharger le fichier audio', podcast: 'Télécharger le podcast', video: 'Télécharger la vidéo' };
 const isFileResource = (kind: string, url: string | null) => FILE_KINDS.includes(kind) || /\.(pdf|docx?|pptx?|png|jpe?g|gif|webp|mp3|m4a|wav|ogg|mp4|mov|webm)(\?|$)/i.test(url || '');
 const downloadLabel = (kind: string) => DOWNLOAD_LABEL[kind] || 'Télécharger le fichier';
@@ -50,9 +50,9 @@ export const CoursChapterView: React.FC<Props> = ({ level, academicYearId, secti
     return <p className="text-center text-muted-foreground italic py-12">Aucun chapitre publié pour cette classe.</p>;
   }
 
-  const renderItems = (items: Resource[]) => (
+  const renderItems = (items: Resource[], showEmpty = true) => (
     <div className="space-y-2">
-      {items.length === 0 ? (
+      {items.length === 0 && showEmpty ? (
         <p className="text-sm italic text-muted-foreground">Aucune ressource.</p>
       ) : items.map(r => {
         const Icon = ICONS[r.kind] || LinkIcon;
@@ -134,7 +134,10 @@ export const CoursChapterView: React.FC<Props> = ({ level, academicYearId, secti
                   );
                 })}
                 <TabsContent value="multimedia" className="space-y-3">
-                  {renderItems(chResources.filter(r => r.section === 'multimedia'))}
+                  {renderItems(chResources.filter(r => r.section === 'multimedia'), false)}
+                  {chResources.every(r => r.section !== 'multimedia') && chPodcasts.length === 0 && (
+                    <p className="text-sm italic text-muted-foreground">Aucune ressource.</p>
+                  )}
                   {chPodcasts.map(p => (
                     <Card key={p.id} className="p-3">
                       <p className="font-semibold">{p.title}</p>

@@ -93,7 +93,8 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
   const uploadFile = async (file: File): Promise<string | null> => {
     setUploading(true);
     try {
-      const ext = file.name.includes('.') ? file.name.split('.').pop()!.toLowerCase() : 'bin';
+      const extension = file.name.includes('.') ? file.name.split('.').pop() : null;
+      const ext = extension?.toLowerCase() || 'bin';
       const base = file.name
         .replace(/\.[^.]+$/, '')
         .normalize('NFD')
@@ -135,16 +136,6 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
   const deleteResource = async (id: string) => {
     await (supabase as any).from('chapter_resources').delete().eq('id', id);
     fetchResources();
-  };
-
-  const addPodcast = async (title: string, audio_url: string, duration: number, description: string) => {
-    if (!selectedChapter || !title.trim() || !audio_url.trim()) return;
-    const { error } = await (supabase as any).from('chapter_podcasts').insert({
-      chapter_id: selectedChapter, title, audio_url, duration_seconds: duration || null,
-      description: description || null, display_order: podcasts.length,
-    });
-    if (error) toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-    else { toast({ title: 'Podcast ajouté' }); fetchResources(); }
   };
 
   const deletePodcast = async (id: string) => {
