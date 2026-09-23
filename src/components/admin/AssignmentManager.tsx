@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
 import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
+import type { Json } from '@/integrations/supabase/types';
 
 interface Assignment {
   id: string;
@@ -19,7 +20,7 @@ interface Assignment {
   order_index: number;
   file_url: string | null;
   correction_url: string | null;
-  resource_links?: any;
+  resource_links?: Json;
   level: string | null;
 }
 
@@ -52,19 +53,24 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  useEffect(() => {
-    fetchData();
-  }, [filterLevel, academicYearId]);
+  const fetchData = useCallback(async () => {
+    if (!academicYearId) {
+      setAssignments([]);
+      return;
+    }
 
-  const fetchData = async () => {
     const { data } = await supabase
       .from('assignments')
       .select('*')
       .eq('level', filterLevel)
-      .eq('academic_year_id', academicYearId as any)
+      .eq('academic_year_id', academicYearId)
       .order('order_index');
     if (data) setAssignments(data);
-  };
+  }, [academicYearId, filterLevel]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -122,12 +128,18 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
       return;
     }
 
+    if (!academicYearId) {
+      toast({ title: "Erreur", description: "Aucune annee scolaire selectionnee", variant: "destructive" });
+      return;
+    }
+
     const data = {
       title: form.title,
       description: form.description || null,
       file_url: form.file_url || null,
       correction_url: form.correction_url || null,
-      resource_links: form.resource_links.filter(l => l.url.trim()) as any,
+      resource_links: form.resource_links.filter(l => l.url.trim()) as Json,
+      academic_year_id: academicYearId,
     };
 
     if (editingAssignment) {
@@ -136,10 +148,11 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
         .update(data)
         .eq('id', editingAssignment.id);
 
-      if (!error) {
+      if (error) {
+        console.error('Error updating assignment:', error);
+        toast({ title: "Erreur", description: "Impossible de modifier le devoir", variant: "destructive" });
+      } else {
         toast({ title: "Succès", description: "Devoir modifié" });
-        if (editingAssignment.is_published) {
-        }
         fetchData();
         resetForm();
       }
@@ -149,10 +162,14 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
         .insert({
           ...data,
           level: filterLevel,
+          academic_year_id: academicYearId,
           order_index: assignments.length,
         });
 
-      if (!error) {
+      if (error) {
+        console.error('Error creating assignment:', error);
+        toast({ title: "Erreur", description: "Impossible de creer le devoir", variant: "destructive" });
+      } else {
         toast({ title: "Succès", description: "Devoir créé" });
         fetchData();
         resetForm();
@@ -170,8 +187,6 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
   const handleTogglePublish = async (assignment: Assignment) => {
     const newPublished = !assignment.is_published;
     await supabase.from('assignments').update({ is_published: newPublished }).eq('id', assignment.id);
-    if (newPublished) {
-    }
     fetchData();
   };
 

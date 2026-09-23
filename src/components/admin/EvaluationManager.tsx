@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
 import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
+import type { Json } from '@/integrations/supabase/types';
 
 interface Evaluation {
   id: string;
@@ -19,7 +20,7 @@ interface Evaluation {
   order_index: number;
   file_url: string | null;
   correction_url: string | null;
-  resource_links?: any;
+  resource_links?: Json;
   level: string | null;
 }
 
@@ -52,19 +53,24 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  useEffect(() => {
-    fetchData();
-  }, [filterLevel, academicYearId]);
+  const fetchData = useCallback(async () => {
+    if (!academicYearId) {
+      setEvaluations([]);
+      return;
+    }
 
-  const fetchData = async () => {
     const { data } = await supabase
       .from('evaluations')
       .select('*')
       .eq('level', filterLevel)
-      .eq('academic_year_id', academicYearId as any)
+      .eq('academic_year_id', academicYearId)
       .order('order_index');
     if (data) setEvaluations(data);
-  };
+  }, [academicYearId, filterLevel]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -122,12 +128,18 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
       return;
     }
 
+    if (!academicYearId) {
+      toast({ title: "Erreur", description: "Aucune annee scolaire selectionnee", variant: "destructive" });
+      return;
+    }
+
     const data = {
       title: form.title,
       description: form.description || null,
       file_url: form.file_url || null,
       correction_url: form.correction_url || null,
-      resource_links: form.resource_links.filter(l => l.url.trim()) as any,
+      resource_links: form.resource_links.filter(l => l.url.trim()) as Json,
+      academic_year_id: academicYearId,
     };
 
     if (editingEvaluation) {
@@ -136,10 +148,11 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
         .update(data)
         .eq('id', editingEvaluation.id);
 
-      if (!error) {
+      if (error) {
+        console.error('Error updating evaluation:', error);
+        toast({ title: "Erreur", description: "Impossible de modifier l'evaluation", variant: "destructive" });
+      } else {
         toast({ title: "Succès", description: "Évaluation modifiée" });
-        if (editingEvaluation.is_published) {
-        }
         fetchData();
         resetForm();
       }
@@ -149,10 +162,14 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
         .insert({
           ...data,
           level: filterLevel,
+          academic_year_id: academicYearId,
           order_index: evaluations.length,
         });
 
-      if (!error) {
+      if (error) {
+        console.error('Error creating evaluation:', error);
+        toast({ title: "Erreur", description: "Impossible de creer l'evaluation", variant: "destructive" });
+      } else {
         toast({ title: "Succès", description: "Évaluation créée" });
         fetchData();
         resetForm();
@@ -170,8 +187,6 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
   const handleTogglePublish = async (evaluation: Evaluation) => {
     const newPublished = !evaluation.is_published;
     await supabase.from('evaluations').update({ is_published: newPublished }).eq('id', evaluation.id);
-    if (newPublished) {
-    }
     fetchData();
   };
 
