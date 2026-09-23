@@ -17,6 +17,7 @@ interface LinkItem {
 
 interface GamesGenially {
   id: string;
+  academic_year_id: string | null;
   level: string;
   title: string;
   description: string | null;
@@ -57,13 +58,23 @@ export const GamesGeniallyManager: React.FC<GamesGeniallyManagerProps> = ({ filt
   }, [filterLevel, academicYearId]);
 
   const fetchData = async () => {
-    const { data } = await (supabase as any)
+    if (!academicYearId) {
+      setItems([]);
+      return;
+    }
+
+    const { data, error } = await (supabase as any)
       .from('games_genially')
       .select('*')
       .eq('level', filterLevel)
-      .eq('academic_year_id', academicYearId)
+      .or(`academic_year_id.eq.${academicYearId},academic_year_id.is.null`)
       .order('order_index');
-    if (data) setItems(data);
+    if (error) {
+      console.error('Error loading games/genially:', error);
+      toast({ title: "Erreur", description: "Impossible de charger les jeux et Genially", variant: "destructive" });
+    } else {
+      setItems(data || []);
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,11 +106,17 @@ export const GamesGeniallyManager: React.FC<GamesGeniallyManagerProps> = ({ filt
       return;
     }
 
+    if (!academicYearId) {
+      toast({ title: "Erreur", description: "Aucune annee scolaire selectionnee", variant: "destructive" });
+      return;
+    }
+
     const data = {
       title: form.title,
       description: form.description || null,
       file_url: form.file_url || null,
       links: form.links.filter(l => l.url.trim()),
+      academic_year_id: academicYearId,
     };
 
     if (editingItem) {
@@ -107,6 +124,11 @@ export const GamesGeniallyManager: React.FC<GamesGeniallyManagerProps> = ({ filt
         .from('games_genially')
         .update(data)
         .eq('id', editingItem.id);
+      if (error) {
+        console.error('Error updating game/genially:', error);
+        toast({ title: "Erreur", description: "Impossible de modifier l'element", variant: "destructive" });
+        return;
+      }
       if (!error) {
         toast({ title: "Succès", description: "Élément modifié" });
         fetchData();
@@ -116,6 +138,11 @@ export const GamesGeniallyManager: React.FC<GamesGeniallyManagerProps> = ({ filt
       const { error } = await (supabase as any)
         .from('games_genially')
         .insert({ ...data, level: filterLevel, academic_year_id: academicYearId, order_index: items.length });
+      if (error) {
+        console.error('Error creating game/genially:', error);
+        toast({ title: "Erreur", description: "Impossible de creer l'element", variant: "destructive" });
+        return;
+      }
       if (!error) {
         toast({ title: "Succès", description: "Élément créé" });
         fetchData();
@@ -134,8 +161,6 @@ export const GamesGeniallyManager: React.FC<GamesGeniallyManagerProps> = ({ filt
   const handleTogglePublish = async (item: GamesGenially) => {
     const newPublished = !item.is_published;
     await (supabase as any).from('games_genially').update({ is_published: newPublished }).eq('id', item.id);
-    if (newPublished) {
-    }
     fetchData();
   };
 

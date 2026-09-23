@@ -37,6 +37,7 @@ export const RESOURCE_TYPES = [
 
 interface SpiralResource {
   id: string;
+  academic_year_id: string | null;
   level: SpiralLevel;
   resource_type: string;
   title: string;
@@ -78,13 +79,23 @@ export const SpiralResourcesManager: React.FC<Props> = ({ selectedLevel }) => {
   useEffect(() => { fetchData(); }, [selectedLevel, academicYearId]);
 
   const fetchData = async () => {
-    const { data } = await (supabase as any)
+    if (!academicYearId) {
+      setItems([]);
+      return;
+    }
+
+    const { data, error } = await (supabase as any)
       .from('spiral_resources')
       .select('*')
       .eq('level', selectedLevel)
-      .eq('academic_year_id', academicYearId as any)
+      .or(`academic_year_id.eq.${academicYearId},academic_year_id.is.null`)
       .order('order_index', { ascending: true });
-    if (data) setItems(data);
+    if (error) {
+      console.error('Error loading spiral resources:', error);
+      toast({ title: "Erreur", description: "Impossible de charger les ressources", variant: "destructive" });
+    } else {
+      setItems(data || []);
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,6 +131,10 @@ export const SpiralResourcesManager: React.FC<Props> = ({ selectedLevel }) => {
   const handleSave = async () => {
     if (!form.title.trim()) {
       toast({ title: "Erreur", description: "Titre requis", variant: "destructive" });
+      return;
+    }
+    if (!academicYearId) {
+      toast({ title: "Erreur", description: "Aucune annee scolaire selectionnee", variant: "destructive" });
       return;
     }
     const payload = {

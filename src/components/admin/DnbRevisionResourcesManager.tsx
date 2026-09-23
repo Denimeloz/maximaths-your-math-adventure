@@ -18,6 +18,7 @@ interface ResourceLink { title: string; url: string }
 
 interface Resource {
   id: string;
+  academic_year_id: string | null;
   title: string;
   description: string | null;
   file_url: string | null;
@@ -52,12 +53,22 @@ export const DnbRevisionResourcesManager: React.FC = () => {
   useEffect(() => { fetchData(); }, [academicYearId]);
 
   const fetchData = async () => {
-    const { data } = await (supabase as any)
+    if (!academicYearId) {
+      setItems([]);
+      return;
+    }
+
+    const { data, error } = await (supabase as any)
       .from('dnb_revision_resources')
       .select('*')
-      .eq('academic_year_id', academicYearId)
+      .or(`academic_year_id.eq.${academicYearId},academic_year_id.is.null`)
       .order('order_index', { ascending: true });
-    if (data) setItems(data);
+    if (error) {
+      console.error('Error loading DNB revision resources:', error);
+      toast({ title: "Erreur", description: "Impossible de charger les ressources DNB", variant: "destructive" });
+    } else {
+      setItems(data || []);
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,6 +104,10 @@ export const DnbRevisionResourcesManager: React.FC = () => {
   const handleSave = async () => {
     if (!form.title.trim()) {
       toast({ title: "Erreur", description: "Le titre est requis", variant: "destructive" });
+      return;
+    }
+    if (!academicYearId) {
+      toast({ title: "Erreur", description: "Aucune annee scolaire selectionnee", variant: "destructive" });
       return;
     }
     const payload = {

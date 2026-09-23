@@ -18,6 +18,7 @@ interface ImageFile {
 
 interface ClassPhoto {
   id: string;
+  academic_year_id: string | null;
   title: string;
   description: string | null;
   level: string;
@@ -51,11 +52,17 @@ export const ClassPhotosManager: React.FC<ClassPhotosManagerProps> = ({ selected
 
   const fetchItems = async () => {
     setIsLoading(true);
+    if (!academicYearId) {
+      setItems([]);
+      setIsLoading(false);
+      return;
+    }
+
     const { data, error } = await (supabase as any)
       .from('class_photos')
       .select('*')
       .eq('level', selectedLevel)
-      .eq('academic_year_id', academicYearId as any)
+      .or(`academic_year_id.eq.${academicYearId},academic_year_id.is.null`)
       .order('order_index', { ascending: true });
 
     if (data) setItems(data);
@@ -105,6 +112,10 @@ export const ClassPhotosManager: React.FC<ClassPhotosManagerProps> = ({ selected
   const handleSubmit = async () => {
     if (!formData.title.trim()) {
       toast({ title: 'Erreur', description: 'Le titre est requis', variant: 'destructive' });
+      return;
+    }
+    if (!academicYearId) {
+      toast({ title: 'Erreur', description: 'Aucune annee scolaire selectionnee', variant: 'destructive' });
       return;
     }
 

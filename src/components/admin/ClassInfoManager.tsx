@@ -47,6 +47,7 @@ interface FileAttachment {
 
 interface ClassInfo {
   id: string;
+  academic_year_id: string | null;
   level: string;
   title: string;
   content: string | null;
@@ -94,11 +95,17 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
 
   const fetchInfos = async () => {
     setIsLoading(true);
+    if (!academicYearId) {
+      setInfos([]);
+      setIsLoading(false);
+      return;
+    }
+
     const { data, error } = await (supabase as any)
       .from('class_info')
       .select('*')
       .eq('level', selectedLevel)
-      .eq('academic_year_id', academicYearId as any)
+      .or(`academic_year_id.eq.${academicYearId},academic_year_id.is.null`)
       .order('order_index', { ascending: true });
 
     if (error) {
@@ -184,6 +191,15 @@ export const ClassInfoManager: React.FC<ClassInfoManagerProps> = ({ selectedLeve
       toast({
         title: "Erreur",
         description: "Le titre est requis",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!academicYearId) {
+      toast({
+        title: "Erreur",
+        description: "Aucune annee scolaire selectionnee",
         variant: "destructive",
       });
       return;

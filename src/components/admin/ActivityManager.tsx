@@ -29,6 +29,7 @@ import { LinksEditor, ResourceLink } from './LinksEditor';
 
 interface Activity {
   id: string;
+  academic_year_id: string | null;
   title: string;
   description: string | null;
   level: string;
@@ -90,6 +91,12 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
 
   const fetchActivities = async () => {
     setIsLoading(true);
+    if (!academicYearId) {
+      setActivities([]);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       let query = supabase
         .from('activities')
@@ -99,9 +106,7 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
       if (selectedLevel) {
         query = query.eq('level', selectedLevel);
       }
-      if (academicYearId) {
-        query = query.eq('academic_year_id', academicYearId);
-      }
+      query = query.or(`academic_year_id.eq.${academicYearId},academic_year_id.is.null`);
       
       const { data, error } = await query;
       
@@ -226,6 +231,10 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!academicYearId) {
+      toast.error('Aucune annee scolaire selectionnee');
+      return;
+    }
     
     const activityData = {
       title: formData.title,

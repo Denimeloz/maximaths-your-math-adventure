@@ -13,6 +13,7 @@ import { useCurrentAcademicYearId, useAcademicYears } from '@/contexts/AcademicY
 
 interface TrainingExercise {
   id: string;
+  academic_year_id: string | null;
   level: string;
   title: string;
   description: string | null;
@@ -60,13 +61,23 @@ export const TrainingExerciseManager: React.FC<TrainingExerciseManagerProps> = (
   }, [filterLevel, academicYearId]);
 
   const fetchData = async () => {
-    const { data } = await supabase
+    if (!academicYearId) {
+      setItems([]);
+      return;
+    }
+
+    const { data, error } = await supabase
       .from('training_exercises')
       .select('*')
       .eq('level', filterLevel)
-      .eq('academic_year_id', academicYearId as any)
+      .or(`academic_year_id.eq.${academicYearId},academic_year_id.is.null`)
       .order('order_index');
-    if (data) setItems(data);
+    if (error) {
+      console.error('Error loading training exercises:', error);
+      toast({ title: "Erreur", description: "Impossible de charger les exercices", variant: "destructive" });
+    } else {
+      setItems(data || []);
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,12 +136,18 @@ export const TrainingExerciseManager: React.FC<TrainingExerciseManagerProps> = (
       return;
     }
 
+    if (!academicYearId) {
+      toast({ title: "Erreur", description: "Aucune annee scolaire selectionnee", variant: "destructive" });
+      return;
+    }
+
     const data = {
       title: form.title,
       description: form.description || null,
       file_url: form.file_url || null,
       correction_url: form.correction_url || null,
       resource_links: form.resource_links.filter(l => l.url.trim()) as any,
+      academic_year_id: academicYearId,
     };
 
     if (editingItem) {
@@ -138,6 +155,12 @@ export const TrainingExerciseManager: React.FC<TrainingExerciseManagerProps> = (
         .from('training_exercises')
         .update(data)
         .eq('id', editingItem.id);
+
+      if (error) {
+        console.error('Error updating training exercise:', error);
+        toast({ title: "Erreur", description: "Impossible de modifier l'exercice", variant: "destructive" });
+        return;
+      }
 
       if (!error) {
         toast({ title: "Succès", description: "Exercice modifié" });
@@ -153,6 +176,12 @@ export const TrainingExerciseManager: React.FC<TrainingExerciseManagerProps> = (
           academic_year_id: academicYearId,
           order_index: items.length,
         });
+
+      if (error) {
+        console.error('Error creating training exercise:', error);
+        toast({ title: "Erreur", description: "Impossible de creer l'exercice", variant: "destructive" });
+        return;
+      }
 
       if (!error) {
         toast({ title: "Succès", description: "Exercice créé" });
@@ -172,8 +201,6 @@ export const TrainingExerciseManager: React.FC<TrainingExerciseManagerProps> = (
   const handleTogglePublish = async (item: TrainingExercise) => {
     const newPublished = !item.is_published;
     await supabase.from('training_exercises').update({ is_published: newPublished }).eq('id', item.id);
-    if (newPublished) {
-    }
     fetchData();
   };
 

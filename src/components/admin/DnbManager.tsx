@@ -13,6 +13,7 @@ import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 interface DnbContent {
   id: string;
+  academic_year_id: string | null;
   title: string;
   description: string | null;
   content: string | null;
@@ -56,12 +57,22 @@ export const DnbManager: React.FC = () => {
   }, [academicYearId]);
 
   const fetchData = async () => {
-    const { data } = await supabase
+    if (!academicYearId) {
+      setItems([]);
+      return;
+    }
+
+    const { data, error } = await supabase
       .from('dnb_content')
       .select('*')
-      .eq('academic_year_id', academicYearId as any)
+      .or(`academic_year_id.eq.${academicYearId},academic_year_id.is.null`)
       .order('order_index', { ascending: true });
-    if (data) setItems(data);
+    if (error) {
+      console.error('Error loading DNB content:', error);
+      toast({ title: "Erreur", description: "Impossible de charger le contenu DNB", variant: "destructive" });
+    } else {
+      setItems(data || []);
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,6 +128,11 @@ export const DnbManager: React.FC = () => {
   const handleSave = async () => {
     if (!form.title.trim()) {
       toast({ title: "Erreur", description: "Le titre est requis", variant: "destructive" });
+      return;
+    }
+
+    if (!academicYearId) {
+      toast({ title: "Erreur", description: "Aucune annee scolaire selectionnee", variant: "destructive" });
       return;
     }
 

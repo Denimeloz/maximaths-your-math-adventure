@@ -13,6 +13,7 @@ import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 interface TrainingTest {
   id: string;
+  academic_year_id: string | null;
   level: string;
   title: string;
   description: string | null;
@@ -57,13 +58,23 @@ export const TrainingTestManager: React.FC<TrainingTestManagerProps> = ({ filter
   }, [filterLevel, academicYearId]);
 
   const fetchData = async () => {
-    const { data } = await supabase
+    if (!academicYearId) {
+      setItems([]);
+      return;
+    }
+
+    const { data, error } = await supabase
       .from('training_tests')
       .select('*')
       .eq('level', filterLevel)
-      .eq('academic_year_id', academicYearId as any)
+      .or(`academic_year_id.eq.${academicYearId},academic_year_id.is.null`)
       .order('order_index');
-    if (data) setItems(data);
+    if (error) {
+      console.error('Error loading training tests:', error);
+      toast({ title: "Erreur", description: "Impossible de charger les tests", variant: "destructive" });
+    } else {
+      setItems(data || []);
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -122,12 +133,18 @@ export const TrainingTestManager: React.FC<TrainingTestManagerProps> = ({ filter
       return;
     }
 
+    if (!academicYearId) {
+      toast({ title: "Erreur", description: "Aucune annee scolaire selectionnee", variant: "destructive" });
+      return;
+    }
+
     const data = {
       title: form.title,
       description: form.description || null,
       file_url: form.file_url || null,
       correction_url: form.correction_url || null,
       resource_links: form.resource_links.filter(l => l.url.trim()) as any,
+      academic_year_id: academicYearId,
     };
 
     if (editingItem) {
@@ -135,6 +152,12 @@ export const TrainingTestManager: React.FC<TrainingTestManagerProps> = ({ filter
         .from('training_tests')
         .update(data)
         .eq('id', editingItem.id);
+
+      if (error) {
+        console.error('Error updating training test:', error);
+        toast({ title: "Erreur", description: "Impossible de modifier le test", variant: "destructive" });
+        return;
+      }
 
       if (!error) {
         toast({ title: "Succès", description: "Test modifié" });
@@ -150,6 +173,12 @@ export const TrainingTestManager: React.FC<TrainingTestManagerProps> = ({ filter
           academic_year_id: academicYearId,
           order_index: items.length,
         });
+
+      if (error) {
+        console.error('Error creating training test:', error);
+        toast({ title: "Erreur", description: "Impossible de creer le test", variant: "destructive" });
+        return;
+      }
 
       if (!error) {
         toast({ title: "Succès", description: "Test créé" });
@@ -169,8 +198,6 @@ export const TrainingTestManager: React.FC<TrainingTestManagerProps> = ({ filter
   const handleTogglePublish = async (item: TrainingTest) => {
     const newPublished = !item.is_published;
     await supabase.from('training_tests').update({ is_published: newPublished }).eq('id', item.id);
-    if (newPublished) {
-    }
     fetchData();
   };
 
