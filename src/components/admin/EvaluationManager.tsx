@@ -14,6 +14,7 @@ import type { Json } from '@/integrations/supabase/types';
 
 interface Evaluation {
   id: string;
+  academic_year_id: string | null;
   title: string;
   description: string | null;
   is_published: boolean;
@@ -59,14 +60,21 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
       return;
     }
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('evaluations')
       .select('*')
       .eq('level', filterLevel)
-      .eq('academic_year_id', academicYearId)
+      .or(`academic_year_id.eq.${academicYearId},academic_year_id.is.null`)
       .order('order_index');
-    if (data) setEvaluations(data);
-  }, [academicYearId, filterLevel]);
+
+    if (error) {
+      console.error('Error loading evaluations:', error);
+      toast({ title: "Erreur", description: "Impossible de charger les evaluations", variant: "destructive" });
+      return;
+    }
+
+    setEvaluations(data || []);
+  }, [academicYearId, filterLevel, toast]);
 
   useEffect(() => {
     fetchData();

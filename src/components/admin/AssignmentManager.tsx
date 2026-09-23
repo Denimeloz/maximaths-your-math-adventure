@@ -14,6 +14,7 @@ import type { Json } from '@/integrations/supabase/types';
 
 interface Assignment {
   id: string;
+  academic_year_id: string | null;
   title: string;
   description: string | null;
   is_published: boolean;
@@ -59,14 +60,21 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
       return;
     }
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('assignments')
       .select('*')
       .eq('level', filterLevel)
-      .eq('academic_year_id', academicYearId)
+      .or(`academic_year_id.eq.${academicYearId},academic_year_id.is.null`)
       .order('order_index');
-    if (data) setAssignments(data);
-  }, [academicYearId, filterLevel]);
+
+    if (error) {
+      console.error('Error loading assignments:', error);
+      toast({ title: "Erreur", description: "Impossible de charger les devoirs", variant: "destructive" });
+      return;
+    }
+
+    setAssignments(data || []);
+  }, [academicYearId, filterLevel, toast]);
 
   useEffect(() => {
     fetchData();
