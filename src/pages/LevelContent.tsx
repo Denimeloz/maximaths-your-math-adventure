@@ -363,7 +363,7 @@ const LevelContent = () => {
         .from('courses')
         .select('*')
         .eq('level', level)
-        .eq('academic_year_id', resolvedYearId)
+        .or(`academic_year_id.eq.${resolvedYearId},academic_year_id.is.null`)
         .eq('is_published', true)
         .neq('category', 'activite')
         .order('order_index', { ascending: true });
@@ -376,7 +376,7 @@ const LevelContent = () => {
         .from('activities')
         .select('*')
         .eq('level', level)
-        .eq('academic_year_id', resolvedYearId)
+        .or(`academic_year_id.eq.${resolvedYearId},academic_year_id.is.null`)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       
@@ -388,7 +388,7 @@ const LevelContent = () => {
         .from('class_info')
         .select('*')
         .eq('level', level)
-        .eq('academic_year_id', resolvedYearId)
+        .or(`academic_year_id.eq.${resolvedYearId},academic_year_id.is.null`)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       
@@ -399,7 +399,7 @@ const LevelContent = () => {
         .from('assignments')
         .select('*')
         .eq('level', level)
-        .eq('academic_year_id', resolvedYearId)
+        .or(`academic_year_id.eq.${resolvedYearId},academic_year_id.is.null`)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       
@@ -410,7 +410,7 @@ const LevelContent = () => {
         .from('evaluations')
         .select('*')
         .eq('level', level)
-        .eq('academic_year_id', resolvedYearId)
+        .or(`academic_year_id.eq.${resolvedYearId},academic_year_id.is.null`)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       
@@ -421,7 +421,7 @@ const LevelContent = () => {
         .from('training_exercises')
         .select('*')
         .eq('level', level)
-        .eq('academic_year_id', resolvedYearId)
+        .or(`academic_year_id.eq.${resolvedYearId},academic_year_id.is.null`)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       
@@ -432,7 +432,7 @@ const LevelContent = () => {
         .from('training_tests')
         .select('*')
         .eq('level', level)
-        .eq('academic_year_id', resolvedYearId)
+        .or(`academic_year_id.eq.${resolvedYearId},academic_year_id.is.null`)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       
@@ -442,7 +442,7 @@ const LevelContent = () => {
       const { data } = await supabase
         .from('dnb_content')
         .select('*')
-        .eq('academic_year_id', resolvedYearId)
+        .or(`academic_year_id.eq.${resolvedYearId},academic_year_id.is.null`)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       
@@ -453,7 +453,7 @@ const LevelContent = () => {
         .from('class_photos')
         .select('*')
         .eq('level', level)
-        .eq('academic_year_id', resolvedYearId)
+        .or(`academic_year_id.eq.${resolvedYearId},academic_year_id.is.null`)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       
@@ -464,7 +464,7 @@ const LevelContent = () => {
         .from('games_genially')
         .select('*')
         .eq('level', level)
-        .eq('academic_year_id', resolvedYearId)
+        .or(`academic_year_id.eq.${resolvedYearId},academic_year_id.is.null`)
         .eq('is_published', true)
         .order('order_index', { ascending: true });
       
