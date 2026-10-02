@@ -146,7 +146,7 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
       description: form.description || null,
       file_url: form.file_url || null,
       correction_url: form.correction_url || null,
-      resource_links: form.resource_links.filter(l => l.url.trim()) as Json,
+      resource_links: form.resource_links.filter(l => l.url.trim()) as unknown as Json,
       academic_year_id: academicYearId,
     };
 
@@ -205,7 +205,7 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({ filterLeve
       description: assignment.description || '',
       file_url: assignment.file_url || '',
       correction_url: assignment.correction_url || '',
-      resource_links: Array.isArray(assignment.resource_links) ? assignment.resource_links : [],
+      resource_links: Array.isArray(assignment.resource_links) ? assignment.resource_links as unknown as ResourceLink[] : [],
     });
     setShowForm(true);
   };

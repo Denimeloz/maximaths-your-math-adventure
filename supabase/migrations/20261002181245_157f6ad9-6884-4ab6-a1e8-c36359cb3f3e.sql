@@ -1,0 +1,1 @@
+UPDATE public.assignments SET academic_year_id = (SELECT id FROM public.academic_years WHERE label = '2026-2027' LIMIT 1) WHERE id = '3cb31756-5efc-42b5-a693-7233b8fea373';
