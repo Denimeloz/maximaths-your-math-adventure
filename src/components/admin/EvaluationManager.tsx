@@ -146,7 +146,7 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
       description: form.description || null,
       file_url: form.file_url || null,
       correction_url: form.correction_url || null,
-      resource_links: form.resource_links.filter(l => l.url.trim()) as Json,
+      resource_links: form.resource_links.filter(l => l.url.trim()) as unknown as Json,
       academic_year_id: academicYearId,
     };
 
@@ -205,7 +205,7 @@ export const EvaluationManager: React.FC<EvaluationManagerProps> = ({ filterLeve
       description: evaluation.description || '',
       file_url: evaluation.file_url || '',
       correction_url: evaluation.correction_url || '',
-      resource_links: Array.isArray(evaluation.resource_links) ? evaluation.resource_links : [],
+      resource_links: Array.isArray(evaluation.resource_links) ? evaluation.resource_links as unknown as ResourceLink[] : [],
     });
     setShowForm(true);
   };
