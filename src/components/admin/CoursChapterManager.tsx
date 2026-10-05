@@ -201,6 +201,7 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
                         </div>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
+                        <MoveButtons index={i} total={arr.length} onMove={d => move('chapter_resources', arr, i, d, fetchResources)} />
                         <Button variant="ghost" size="icon" onClick={() => setEditingId(r.id)}><Pencil className="w-4 h-4" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => deleteResource(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                       </div>
@@ -214,7 +215,7 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
           <TabsContent value="multimedia" className="space-y-4">
             <ResourceForm onAdd={(kind, title, url, desc) => addResource('multimedia', kind, title, url, desc, '')} onUpload={uploadFile} uploading={uploading} showCorrection={false} />
             <div className="space-y-2">
-              {resources.filter(r => r.section === 'multimedia').map(r => (
+              {resources.filter(r => r.section === 'multimedia').map((r, i, arr) => (
                 editingId === r.id ? (
                   <ResourceEditForm key={r.id} resource={r} onUpload={uploadFile} uploading={uploading}
                     onCancel={() => setEditingId(null)} onSave={values => updateResource(r.id, values)} showCorrection={false} />
@@ -226,13 +227,14 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
                       {r.url && <a href={r.url} target="_blank" rel="noreferrer" className="text-xs text-rainbow-blue underline">Voir la ressource</a>}
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
+                      <MoveButtons index={i} total={arr.length} onMove={d => move('chapter_resources', arr, i, d, fetchResources)} />
                       <Button variant="ghost" size="icon" onClick={() => setEditingId(r.id)}><Pencil className="w-4 h-4" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => deleteResource(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                     </div>
                   </Card>
                 )
               ))}
-              {podcasts.map(p => (
+              {podcasts.map((p, i) => (
                 <Card key={p.id} className="p-3">
                   <div className="flex items-center justify-between mb-2">
                     <div>
@@ -240,7 +242,10 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
                       {p.description && <p className="text-sm text-muted-foreground">{p.description}</p>}
                       {p.duration_seconds && <p className="text-xs text-muted-foreground">{Math.floor(p.duration_seconds / 60)}:{(p.duration_seconds % 60).toString().padStart(2,'0')}</p>}
                     </div>
-                    <Button variant="ghost" size="icon" onClick={() => deletePodcast(p.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                    <div className="flex items-center gap-1">
+                      <MoveButtons index={i} total={podcasts.length} onMove={d => move('chapter_podcasts', podcasts, i, d, fetchResources)} />
+                      <Button variant="ghost" size="icon" onClick={() => deletePodcast(p.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                    </div>
                   </div>
                   <audio controls src={p.audio_url} className="w-full" />
                 </Card>
