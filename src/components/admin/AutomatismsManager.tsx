@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Zap } from 'lucide-react';
+import { Plus, Trash2, Zap, Upload, FileText } from 'lucide-react';
 import { useAcademicYears, useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 type Level = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
@@ -15,6 +15,7 @@ interface Item {
   id: string; level: Level; chapter: string | null; title: string;
   description: string | null; canva_embed_url: string | null; thumbnail_url: string | null;
   academic_year_id: string | null; display_order: number;
+  file_url: string | null; file_name: string | null;
 }
 
 export const AutomatismsManager: React.FC = () => {
@@ -24,6 +25,20 @@ export const AutomatismsManager: React.FC = () => {
   const [level, setLevel] = useState<Level>('6eme');
   const [items, setItems] = useState<Item[]>([]);
   const [form, setForm] = useState({ title: '', description: '', chapter: '', canva_embed_url: '', thumbnail_url: '' });
+  const [file, setFile] = useState<{ url: string; name: string } | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const upload = async (f: File) => {
+    setUploading(true);
+    const ext = (f.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const path = `automatismes/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error } = await supabase.storage.from('course-files').upload(path, f, { upsert: false });
+    setUploading(false);
+    if (error) { toast({ title: 'Upload échoué', description: error.message, variant: 'destructive' }); return; }
+    const { data } = supabase.storage.from('course-files').getPublicUrl(path);
+    setFile({ url: data.publicUrl, name: f.name });
+    setForm(x => ({ ...x, title: x.title || f.name.replace(/\.[^.]+$/, '') }));
+  };
 
   const availableLevels = classes
     .filter(c => c.academic_year_id === academicYearId)
@@ -47,11 +62,11 @@ export const AutomatismsManager: React.FC = () => {
     if (!form.title.trim() || !academicYearId) return;
     const { error } = await (supabase as any).from('automatisms').insert({
       title: form.title, description: form.description || null, chapter: form.chapter || null,
-      canva_embed_url: form.canva_embed_url || null, thumbnail_url: form.thumbnail_url || null,
+      canva_embed_url: form.canva_embed_url || null, file_url: file?.url || null, file_name: file?.name || null, thumbnail_url: form.thumbnail_url || null,
       level, academic_year_id: academicYearId, display_order: items.length,
     });
     if (error) toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-    else { toast({ title: 'Ajouté' }); setForm({ title: '', description: '', chapter: '', canva_embed_url: '', thumbnail_url: '' }); fetch(); }
+    else { toast({ title: 'Ajouté' }); setForm({ title: '', description: '', chapter: '', canva_embed_url: '', thumbnail_url: '' }); setFile(null); fetch(); }
   };
 
   const remove = async (id: string) => {
@@ -83,6 +98,13 @@ export const AutomatismsManager: React.FC = () => {
         <Input placeholder="Titre" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
         <Input placeholder="Chapitre (optionnel)" value={form.chapter} onChange={e => setForm(f => ({ ...f, chapter: e.target.value }))} />
         <Input placeholder="URL d'intégration Canva (embed)" value={form.canva_embed_url} onChange={e => setForm(f => ({ ...f, canva_embed_url: e.target.value }))} />
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="inline-flex items-center gap-2 cursor-pointer text-sm border rounded-md px-3 py-2 bg-background">
+            <Upload className="w-4 h-4" />{uploading ? 'Envoi...' : 'Téléverser un fichier (PDF, Word, PowerPoint, image...)'}
+            <input type="file" className="hidden" disabled={uploading} onChange={e => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = ''; }} />
+          </label>
+          {file && <span className="text-xs text-muted-foreground">{file.name}</span>}
+        </div>
         <Input placeholder="URL miniature (optionnel)" value={form.thumbnail_url} onChange={e => setForm(f => ({ ...f, thumbnail_url: e.target.value }))} />
         <Textarea placeholder="Description courte" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
         <Button onClick={add}><Plus className="w-4 h-4 mr-1" />Ajouter</Button>
@@ -97,6 +119,11 @@ export const AutomatismsManager: React.FC = () => {
             </div>
             {it.chapter && <p className="text-xs text-muted-foreground">{it.chapter}</p>}
             {it.description && <p className="text-sm mt-2">{it.description}</p>}
+            {it.file_url && (
+              <a href={it.file_url} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-sm text-rainbow-purple hover:underline">
+                <FileText className="w-4 h-4" />{it.file_name || 'Ouvrir le fichier'}
+              </a>
+            )}
             {it.canva_embed_url && (
               <div className="mt-3 aspect-video">
                 <iframe src={it.canva_embed_url} className="w-full h-full rounded-lg border" allow="fullscreen" />

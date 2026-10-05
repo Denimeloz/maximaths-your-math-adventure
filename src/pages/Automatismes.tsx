@@ -5,14 +5,14 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Zap, ArrowLeft } from 'lucide-react';
+import { Zap, ArrowLeft, Download } from 'lucide-react';
 
 interface Year { id: string; label: string; start_year: number; is_active: boolean; }
 interface YearClass { academic_year_id: string; class_level: string; }
 interface Item {
   id: string; level: string; chapter: string | null; title: string;
   description: string | null; canva_embed_url: string | null; thumbnail_url: string | null;
-  academic_year_id: string;
+  academic_year_id: string; file_url: string | null; file_name: string | null;
 }
 
 const LEVEL_LABELS: Record<string, string> = {
@@ -85,6 +85,11 @@ const Automatismes = () => {
               <h3 className="font-display text-lg">{it.title}</h3>
               {it.chapter && <p className="text-xs text-muted-foreground">{it.chapter}</p>}
               {it.description && <p className="text-sm mt-2 text-muted-foreground">{it.description}</p>}
+              {it.file_url && (
+                <a href={it.file_url} target="_blank" rel="noreferrer" download className="mt-3 inline-flex items-center gap-2 text-sm text-rainbow-purple hover:underline">
+                  <Download className="w-4 h-4" />{it.file_name || 'Télécharger le fichier'}
+                </a>
+              )}
               {it.canva_embed_url && (
                 <div className="mt-4 aspect-video">
                   <iframe src={it.canva_embed_url} className="w-full h-full rounded-lg border" allow="fullscreen" />
