@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { move, MoveButtons } from './MoveButtons';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -179,7 +180,7 @@ export const RevisionPathManager: React.FC = () => {
           <Card key={step.id} className="p-4">
             <h3 className="font-display mb-3">{step.id}. {step.label}</h3>
             <div className="space-y-2">
-              {stepItems.map(r => (
+              {stepItems.map((r, i) => (
                 editingId === r.id ? (
                   <div key={r.id} className="space-y-2 p-3 rounded border border-rainbow-blue/50">
                     <Select value={editForm.kind} onValueChange={v => setEditForm(f => ({ ...f, kind: v }))}>
@@ -224,7 +225,8 @@ export const RevisionPathManager: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <Button variant="ghost" size="icon" onClick={() => startEdit(r)}><Pencil className="w-4 h-4" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                      <MoveButtons index={i} total={stepItems.length} onMove={d => move('revision_path_resources', stepItems, i, d, fetch)} />
+              <Button variant="ghost" size="icon" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                     </div>
                   </div>
                 )
