@@ -185,11 +185,13 @@ export type Database = {
       automatisms: {
         Row: {
           academic_year_id: string | null
-          canva_embed_url: string
+          canva_embed_url: string | null
           chapter: string | null
           created_at: string
           description: string | null
           display_order: number
+          file_name: string | null
+          file_url: string | null
           id: string
           level: string
           thumbnail_url: string | null
@@ -198,11 +200,13 @@ export type Database = {
         }
         Insert: {
           academic_year_id?: string | null
-          canva_embed_url: string
+          canva_embed_url?: string | null
           chapter?: string | null
           created_at?: string
           description?: string | null
           display_order?: number
+          file_name?: string | null
+          file_url?: string | null
           id?: string
           level: string
           thumbnail_url?: string | null
@@ -211,11 +215,13 @@ export type Database = {
         }
         Update: {
           academic_year_id?: string | null
-          canva_embed_url?: string
+          canva_embed_url?: string | null
           chapter?: string | null
           created_at?: string
           description?: string | null
           display_order?: number
+          file_name?: string | null
+          file_url?: string | null
           id?: string
           level?: string
           thumbnail_url?: string | null
