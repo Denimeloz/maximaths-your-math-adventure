@@ -1,0 +1,1 @@
+ALTER TABLE public.automatisms ALTER COLUMN canva_embed_url DROP NOT NULL; ALTER TABLE public.automatisms ADD COLUMN IF NOT EXISTS file_url text; ALTER TABLE public.automatisms ADD COLUMN IF NOT EXISTS file_name text;
