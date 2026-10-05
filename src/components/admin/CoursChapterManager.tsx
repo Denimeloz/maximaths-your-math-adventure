@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Trash2, Upload, Loader2, BookOpen, Lightbulb, Dumbbell, HeartHandshake, Clapperboard, Pencil, Save, X, CheckCircle2 } from 'lucide-react';
+import { move, MoveButtons } from './MoveButtons';
 import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 type Level = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
@@ -159,8 +160,9 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
           </div>
         )}
         <div className="flex flex-wrap gap-2">
-          {chapters.map(c => (
+          {chapters.map((c, i) => (
             <div key={c.id} className="flex items-center gap-1">
+              <MoveButtons index={i} total={chapters.length} horizontal onMove={d => move('tab_chapters', chapters, i, d, fetchChapters)} />
               <Button variant={selectedChapter === c.id ? 'default' : 'outline'} size="sm" onClick={() => setSelectedChapter(c.id)}>{c.title}</Button>
               <Button variant="ghost" size="icon" onClick={() => deleteChapter(c.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
             </div>
@@ -182,7 +184,7 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
             <TabsContent key={s.id} value={s.id} className="space-y-4">
               <ResourceForm onAdd={(kind, title, url, desc, correction) => addResource(s.id, kind, title, url, desc, correction)} onUpload={uploadFile} uploading={uploading} />
               <div className="space-y-2">
-                {resources.filter(r => r.section === s.id).map(r => (
+                {resources.filter(r => r.section === s.id).map((r, i, arr) => (
                   editingId === r.id ? (
                     <ResourceEditForm key={r.id} resource={r} onUpload={uploadFile} uploading={uploading}
                       onCancel={() => setEditingId(null)} onSave={values => updateResource(r.id, values)} />

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { move, MoveButtons } from './MoveButtons';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -126,12 +127,13 @@ export const AutomatismsManager: React.FC = () => {
       </Card>
 
       <div className="grid md:grid-cols-2 gap-4">
-        {items.map(it => (
+        {items.map((it, i) => (
           <Card key={it.id} className="p-4">
             <div className="flex items-start justify-between mb-2">
               <h4 className="font-display">{it.title}</h4>
               <div className="flex">
               <Button variant="ghost" size="icon" onClick={() => startEdit(it)}><Pencil className="w-4 h-4" /></Button>
+              <MoveButtons index={i} total={items.length} onMove={d => move('automatisms', items, i, d, fetch)} />
               <Button variant="ghost" size="icon" onClick={() => remove(it.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
               </div>
             </div>
