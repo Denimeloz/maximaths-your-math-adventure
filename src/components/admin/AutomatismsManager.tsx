@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Zap, Upload, FileText } from 'lucide-react';
+import { Plus, Trash2, Zap, Upload, FileText, Pencil, X, Save } from 'lucide-react';
 import { useAcademicYears, useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 type Level = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
@@ -27,6 +27,15 @@ export const AutomatismsManager: React.FC = () => {
   const [form, setForm] = useState({ title: '', description: '', chapter: '', canva_embed_url: '', thumbnail_url: '' });
   const [file, setFile] = useState<{ url: string; name: string } | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const emptyForm = { title: '', description: '', chapter: '', canva_embed_url: '', thumbnail_url: '' };
+  const startEdit = (it: Item) => {
+    setEditingId(it.id);
+    setForm({ title: it.title, description: it.description || '', chapter: it.chapter || '', canva_embed_url: it.canva_embed_url || '', thumbnail_url: it.thumbnail_url || '' });
+    setFile(it.file_url ? { url: it.file_url, name: it.file_name || 'Fichier' } : null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const cancelEdit = () => { setEditingId(null); setForm(emptyForm); setFile(null); };
 
   const upload = async (f: File) => {
     setUploading(true);
@@ -60,13 +69,15 @@ export const AutomatismsManager: React.FC = () => {
 
   const add = async () => {
     if (!form.title.trim() || !academicYearId) return;
-    const { error } = await (supabase as any).from('automatisms').insert({
+    const payload = {
       title: form.title, description: form.description || null, chapter: form.chapter || null,
       canva_embed_url: form.canva_embed_url || null, file_url: file?.url || null, file_name: file?.name || null, thumbnail_url: form.thumbnail_url || null,
-      level, academic_year_id: academicYearId, display_order: items.length,
-    });
+    };
+    const { error } = editingId
+      ? await (supabase as any).from('automatisms').update(payload).eq('id', editingId)
+      : await (supabase as any).from('automatisms').insert({ ...payload, level, academic_year_id: academicYearId, display_order: items.length });
     if (error) toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-    else { toast({ title: 'Ajouté' }); setForm({ title: '', description: '', chapter: '', canva_embed_url: '', thumbnail_url: '' }); setFile(null); fetch(); }
+    else { toast({ title: editingId ? 'Modifié' : 'Ajouté' }); cancelEdit(); fetch(); }
   };
 
   const remove = async (id: string) => {
@@ -94,7 +105,7 @@ export const AutomatismsManager: React.FC = () => {
       </Card>
 
       <Card className="p-4 space-y-2 bg-muted/30">
-        <h3 className="font-display">Nouveau support</h3>
+        <h3 className="font-display">{editingId ? 'Modifier le support' : 'Nouveau support'}</h3>
         <Input placeholder="Titre" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
         <Input placeholder="Chapitre (optionnel)" value={form.chapter} onChange={e => setForm(f => ({ ...f, chapter: e.target.value }))} />
         <Input placeholder="URL d'intégration Canva (embed)" value={form.canva_embed_url} onChange={e => setForm(f => ({ ...f, canva_embed_url: e.target.value }))} />
@@ -104,10 +115,14 @@ export const AutomatismsManager: React.FC = () => {
             <input type="file" className="hidden" disabled={uploading} onChange={e => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = ''; }} />
           </label>
           {file && <span className="text-xs text-muted-foreground">{file.name}</span>}
+          {file && <Button type="button" variant="ghost" size="sm" onClick={() => setFile(null)}>Retirer le fichier</Button>}
         </div>
         <Input placeholder="URL miniature (optionnel)" value={form.thumbnail_url} onChange={e => setForm(f => ({ ...f, thumbnail_url: e.target.value }))} />
         <Textarea placeholder="Description courte" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
-        <Button onClick={add}><Plus className="w-4 h-4 mr-1" />Ajouter</Button>
+        <div className="flex gap-2">
+          <Button onClick={add}>{editingId ? <Save className="w-4 h-4 mr-1" /> : <Plus className="w-4 h-4 mr-1" />}{editingId ? 'Enregistrer' : 'Ajouter'}</Button>
+          {editingId && <Button variant="outline" onClick={cancelEdit}><X className="w-4 h-4 mr-1" />Annuler</Button>}
+        </div>
       </Card>
 
       <div className="grid md:grid-cols-2 gap-4">
@@ -115,7 +130,10 @@ export const AutomatismsManager: React.FC = () => {
           <Card key={it.id} className="p-4">
             <div className="flex items-start justify-between mb-2">
               <h4 className="font-display">{it.title}</h4>
+              <div className="flex">
+              <Button variant="ghost" size="icon" onClick={() => startEdit(it)}><Pencil className="w-4 h-4" /></Button>
               <Button variant="ghost" size="icon" onClick={() => remove(it.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+              </div>
             </div>
             {it.chapter && <p className="text-xs text-muted-foreground">{it.chapter}</p>}
             {it.description && <p className="text-sm mt-2">{it.description}</p>}
