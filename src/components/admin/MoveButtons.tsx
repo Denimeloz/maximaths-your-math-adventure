@@ -22,3 +22,14 @@ export const MoveButtons: React.FC<{ index: number; total: number; onMove: (d: -
     </div>
   );
 };
+
+export const PublishToggle: React.FC<{ table: string; id: string; published?: boolean | null; onDone: () => void }> = ({ table, id, published, onDone }) => {
+  const isPub = published !== false;
+  return (
+    <button type="button" title={isPub ? 'Publié — cliquer pour masquer' : 'Masqué — cliquer pour publier'}
+      className="p-1.5 rounded hover:bg-muted"
+      onClick={async () => { await (supabase as any).from(table).update({ is_published: !isPub }).eq('id', id); onDone(); }}>
+      {isPub ? <Eye className="w-4 h-4 text-primary" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+    </button>
+  );
+};
