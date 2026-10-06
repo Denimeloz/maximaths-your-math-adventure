@@ -46,7 +46,7 @@ const Automatismes = () => {
     if (!yearId || !level) { setItems([]); return; }
     (async () => {
       const { data } = await (supabase as any).from('automatisms')
-        .select('*').eq('academic_year_id', yearId).eq('level', level)
+        .select('*').eq('academic_year_id', yearId).eq('is_published', true).eq('level', level)
         .order('display_order');
       setItems(data || []);
     })();
