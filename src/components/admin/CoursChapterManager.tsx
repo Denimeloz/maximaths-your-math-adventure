@@ -245,7 +245,7 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
                       {p.duration_seconds && <p className="text-xs text-muted-foreground">{Math.floor(p.duration_seconds / 60)}:{(p.duration_seconds % 60).toString().padStart(2,'0')}</p>}
                     </div>
                     <div className="flex items-center gap-1">
-                      <MoveButtons index={i} total={podcasts.length} onMove={d => move('chapter_podcasts', podcasts, i, d, fetchResources)} />
+                      <PublishToggle table="chapter_podcasts" id={p.id} published={(p as any).is_published} onDone={fetchResources} /><MoveButtons index={i} total={podcasts.length} onMove={d => move('chapter_podcasts', podcasts, i, d, fetchResources)} />
                       <Button variant="ghost" size="icon" onClick={() => deletePodcast(p.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                     </div>
                   </div>
