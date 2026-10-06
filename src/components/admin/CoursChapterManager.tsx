@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Trash2, Upload, Loader2, BookOpen, Lightbulb, Dumbbell, HeartHandshake, Clapperboard, Pencil, Save, X, CheckCircle2 } from 'lucide-react';
-import { move, MoveButtons } from './MoveButtons';
+import { move, MoveButtons, PublishToggle } from './MoveButtons';
 import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 type Level = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
@@ -203,7 +203,7 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
                         </div>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
-                        <MoveButtons index={i} total={arr.length} onMove={d => move('chapter_resources', arr, i, d, fetchResources)} />
+                        <PublishToggle table="chapter_resources" id={r.id} published={(r as any).is_published} onDone={fetchResources} /><MoveButtons index={i} total={arr.length} onMove={d => move('chapter_resources', arr, i, d, fetchResources)} />
                         <Button variant="ghost" size="icon" onClick={() => setEditingId(r.id)}><Pencil className="w-4 h-4" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => deleteResource(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                       </div>
@@ -229,7 +229,7 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
                       {r.url && <a href={r.url} target="_blank" rel="noreferrer" className="text-xs text-rainbow-blue underline">Voir la ressource</a>}
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      <MoveButtons index={i} total={arr.length} onMove={d => move('chapter_resources', arr, i, d, fetchResources)} />
+                      <PublishToggle table="chapter_resources" id={r.id} published={(r as any).is_published} onDone={fetchResources} /><MoveButtons index={i} total={arr.length} onMove={d => move('chapter_resources', arr, i, d, fetchResources)} />
                       <Button variant="ghost" size="icon" onClick={() => setEditingId(r.id)}><Pencil className="w-4 h-4" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => deleteResource(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                     </div>
@@ -245,7 +245,7 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
                       {p.duration_seconds && <p className="text-xs text-muted-foreground">{Math.floor(p.duration_seconds / 60)}:{(p.duration_seconds % 60).toString().padStart(2,'0')}</p>}
                     </div>
                     <div className="flex items-center gap-1">
-                      <MoveButtons index={i} total={podcasts.length} onMove={d => move('chapter_podcasts', podcasts, i, d, fetchResources)} />
+                      <PublishToggle table="chapter_podcasts" id={p.id} published={(p as any).is_published} onDone={fetchResources} /><MoveButtons index={i} total={podcasts.length} onMove={d => move('chapter_podcasts', podcasts, i, d, fetchResources)} />
                       <Button variant="ghost" size="icon" onClick={() => deletePodcast(p.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                     </div>
                   </div>

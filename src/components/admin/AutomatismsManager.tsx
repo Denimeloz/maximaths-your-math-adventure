@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { move, MoveButtons } from './MoveButtons';
+import { move, MoveButtons, PublishToggle } from './MoveButtons';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -133,7 +133,7 @@ export const AutomatismsManager: React.FC = () => {
               <h4 className="font-display">{it.title}</h4>
               <div className="flex">
               <Button variant="ghost" size="icon" onClick={() => startEdit(it)}><Pencil className="w-4 h-4" /></Button>
-              <MoveButtons index={i} total={items.length} onMove={d => move('automatisms', items, i, d, fetch)} />
+              <PublishToggle table="automatisms" id={it.id} published={(it as any).is_published} onDone={fetch} /><MoveButtons index={i} total={items.length} onMove={d => move('automatisms', items, i, d, fetch)} />
               <Button variant="ghost" size="icon" onClick={() => remove(it.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
               </div>
             </div>

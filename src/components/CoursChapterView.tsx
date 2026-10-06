@@ -38,8 +38,8 @@ export const CoursChapterView: React.FC<Props> = ({ level, academicYearId, secti
       const ids = (chs || []).map((c: Chapter) => c.id);
       if (ids.length === 0) return;
       const [{ data: r }, { data: p }] = await Promise.all([
-        (supabase as any).from('chapter_resources').select('*').in('chapter_id', ids).order('display_order'),
-        (supabase as any).from('chapter_podcasts').select('*').in('chapter_id', ids).order('display_order'),
+        (supabase as any).from('chapter_resources').select('*').in('chapter_id', ids).eq('is_published', true).order('display_order'),
+        (supabase as any).from('chapter_podcasts').select('*').in('chapter_id', ids).eq('is_published', true).order('display_order'),
       ]);
       setResources(r || []);
       setPodcasts(p || []);

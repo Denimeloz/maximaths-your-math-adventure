@@ -56,7 +56,7 @@ const ParcoursRevision = () => {
     if (!yearId || !level) { setItems([]); return; }
     (async () => {
       const { data } = await (supabase as any).from('revision_path_resources')
-        .select('*').eq('academic_year_id', yearId).eq('level', level)
+        .select('*').eq('academic_year_id', yearId).eq('level', level).eq('is_published', true)
         .order('step').order('display_order');
       setItems(data || []);
     })();

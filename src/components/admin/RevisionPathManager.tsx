@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { move, MoveButtons } from './MoveButtons';
+import { move, MoveButtons, PublishToggle } from './MoveButtons';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -225,7 +225,7 @@ export const RevisionPathManager: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <Button variant="ghost" size="icon" onClick={() => startEdit(r)}><Pencil className="w-4 h-4" /></Button>
-                      <MoveButtons index={i} total={stepItems.length} onMove={d => move('revision_path_resources', stepItems, i, d, fetch)} />
+                      <PublishToggle table="revision_path_resources" id={r.id} published={(r as any).is_published} onDone={fetch} /><MoveButtons index={i} total={stepItems.length} onMove={d => move('revision_path_resources', stepItems, i, d, fetch)} />
               <Button variant="ghost" size="icon" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                     </div>
                   </div>
