@@ -94,6 +94,7 @@ const getNewArchitectureSubMenu = (levelId: string) => {
   const is3eme = levelId === '3eme';
   const items: { id: string; label: string; description: string }[] = [
     { id: 'infos', label: 'Infos pour la classe', description: 'Informations importantes' },
+    { id: 'automatismes', label: 'Automatismes', description: 'Entraînement régulier' },
     { id: 'chap-activite', label: 'Activité de découverte', description: 'Découverte des notions' },
     { id: 'chap-cours', label: 'Cours', description: 'Leçons et chapitres' },
     { id: 'chap-exercices', label: "Exercices d'entraînement", description: 'Pour pratiquer' },
@@ -170,8 +171,8 @@ const Header = () => {
   };
 
   const handleSubMenuClick = (levelId: string, subMenuId: string) => {
-    if (subMenuId === 'parcours-revision') {
-      navigate(`/parcours-revision?year=${selectedYearId || ''}&level=${levelId}`);
+    if (subMenuId === 'parcours-revision' || subMenuId === 'automatismes') {
+      navigate(`/${subMenuId}?year=${selectedYearId || ''}&level=${levelId}`);
     } else {
       navigate(`/niveau/${levelId}/${subMenuId}`);
     }
