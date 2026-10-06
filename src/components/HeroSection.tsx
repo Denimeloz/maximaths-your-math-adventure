@@ -1,4 +1,5 @@
-import { ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap, Puzzle, Camera, Gamepad2, CalendarRange, Star, Info, Video } from "lucide-react";
+import { ChevronDown, ChevronUp, BookOpen, Lightbulb, ClipboardList, FileCheck, GraduationCap, Puzzle, Camera, Gamepad2, CalendarRange, Star, Info, Video, Zap, ArrowRight } from "lucide-react";
+import { Button } from '@/components/ui/button';
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { AcademicYearProvider, useAcademicYears } from "@/contexts/AcademicYearContext";
@@ -37,6 +38,7 @@ const getNewArchitectureSubMenu = (levelId: string) => {
   const is3eme = levelId === '3eme';
   const items: any[] = [
     { id: 'infos', label: 'Infos pour la classe', description: 'Informations importantes', icon: Info },
+    { id: 'automatismes', label: 'Automatismes', description: 'Entraînement régulier', icon: Zap },
     { id: 'chap-activite', label: 'Activité de découverte', description: 'Découverte des notions', icon: Lightbulb },
     { id: 'chap-cours', label: 'Cours', description: 'Leçons et chapitres', icon: BookOpen },
     { id: 'chap-exercices', label: "Exercices d'entraînement", description: 'Pour pratiquer', icon: ClipboardList },
@@ -86,6 +88,10 @@ const HeroInner = () => {
 
   const handleClubClick = () => navigate('/club-maths');
   const handleSubMenuClick = (yearId: string, levelId: string, subMenuId: string) => {
+    if (subMenuId === 'automatismes') {
+      navigate(`/automatismes?year=${yearId}&level=${levelId}`);
+      return;
+    }
     if (subMenuId === 'parcours-revision') {
       navigate(`/parcours-revision?year=${yearId}&level=${levelId}`);
       return;
@@ -117,6 +123,18 @@ const HeroInner = () => {
               loading="eager"
             />
           </div>
+        </div>
+
+        <div className="mt-6 max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4 border-y border-rainbow-yellow/40 bg-secondary/15 px-5 py-4">
+          <h2 className="flex items-center gap-3 font-display text-xl text-foreground">
+            <Zap className="h-6 w-6 text-primary" /> Automatismes
+          </h2>
+          <Button
+            onClick={() => navigate(activeYear && activeYear.start_year >= 2026 ? `/automatismes?year=${activeYear.id}` : '/automatismes')}
+            className="rounded-lg gap-2"
+          >
+            Accéder aux automatismes <ArrowRight className="h-4 w-4" />
+          </Button>
         </div>
 
         {/* Quote */}
