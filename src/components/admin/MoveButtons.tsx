@@ -1,7 +1,7 @@
 import React from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react';
 
 export const move = async (table: string, list: { id: string }[], index: number, dir: -1 | 1, refresh: () => void) => {
   const target = index + dir;
