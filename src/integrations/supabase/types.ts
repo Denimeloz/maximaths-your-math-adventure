@@ -193,6 +193,7 @@ export type Database = {
           file_name: string | null
           file_url: string | null
           id: string
+          is_published: boolean
           level: string
           thumbnail_url: string | null
           title: string
@@ -208,6 +209,7 @@ export type Database = {
           file_name?: string | null
           file_url?: string | null
           id?: string
+          is_published?: boolean
           level: string
           thumbnail_url?: string | null
           title: string
@@ -223,6 +225,7 @@ export type Database = {
           file_name?: string | null
           file_url?: string | null
           id?: string
+          is_published?: boolean
           level?: string
           thumbnail_url?: string | null
           title?: string
@@ -247,6 +250,7 @@ export type Database = {
           display_order: number
           duration_seconds: number | null
           id: string
+          is_published: boolean
           title: string
           updated_at: string
         }
@@ -258,6 +262,7 @@ export type Database = {
           display_order?: number
           duration_seconds?: number | null
           id?: string
+          is_published?: boolean
           title: string
           updated_at?: string
         }
@@ -269,6 +274,7 @@ export type Database = {
           display_order?: number
           duration_seconds?: number | null
           id?: string
+          is_published?: boolean
           title?: string
           updated_at?: string
         }
@@ -290,6 +296,7 @@ export type Database = {
           description: string | null
           display_order: number
           id: string
+          is_published: boolean
           kind: string
           section: string
           title: string
@@ -303,6 +310,7 @@ export type Database = {
           description?: string | null
           display_order?: number
           id?: string
+          is_published?: boolean
           kind: string
           section: string
           title: string
@@ -316,6 +324,7 @@ export type Database = {
           description?: string | null
           display_order?: number
           id?: string
+          is_published?: boolean
           kind?: string
           section?: string
           title?: string
@@ -1328,6 +1337,7 @@ export type Database = {
           description: string | null
           display_order: number
           id: string
+          is_published: boolean
           kind: string
           level: string
           step: number
@@ -1342,6 +1352,7 @@ export type Database = {
           description?: string | null
           display_order?: number
           id?: string
+          is_published?: boolean
           kind: string
           level: string
           step: number
@@ -1356,6 +1367,7 @@ export type Database = {
           description?: string | null
           display_order?: number
           id?: string
+          is_published?: boolean
           kind?: string
           level?: string
           step?: number
