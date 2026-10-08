@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAcademicYears } from "@/contexts/AcademicYearContext";
+import { useYearTabs } from "@/hooks/useYearTabs";
 import { levelLabel, levelStyle } from "@/lib/levels";
 import { Camera, Calendar, Images } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +20,7 @@ interface ClassPhoto {
   is_published: boolean;
   order_index: number;
   created_at: string;
+  academic_year_id?: string | null;
 }
 
 interface ImageItem {
@@ -33,23 +35,22 @@ const ClassPhotosSection = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImage, setLightboxImage] = useState("");
 
-  const { activeYear, loading: yearsLoading } = useAcademicYears();
-  const activeYearId = activeYear?.id ?? null;
+  const { loading: yearsLoading } = useAcademicYears();
+  const { yearsWithItems, currentYearId, setYear, visible } = useYearTabs(photos);
 
   useEffect(() => {
-    if (yearsLoading) return;
     fetchPhotos();
-  }, [yearsLoading, activeYearId]);
+  }, []);
 
   const fetchPhotos = async () => {
     try {
-      let query = supabase
+      // Toutes les années sont chargées ; le tri par année se fait à l'affichage (6 albums récents par année)
+      const { data, error } = await supabase
         .from("class_photos")
         .select("*")
-        .eq("is_published", true);
-      // L'accueil n'affiche que les albums de l'année en cours (et ceux sans année)
-      if (activeYearId) query = query.or(`academic_year_id.eq.${activeYearId},academic_year_id.is.null`);
-      const { data, error } = await query.order("created_at", { ascending: false }).limit(6);
+        .eq("is_published", true)
+        .order("created_at", { ascending: false })
+        .limit(60);
 
       if (error) throw error;
       setPhotos(data || []);
@@ -67,12 +68,12 @@ const ClassPhotosSection = () => {
     return [];
   };
 
-  const availableLevels = [...new Set(photos.map((p) => p.level))];
-  const filteredPhotos = selectedLevel === "all"
-    ? photos
-    : photos.filter((p) => p.level === selectedLevel);
+  const availableLevels = [...new Set(visible.map((p) => p.level))];
+  const filteredPhotos = (selectedLevel === "all"
+    ? visible
+    : visible.filter((p) => p.level === selectedLevel)).slice(0, 6);
 
-  if (loading) {
+  if (loading || yearsLoading) {
     return (
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
@@ -117,6 +118,26 @@ const ClassPhotosSection = () => {
             Découvre les moments forts et les activités de nos classes en images !
           </p>
         </div>
+
+        {/* Années : l'année en cours par défaut, les précédentes restent consultables */}
+        {yearsWithItems.length > 1 && (
+          <div className="flex justify-center mb-4">
+            <div className="inline-flex flex-wrap gap-2 p-2 bg-card rounded-2xl border border-border shadow-sm" role="group" aria-label="Année scolaire">
+              {yearsWithItems.map((year) => (
+                <Button
+                  key={year.id}
+                  variant={currentYearId === year.id ? "default" : "ghost"}
+                  size="sm"
+                  aria-pressed={currentYearId === year.id}
+                  onClick={() => { setYear(year.id); setSelectedLevel("all"); }}
+                  className="rounded-xl"
+                >
+                  {year.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Level filter */}
         {availableLevels.length > 1 && (

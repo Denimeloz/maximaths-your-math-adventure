@@ -1,18 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, Star } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useAcademicYears } from "@/contexts/AcademicYearContext";
 import { fetchSiteLabels } from "@/lib/siteLabels";
 import { levelLabel } from "@/lib/levels";
 import { getLevelMenu, levelMenuPath, usesNewArchitecture } from "@/lib/levelMenus";
-
-const PILLARS = [
-  { title: "Comprendre", text: "Des cours clairs et structurés pour comprendre chaque notion." },
-  { title: "S'entraîner", text: "Des exercices variés et progressifs pour s'entraîner efficacement." },
-  { title: "Progresser", text: "Des corrigés détaillés et des conseils pour gagner en confiance." },
-];
-
-const MOTTO = ["Curiosité", "Assiduité", "Rigueur"];
 
 const HeroSection = () => {
   const { years, classes, loading, activeYear } = useAcademicYears();
@@ -34,7 +26,7 @@ const HeroSection = () => {
     return () => { mounted = false; };
   }, [activeYear]);
 
-  // Année en cours d'abord, puis les plus récentes
+  // Année en cours d'abord, puis les années précédentes de la plus récente à la plus ancienne
   const sortedYears = [...years].sort((a, b) => {
     if (a.is_active && !b.is_active) return -1;
     if (!a.is_active && b.is_active) return 1;
@@ -42,41 +34,37 @@ const HeroSection = () => {
   });
 
   return (
-    <section className="bg-grid-paper border-b border-border pt-28 pb-12 md:pt-32 md:pb-16">
-      <div className="container mx-auto px-4 max-w-6xl">
-        {/* Sur téléphone : titre, puis choix de la classe, puis les trois piliers.
-            Sur ordinateur : titre et piliers côte à côte, choix de la classe en dessous. */}
-        <div className="grid gap-8 md:gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-end">
-          <div>
-            <p className="font-body text-sm md:text-base text-muted-foreground">École Internationale Jules Verne</p>
-            <h1 className="mt-2 font-display font-bold leading-[0.9] tracking-tight text-[clamp(3rem,11vw,6.5rem)]">
-              <span className="text-primary">MAXI</span>
-              <span className="text-secondary">MATHS</span>
-            </h1>
-            <p className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 font-display text-lg md:text-xl font-semibold text-primary">
-              {MOTTO.map((word, i) => (
-                <span key={word} className="inline-flex items-center gap-3">
-                  {i > 0 && <Star className="w-4 h-4 text-secondary fill-secondary" aria-hidden="true" />}
-                  {word}
-                </span>
-              ))}
-            </p>
-            <p className="mt-4 max-w-xl font-body text-base md:text-lg text-muted-foreground">
-              Cours, exercices et corrigés de mathématiques, de la 6ème à la Terminale.
-            </p>
+    <section className="relative bg-hero-gradient overflow-hidden pt-24 pb-12 md:pb-16">
+      <div className="absolute inset-0 sun-rays opacity-30 pointer-events-none" />
+
+      <div className="relative container mx-auto px-4 max-w-6xl">
+        <h1 className="sr-only">MAXIMATHS — Curiosité, Assiduité, Rigueur</h1>
+
+        {/* Bannière : même image qu'avant, servie en WebP (bien plus légère) avec le PNG d'origine en secours */}
+        <div className="relative animate-fade-in-up">
+          <div className="absolute -inset-4 md:-inset-6 bg-gradient-to-br from-primary/10 via-transparent to-secondary/20 rounded-[2.5rem] blur-2xl" />
+          <div className="relative rounded-[1.75rem] md:rounded-[2.25rem] overflow-hidden ring-1 ring-border shadow-[0_20px_60px_-20px_hsl(218_81%_18%/0.25)] bg-card animate-float-slow">
+            <picture>
+              <source
+                type="image/webp"
+                srcSet="/images/maximaths-banner-768.webp 768w, /images/maximaths-banner.webp 1536w"
+                sizes="(min-width: 1200px) 1104px, 100vw"
+              />
+              <img
+                src="/images/maximaths-banner.png"
+                alt="MAXIMATHS, École Internationale Jules Verne — Curiosité, Assiduité, Rigueur. Comprendre, s'entraîner, progresser."
+                width={1536}
+                height={1024}
+                className="w-full h-auto block"
+                loading="eager"
+                {...{ fetchpriority: 'high' }}
+              />
+            </picture>
           </div>
+        </div>
 
-          <dl className="order-3 lg:order-none grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
-            {PILLARS.map(pillar => (
-              <div key={pillar.title} className="border-l-4 border-secondary pl-4">
-                <dt className="font-display text-lg font-semibold text-primary">{pillar.title}</dt>
-                <dd className="mt-1 font-body text-sm text-muted-foreground">{pillar.text}</dd>
-              </div>
-            ))}
-          </dl>
-
-        {/* Choix de la classe */}
-        <div id="classes" className="order-2 lg:order-none lg:col-span-2 scroll-mt-28 rounded-3xl border-2 border-primary/15 bg-card p-5 md:p-8 shadow-[0_18px_40px_-24px_hsl(218_81%_18%/0.35)]">
+        {/* Choix de la classe, toutes années confondues */}
+        <div id="classes" className="scroll-mt-28 mt-10 md:mt-12 rounded-3xl border-2 border-primary/15 bg-card p-5 md:p-8 shadow-[0_18px_40px_-24px_hsl(218_81%_18%/0.35)]">
           <h2 className="font-display text-2xl md:text-3xl font-semibold text-foreground">Choisis ta classe</h2>
 
           {loading && <p className="mt-4 text-muted-foreground font-body" role="status">Chargement des classes…</p>}
@@ -100,9 +88,13 @@ const HeroSection = () => {
                 <div key={year.id}>
                   <div className="flex flex-wrap items-center gap-3 mb-3">
                     <h3 className="font-display text-base md:text-lg font-medium text-foreground">Année {year.label}</h3>
-                    {year.is_active && (
+                    {year.is_active ? (
                       <span className="text-xs px-2.5 py-0.5 rounded-full bg-secondary/25 text-secondary-foreground font-body font-semibold">
                         En cours
+                      </span>
+                    ) : (
+                      <span className="text-xs px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground font-body font-semibold">
+                        Année précédente
                       </span>
                     )}
                   </div>
@@ -149,14 +141,6 @@ const HeroSection = () => {
             })}
           </div>
         </div>
-        </div>
-
-        <figure className="mt-8 max-w-3xl">
-          <blockquote className="font-body italic text-base md:text-lg text-foreground/90">
-            « Le génie, c'est 1 % d'inspiration et 99 % de transpiration. »
-          </blockquote>
-          <figcaption className="mt-1 font-body text-sm text-muted-foreground">Thomas Edison</figcaption>
-        </figure>
       </div>
     </section>
   );

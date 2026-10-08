@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAcademicYears } from "@/contexts/AcademicYearContext";
+import { useYearTabs } from "@/hooks/useYearTabs";
 import { levelLabel, levelStyle } from "@/lib/levels";
 import { Megaphone, FileText, Calendar, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,29 +28,28 @@ interface ClassInfo {
   order_index: number;
   created_at: string;
   updated_at: string;
+  academic_year_id?: string | null;
 }
 
 const ClassInfoSection = () => {
   const [classInfos, setClassInfos] = useState<ClassInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedLevel, setSelectedLevel] = useState<string>("all");
-  const { activeYear, loading: yearsLoading } = useAcademicYears();
-  const activeYearId = activeYear?.id ?? null;
+  const { loading: yearsLoading } = useAcademicYears();
+  const { yearsWithItems, currentYearId, setYear, visible } = useYearTabs(classInfos);
 
   useEffect(() => {
-    if (yearsLoading) return;
     fetchClassInfos();
-  }, [yearsLoading, activeYearId]);
+  }, []);
 
   const fetchClassInfos = async () => {
     try {
-      let query = supabase
+      // Toutes les années sont chargées ; le tri par année se fait à l'affichage
+      const { data, error } = await supabase
         .from("class_info")
         .select("*")
-        .eq("is_published", true);
-      // L'accueil n'affiche que les infos de l'année en cours (et celles sans année)
-      if (activeYearId) query = query.or(`academic_year_id.eq.${activeYearId},academic_year_id.is.null`);
-      const { data, error } = await query.order("created_at", { ascending: false }).limit(9);
+        .eq("is_published", true)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       setClassInfos(data || []);
@@ -70,13 +70,13 @@ const ClassInfoSection = () => {
     return [];
   };
 
-  const availableLevels = [...new Set(classInfos.map((info) => info.level))];
+  const availableLevels = [...new Set(visible.map((info) => info.level))];
   
   const filteredInfos = selectedLevel === "all" 
-    ? classInfos 
-    : classInfos.filter((info) => info.level === selectedLevel);
+    ? visible 
+    : visible.filter((info) => info.level === selectedLevel);
 
-  if (loading) {
+  if (loading || yearsLoading) {
     return (
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
@@ -127,6 +127,26 @@ const ClassInfoSection = () => {
             dates d'examens, directives et consignes spéciales.
           </p>
         </div>
+
+        {/* Années : l'année en cours par défaut, les précédentes restent consultables */}
+        {yearsWithItems.length > 1 && (
+          <div className="flex justify-center mb-4">
+            <div className="inline-flex flex-wrap gap-2 p-2 bg-card rounded-2xl border border-border shadow-sm" role="group" aria-label="Année scolaire">
+              {yearsWithItems.map((year) => (
+                <Button
+                  key={year.id}
+                  variant={currentYearId === year.id ? "default" : "ghost"}
+                  size="sm"
+                  aria-pressed={currentYearId === year.id}
+                  onClick={() => { setYear(year.id); setSelectedLevel("all"); }}
+                  className="rounded-xl"
+                >
+                  {year.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Level filter tabs */}
         {availableLevels.length > 1 && (
@@ -227,7 +247,7 @@ const ClassInfoSection = () => {
                   )}
 
                   <Link
-                    to={`/niveau/${info.level}/infos${activeYearId ? `?year=${activeYearId}` : ''}`}
+                    to={`/niveau/${info.level}/infos${(info.academic_year_id || currentYearId) ? `?year=${info.academic_year_id || currentYearId}` : ''}`}
                     className="inline-block text-sm font-body font-semibold text-primary underline underline-offset-4"
                   >
                     Toutes les infos de la classe
