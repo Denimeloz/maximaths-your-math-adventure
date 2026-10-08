@@ -1,5 +1,4 @@
-import { Play, Brain, Ruler, TrendingUp, Star, Lightbulb, BookOpen, ClipboardList, FileCheck, Megaphone } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Star, Lightbulb, BookOpen, ClipboardList, FileCheck, Megaphone } from "lucide-react";
 
 const features = [
   {
@@ -10,7 +9,6 @@ const features = [
     iconBg: "bg-rainbow-orange/20",
     iconColor: "text-rainbow-orange",
     borderColor: "border-rainbow-orange",
-    shadowColor: "shadow-glow-orange",
     emoji: "📢",
   },
   {
@@ -21,7 +19,6 @@ const features = [
     iconBg: "bg-rainbow-yellow/20",
     iconColor: "text-rainbow-yellow",
     borderColor: "border-rainbow-yellow",
-    shadowColor: "shadow-glow-yellow",
     emoji: "💡",
   },
   {
@@ -32,7 +29,6 @@ const features = [
     iconBg: "bg-rainbow-blue/20",
     iconColor: "text-rainbow-blue",
     borderColor: "border-rainbow-blue",
-    shadowColor: "shadow-glow-blue",
     emoji: "📚",
   },
   {
@@ -43,7 +39,6 @@ const features = [
     iconBg: "bg-rainbow-purple/20",
     iconColor: "text-rainbow-purple",
     borderColor: "border-rainbow-purple",
-    shadowColor: "shadow-glow-purple",
     emoji: "✏️",
   },
   {
@@ -54,7 +49,6 @@ const features = [
     iconBg: "bg-rainbow-green/20",
     iconColor: "text-rainbow-green",
     borderColor: "border-rainbow-green",
-    shadowColor: "shadow-glow-blue",
     emoji: "📝",
   },
 ];
@@ -83,43 +77,40 @@ const platformDetails = [
 ];
 
 const FeaturesSection = () => {
-  const navigate = useNavigate();
-
   return (
-    <section className="py-24 bg-sky-cloud relative overflow-hidden">
+    <section className="py-16 md:py-20 bg-sky-cloud relative overflow-hidden">
       {/* Decorative stars */}
       <Star className="absolute top-16 left-[10%] w-8 h-8 text-rainbow-yellow fill-rainbow-yellow opacity-60 animate-float" />
       <Star className="absolute top-32 right-[15%] w-6 h-6 text-rainbow-pink fill-rainbow-pink opacity-60 animate-float-delayed" />
       <Star className="absolute bottom-24 left-[20%] w-7 h-7 text-rainbow-purple fill-rainbow-purple opacity-60 animate-float-slow" />
       
       <div className="container mx-auto px-4 relative">
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-display text-center mb-4 italic">
+        <h2 className="text-2xl md:text-3xl font-display text-center mb-4 italic max-w-4xl mx-auto">
           <span className="text-foreground">"La vie est une équation mathématique et le défi est de transformer les </span>
           <span className="text-rainbow-coral">négatifs</span>
           <span className="text-foreground"> en </span>
           <span className="text-rainbow-green">positifs</span>
           <span className="text-foreground">."</span>
         </h2>
-        <p className="text-muted-foreground text-center text-lg md:text-xl mb-16 font-body max-w-3xl mx-auto">
+        <p className="text-muted-foreground text-center text-lg md:text-xl mb-12 font-body max-w-3xl mx-auto">
           La plateforme de mathématiques pour les élèves du <span className="text-rainbow-blue font-bold">Collège</span> et du <span className="text-rainbow-purple font-bold">Lycée</span>
         </p>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6 max-w-7xl mx-auto mb-20">
-          {features.map((feature, index) => (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6 max-w-6xl mx-auto mb-16">
+          {features.map((feature) => (
             <div 
               key={feature.title}
-              className={`card-sticker ${feature.color} ${feature.borderColor} p-6 text-center group hover:${feature.shadowColor} transition-all`}
-              style={{ animationDelay: `${index * 0.1}s` }}
+              className={`card-sticker relative ${feature.color} ${feature.borderColor} p-6 text-center`}
             >
               {/* Emoji badge */}
-              <div className="absolute -top-4 -right-2 text-3xl animate-wiggle">
+              <div className="absolute -top-4 -right-2 text-3xl" aria-hidden="true">
                 {feature.emoji}
               </div>
               
-              <div className={`w-20 h-20 mx-auto mb-5 rounded-2xl ${feature.iconBg} flex items-center justify-center shadow-lg border-4 border-sky-cloud group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
+              <div className={`w-20 h-20 mx-auto mb-5 rounded-2xl ${feature.iconBg} flex items-center justify-center border-4 border-sky-cloud`}>
                 <feature.icon className={`w-10 h-10 ${feature.iconColor}`} />
               </div>
-              <h3 className="text-xl md:text-2xl font-display text-foreground mb-3">{feature.title}</h3>
+              <h3 className="text-lg md:text-xl font-display text-foreground mb-3">{feature.title}</h3>
               <p className="text-muted-foreground font-body text-sm">{feature.description}</p>
             </div>
           ))}

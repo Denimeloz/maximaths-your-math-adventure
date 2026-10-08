@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAcademicYears } from "@/contexts/AcademicYearContext";
+import { levelLabel, levelStyle } from "@/lib/levels";
 import { Camera, Calendar, Images } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,16 +26,6 @@ interface ImageItem {
   name: string;
 }
 
-const levelLabels: Record<string, string> = {
-  "3eme": "3ème",
-  "seconde": "Seconde",
-};
-
-const levelColors: Record<string, { bg: string; text: string; border: string }> = {
-  "3eme": { bg: "bg-rainbow-orange/10", text: "text-rainbow-orange", border: "border-rainbow-orange/30" },
-  "seconde": { bg: "bg-rainbow-pink/10", text: "text-rainbow-pink", border: "border-rainbow-pink/30" },
-};
-
 const ClassPhotosSection = () => {
   const [photos, setPhotos] = useState<ClassPhoto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,18 +33,23 @@ const ClassPhotosSection = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImage, setLightboxImage] = useState("");
 
+  const { activeYear, loading: yearsLoading } = useAcademicYears();
+  const activeYearId = activeYear?.id ?? null;
+
   useEffect(() => {
+    if (yearsLoading) return;
     fetchPhotos();
-  }, []);
+  }, [yearsLoading, activeYearId]);
 
   const fetchPhotos = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from("class_photos")
         .select("*")
-        .eq("is_published", true)
-        .order("created_at", { ascending: false })
-        .limit(6);
+        .eq("is_published", true);
+      // L'accueil n'affiche que les albums de l'année en cours (et ceux sans année)
+      if (activeYearId) query = query.or(`academic_year_id.eq.${activeYearId},academic_year_id.is.null`);
+      const { data, error } = await query.order("created_at", { ascending: false }).limit(6);
 
       if (error) throw error;
       setPhotos(data || []);
@@ -139,9 +136,9 @@ const ClassPhotosSection = () => {
                   variant={selectedLevel === level ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setSelectedLevel(level)}
-                  className={`rounded-xl ${selectedLevel === level ? "" : levelColors[level]?.text}`}
+                  className={`rounded-xl ${selectedLevel === level ? "" : levelStyle(level).text}`}
                 >
-                  {levelLabels[level] || level}
+                  {levelLabel(level)}
                 </Button>
               ))}
             </div>
@@ -152,13 +149,14 @@ const ClassPhotosSection = () => {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
           {filteredPhotos.map((photo) => {
             const images = getImages(photo);
-            const colors = levelColors[photo.level] || levelColors["3eme"];
+            const style = levelStyle(photo.level);
+            const colors = { bg: style.tint, text: style.text, border: style.border };
             const previewImages = images.slice(0, 4);
 
             return (
               <Card
                 key={photo.id}
-                className={`group overflow-hidden border-2 ${colors.border} hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}
+                className={`group overflow-hidden border-2 ${colors.border} transition-shadow hover:shadow-lg`}
               >
                 {/* Image grid preview */}
                 {previewImages.length > 0 && (
@@ -191,7 +189,7 @@ const ClassPhotosSection = () => {
                       {photo.title}
                     </CardTitle>
                     <Badge variant="secondary" className={`${colors.bg} ${colors.text} border ${colors.border} font-medium shrink-0 ml-2`}>
-                      {levelLabels[photo.level] || photo.level}
+                      {levelLabel(photo.level)}
                     </Badge>
                   </div>
                 </CardHeader>

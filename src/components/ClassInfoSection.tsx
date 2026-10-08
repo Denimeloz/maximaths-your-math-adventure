@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Megaphone, FileText, Calendar, ChevronRight, ExternalLink } from "lucide-react";
+import { useAcademicYears } from "@/contexts/AcademicYearContext";
+import { levelLabel, levelStyle } from "@/lib/levels";
+import { Megaphone, FileText, Calendar, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,42 +29,27 @@ interface ClassInfo {
   updated_at: string;
 }
 
-const levelLabels: Record<string, string> = {
-  "6eme": "6ème",
-  "5eme": "5ème",
-  "4eme": "4ème",
-  "3eme": "3ème",
-  "seconde": "Seconde",
-  "premiere": "Première",
-  "terminale": "Terminale",
-};
-
-const levelColors: Record<string, { bg: string; text: string; border: string }> = {
-  "6eme": { bg: "bg-rainbow-green/10", text: "text-rainbow-green", border: "border-rainbow-green/30" },
-  "5eme": { bg: "bg-rainbow-blue/10", text: "text-rainbow-blue", border: "border-rainbow-blue/30" },
-  "4eme": { bg: "bg-rainbow-purple/10", text: "text-rainbow-purple", border: "border-rainbow-purple/30" },
-  "3eme": { bg: "bg-rainbow-orange/10", text: "text-rainbow-orange", border: "border-rainbow-orange/30" },
-  "seconde": { bg: "bg-rainbow-pink/10", text: "text-rainbow-pink", border: "border-rainbow-pink/30" },
-  "premiere": { bg: "bg-rainbow-coral/10", text: "text-rainbow-coral", border: "border-rainbow-coral/30" },
-  "terminale": { bg: "bg-rainbow-yellow/10", text: "text-rainbow-yellow", border: "border-rainbow-yellow/30" },
-};
-
 const ClassInfoSection = () => {
   const [classInfos, setClassInfos] = useState<ClassInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedLevel, setSelectedLevel] = useState<string>("all");
+  const { activeYear, loading: yearsLoading } = useAcademicYears();
+  const activeYearId = activeYear?.id ?? null;
 
   useEffect(() => {
+    if (yearsLoading) return;
     fetchClassInfos();
-  }, []);
+  }, [yearsLoading, activeYearId]);
 
   const fetchClassInfos = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from("class_info")
         .select("*")
-        .eq("is_published", true)
-        .order("created_at", { ascending: false });
+        .eq("is_published", true);
+      // L'accueil n'affiche que les infos de l'année en cours (et celles sans année)
+      if (activeYearId) query = query.or(`academic_year_id.eq.${activeYearId},academic_year_id.is.null`);
+      const { data, error } = await query.order("created_at", { ascending: false }).limit(9);
 
       if (error) throw error;
       setClassInfos(data || []);
@@ -127,7 +115,7 @@ const ClassInfoSection = () => {
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-3 mb-4">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-rainbow-orange to-rainbow-coral flex items-center justify-center shadow-lg shadow-rainbow-orange/30">
-              <Megaphone className="w-7 h-7 text-white" />
+              <Megaphone className="w-7 h-7 text-primary" />
             </div>
           </div>
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-display mb-3">
@@ -158,9 +146,9 @@ const ClassInfoSection = () => {
                   variant={selectedLevel === level ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setSelectedLevel(level)}
-                  className={`rounded-xl ${selectedLevel === level ? "" : levelColors[level]?.text}`}
+                  className={`rounded-xl ${selectedLevel === level ? "" : levelStyle(level).text}`}
                 >
-                  {levelLabels[level] || level}
+                  {levelLabel(level)}
                 </Button>
               ))}
             </div>
@@ -171,12 +159,13 @@ const ClassInfoSection = () => {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
           {filteredInfos.map((info) => {
             const attachments = getFileAttachments(info);
-            const colors = levelColors[info.level] || levelColors["6eme"];
+            const style = levelStyle(info.level);
+            const colors = { bg: style.tint, text: style.text, border: style.border };
             
             return (
               <Card 
                 key={info.id} 
-                className={`group relative overflow-hidden border-2 ${colors.border} hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}
+                className={`group relative overflow-hidden border-2 ${colors.border} transition-shadow hover:shadow-lg`}
               >
                 {/* Level badge */}
                 <div className="absolute top-4 right-4">
@@ -184,7 +173,7 @@ const ClassInfoSection = () => {
                     variant="secondary" 
                     className={`${colors.bg} ${colors.text} border ${colors.border} font-medium`}
                   >
-                    {levelLabels[info.level] || info.level}
+                    {levelLabel(info.level)}
                   </Badge>
                 </div>
 
@@ -203,11 +192,9 @@ const ClassInfoSection = () => {
                 <CardContent className="space-y-4">
                   {/* Content */}
                   {info.content && (
-                    <div className="prose prose-sm max-w-none">
-                      <p className="text-muted-foreground leading-relaxed line-clamp-4 whitespace-pre-wrap">
-                        {info.content}
-                      </p>
-                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed line-clamp-4 whitespace-pre-wrap">
+                      {info.content}
+                    </p>
                   )}
 
                   {/* Attachments */}
@@ -238,6 +225,13 @@ const ClassInfoSection = () => {
                       </div>
                     </div>
                   )}
+
+                  <Link
+                    to={`/niveau/${info.level}/infos${activeYearId ? `?year=${activeYearId}` : ''}`}
+                    className="inline-block text-sm font-body font-semibold text-primary underline underline-offset-4"
+                  >
+                    Toutes les infos de la classe
+                  </Link>
                 </CardContent>
               </Card>
             );

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import ResourceLinks, { ResourceLink } from '@/components/ResourceLinks';
 import { ArrowLeft, Users, Download, FileText, Home } from 'lucide-react';
@@ -99,6 +100,7 @@ const ParentResources: React.FC = () => {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 };

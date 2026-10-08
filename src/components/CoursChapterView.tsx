@@ -28,23 +28,42 @@ export const CoursChapterView: React.FC<Props> = ({ level, academicYearId, secti
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
   const [podcasts, setPodcasts] = useState<Podcast[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
     (async () => {
       const { data: chs } = await (supabase as any).from('tab_chapters')
         .select('*').eq('level', level).eq('academic_year_id', academicYearId)
         .eq('is_published', true).order('display_order');
-      setChapters(chs || []);
       const ids = (chs || []).map((c: Chapter) => c.id);
-      if (ids.length === 0) return;
-      const [{ data: r }, { data: p }] = await Promise.all([
-        (supabase as any).from('chapter_resources').select('*').in('chapter_id', ids).eq('is_published', true).order('display_order'),
-        (supabase as any).from('chapter_podcasts').select('*').in('chapter_id', ids).eq('is_published', true).order('display_order'),
-      ]);
-      setResources(r || []);
-      setPodcasts(p || []);
+      let r: Resource[] = [];
+      let p: Podcast[] = [];
+      if (ids.length > 0) {
+        const [resRes, podRes] = await Promise.all([
+          (supabase as any).from('chapter_resources').select('*').in('chapter_id', ids).eq('is_published', true).order('display_order'),
+          (supabase as any).from('chapter_podcasts').select('*').in('chapter_id', ids).eq('is_published', true).order('display_order'),
+        ]);
+        r = resRes.data || [];
+        p = podRes.data || [];
+      }
+      if (cancelled) return;
+      setChapters(chs || []);
+      setResources(r);
+      setPodcasts(p);
+      setLoading(false);
     })();
+    return () => { cancelled = true; };
   }, [level, academicYearId]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-20" role="status" aria-label="Chargement">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (chapters.length === 0) {
     return <p className="text-center text-muted-foreground italic py-12">Aucun chapitre publié pour cette classe.</p>;
@@ -61,13 +80,17 @@ export const CoursChapterView: React.FC<Props> = ({ level, academicYearId, secti
           <div key={r.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted/70 transition">
             <Icon className="w-5 h-5 text-rainbow-blue mt-0.5 shrink-0" />
             <div className="min-w-0 flex-1">
-              <a href={r.url || '#'} target="_blank" rel="noreferrer" className="font-semibold text-sm hover:underline">{r.title}</a>
+              {r.url ? (
+                <a href={r.url} target="_blank" rel="noreferrer" className="font-semibold text-sm hover:underline">{r.title}</a>
+              ) : (
+                <span className="font-semibold text-sm">{r.title}</span>
+              )}
               {r.description && <p className="text-xs text-muted-foreground">{r.description}</p>}
               {r.url && r.kind === 'audio' && <audio controls src={r.url} className="w-full mt-2" />}
               {r.url && r.kind === 'video' && /\.(mp4|mov|webm)(\?|$)/i.test(r.url) && <video controls src={r.url} className="w-full max-h-80 mt-2 rounded" />}
               <div className="flex flex-wrap items-center gap-3 mt-1">
                 {isFile && r.url && (
-                  <a href={r.url} download className="inline-flex items-center gap-1 text-xs text-rainbow-purple hover:underline">
+                  <a href={r.url} download target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-rainbow-purple hover:underline">
                     <Download className="w-3 h-3" /> {downloadLabel(r.kind)}
                   </a>
                 )}
@@ -84,6 +107,14 @@ export const CoursChapterView: React.FC<Props> = ({ level, academicYearId, secti
     </div>
   );
 
+  const renderPodcasts = (items: Podcast[]) => items.map(p => (
+    <Card key={p.id} className="p-3">
+      <p className="font-semibold">{p.title}</p>
+      {p.description && <p className="text-xs text-muted-foreground mb-2">{p.description}</p>}
+      <audio controls src={p.audio_url} className="w-full" />
+    </Card>
+  ));
+
   if (section) {
     return (
       <Accordion type="single" collapsible className="space-y-4">
@@ -95,8 +126,18 @@ export const CoursChapterView: React.FC<Props> = ({ level, academicYearId, secti
                 {ch.description && <p className="text-xs font-body text-muted-foreground font-normal">{ch.description}</p>}
               </div>
             </AccordionTrigger>
-            <AccordionContent>
-              {renderItems(resources.filter(r => r.chapter_id === ch.id && r.section === section))}
+            <AccordionContent className="space-y-3">
+              {(() => {
+                const items = resources.filter(r => r.chapter_id === ch.id && r.section === section);
+                // Les podcasts enregistrés avant la rubrique « multimédia » vivent dans une table à part
+                const chPodcasts = section === 'multimedia' ? podcasts.filter(p => p.chapter_id === ch.id) : [];
+                return (
+                  <>
+                    {renderItems(items, chPodcasts.length === 0)}
+                    {renderPodcasts(chPodcasts)}
+                  </>
+                );
+              })()}
             </AccordionContent>
           </AccordionItem>
         ))}
@@ -138,13 +179,7 @@ export const CoursChapterView: React.FC<Props> = ({ level, academicYearId, secti
                   {chResources.every(r => r.section !== 'multimedia') && chPodcasts.length === 0 && (
                     <p className="text-sm italic text-muted-foreground">Aucune ressource.</p>
                   )}
-                  {chPodcasts.map(p => (
-                    <Card key={p.id} className="p-3">
-                      <p className="font-semibold">{p.title}</p>
-                      {p.description && <p className="text-xs text-muted-foreground mb-2">{p.description}</p>}
-                      <audio controls src={p.audio_url} className="w-full" />
-                    </Card>
-                  ))}
+                  {renderPodcasts(chPodcasts)}
                 </TabsContent>
               </Tabs>
             </AccordionContent>
