@@ -13,7 +13,7 @@ import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 type Level = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
-interface Chapter { id: string; title: string; description: string | null; display_order: number; }
+interface Chapter { id: string; title: string; description: string | null; display_order: number; is_published?: boolean | null; }
 interface Resource { id: string; chapter_id: string; section: string; kind: string; title: string; url: string | null; correction_url: string | null; description: string | null; display_order: number; }
 interface Podcast { id: string; chapter_id: string; title: string; description: string | null; audio_url: string; duration_seconds: number | null; display_order: number; }
 
@@ -51,6 +51,8 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
   const [chapterForm, setChapterForm] = useState({ title: '', description: '' });
   const [uploading, setUploading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  // Chapitre en cours de renommage
+  const [editingChapter, setEditingChapter] = useState<{ id: string; title: string; description: string } | null>(null);
 
   // En changeant de classe ou d'année, on repart du premier chapitre de la nouvelle liste :
   // sinon les ressources affichées (et celles qu'on ajoute) restaient celles de la classe précédente.
@@ -59,6 +61,7 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
     setResources([]);
     setPodcasts([]);
     setEditingId(null);
+    setEditingChapter(null);
     fetchChapters(true);
   }, [selectedLevel, academicYearId]);
   useEffect(() => { if (selectedChapter) fetchResources(); }, [selectedChapter]);
@@ -94,6 +97,15 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
     });
     if (error) toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     else { toast({ title: 'Chapitre créé' }); setChapterForm({ title: '', description: '' }); setShowNewChapter(false); fetchChapters(); }
+  };
+
+  const saveChapter = async () => {
+    if (!editingChapter || !editingChapter.title.trim()) return;
+    const { error } = await (supabase as any).from('tab_chapters').update({
+      title: editingChapter.title.trim(), description: editingChapter.description.trim() || null,
+    }).eq('id', editingChapter.id);
+    if (error) toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+    else { toast({ title: 'Chapitre modifié' }); setEditingChapter(null); fetchChapters(); }
   };
 
   const deleteChapter = async (id: string) => {
@@ -147,11 +159,13 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
   };
 
   const deleteResource = async (id: string) => {
+    if (!confirm('Supprimer cette ressource ?')) return;
     await (supabase as any).from('chapter_resources').delete().eq('id', id);
     fetchResources();
   };
 
   const deletePodcast = async (id: string) => {
+    if (!confirm('Supprimer ce podcast ?')) return;
     await (supabase as any).from('chapter_podcasts').delete().eq('id', id);
     fetchResources();
   };
@@ -175,12 +189,36 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
           {chapters.map((c, i) => (
             <div key={c.id} className="flex items-center gap-1">
               <MoveButtons index={i} total={chapters.length} horizontal onMove={d => move('tab_chapters', chapters, i, d, () => fetchChapters())} />
-              <Button variant={selectedChapter === c.id ? 'default' : 'outline'} size="sm" onClick={() => setSelectedChapter(c.id)}>{c.title}</Button>
-              <Button variant="ghost" size="icon" onClick={() => deleteChapter(c.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+              <Button
+                variant={selectedChapter === c.id ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedChapter(c.id)}
+                className={c.is_published === false ? 'opacity-60 border-dashed' : ''}
+                title={c.is_published === false ? 'Chapitre masqué aux élèves' : undefined}
+              >
+                {c.title}{c.is_published === false ? ' (masqué)' : ''}
+              </Button>
+              <PublishToggle table="tab_chapters" id={c.id} published={c.is_published} onDone={() => fetchChapters()} />
+              <Button variant="ghost" size="icon" title="Renommer le chapitre" aria-label={`Renommer le chapitre ${c.title}`}
+                onClick={() => setEditingChapter({ id: c.id, title: c.title, description: c.description || '' })}>
+                <Pencil className="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="icon" title="Supprimer le chapitre" aria-label={`Supprimer le chapitre ${c.title}`} onClick={() => deleteChapter(c.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
             </div>
           ))}
           {chapters.length === 0 && <p className="text-sm text-muted-foreground">Aucun chapitre pour cette classe et cette année.</p>}
         </div>
+        {editingChapter && (
+          <div className="space-y-2 mt-4 p-3 rounded-lg border border-rainbow-blue/50">
+            <p className="text-sm font-semibold">Modifier le chapitre</p>
+            <Input placeholder="Titre" value={editingChapter.title} onChange={e => setEditingChapter(c => c && ({ ...c, title: e.target.value }))} />
+            <Textarea placeholder="Description (optionnel)" value={editingChapter.description} onChange={e => setEditingChapter(c => c && ({ ...c, description: e.target.value }))} />
+            <div className="flex gap-2">
+              <Button onClick={saveChapter} disabled={!editingChapter.title.trim()}><Save className="w-4 h-4 mr-1" /> Enregistrer</Button>
+              <Button variant="outline" onClick={() => setEditingChapter(null)}><X className="w-4 h-4 mr-1" /> Annuler</Button>
+            </div>
+          </div>
+        )}
       </Card>
 
       {selectedChapter && (

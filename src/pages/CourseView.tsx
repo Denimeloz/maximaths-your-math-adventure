@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PDFViewer from '@/components/PDFViewer';
@@ -9,8 +8,6 @@ import NotFound from '@/pages/NotFound';
 import { levelLabel } from '@/lib/levels';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LessonComments } from '@/components/LessonComments';
-import { useLessonProgress } from '@/hooks/useLessonProgress';
 import { 
   BookOpen, 
   FileText, 
@@ -24,7 +21,6 @@ import {
   Upload,
   Clock,
   Star,
-  Circle,
   Gamepad2,
   ExternalLink
 } from 'lucide-react';
@@ -97,8 +93,6 @@ interface VideoItem {
 const CourseView = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { isLessonRead, markAsRead, markAsUnread, getReadCount } = useLessonProgress(courseId);
   
   const [course, setCourse] = useState<Course | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
@@ -366,62 +360,20 @@ const CourseView = () => {
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    {/* Progress indicator - only for logged in users */}
-                    {user && (
-                      <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
-                        <span className="text-sm text-muted-foreground">
-                          Progression: {getReadCount()} / {lessons.length} leçons lues
-                        </span>
-                        <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-rainbow-green transition-all"
-                            style={{ width: `${lessons.length > 0 ? (getReadCount() / lessons.length) * 100 : 0}%` }}
-                          />
-                        </div>
-                      </div>
-                    )}
-
                     {lessons.map((lesson, index) => {
-                      const isRead = user ? isLessonRead(lesson.id) : false;
                       return (
-                        <div key={lesson.id} className={`border rounded-xl p-6 ${isRead ? 'border-rainbow-green/50 bg-rainbow-green/5' : 'border-border'}`}>
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                              <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                                isRead ? 'bg-rainbow-green/20 text-rainbow-green' : 'bg-primary/10 text-primary'
-                              }`}>
-                                {isRead ? <CheckCircle className="w-4 h-4" /> : index + 1}
-                              </span>
-                              <h3 className="font-display text-lg text-foreground">{lesson.title}</h3>
-                            </div>
-                            {user && (
-                              <Button
-                                variant={isRead ? "outline" : "default"}
-                                size="sm"
-                                onClick={() => isRead ? markAsUnread(lesson.id) : markAsRead(lesson.id)}
-                                className="rounded-xl"
-                              >
-                                {isRead ? (
-                                  <>
-                                    <Circle className="w-4 h-4 mr-1" />
-                                    Non lu
-                                  </>
-                                ) : (
-                                  <>
-                                    <CheckCircle className="w-4 h-4 mr-1" />
-                                    Marquer lu
-                                  </>
-                                )}
-                              </Button>
-                            )}
+                        <div key={lesson.id} className="border border-border rounded-xl p-6">
+                          <div className="flex items-center gap-3 mb-4">
+                            <span className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold bg-primary/10 text-primary">
+                              {index + 1}
+                            </span>
+                            <h3 className="font-display text-lg text-foreground">{lesson.title}</h3>
                           </div>
                           <div 
                             className="prose prose-sm max-w-none font-body text-foreground/90 prose-headings:font-display prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary"
                             dangerouslySetInnerHTML={{ __html: lesson.content }}
                           />
-                          
-                          {/* Comments section - only for logged in users */}
-                          {user && <LessonComments lessonId={lesson.id} />}
+
                         </div>
                       );
                     })}
