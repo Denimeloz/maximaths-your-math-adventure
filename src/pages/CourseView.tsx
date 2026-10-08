@@ -5,6 +5,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PDFViewer from '@/components/PDFViewer';
+import NotFound from '@/pages/NotFound';
+import { levelLabel } from '@/lib/levels';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LessonComments } from '@/components/LessonComments';
@@ -26,7 +28,6 @@ import {
   Gamepad2,
   ExternalLink
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 
 interface LinkItem {
   title: string;
@@ -73,6 +74,8 @@ interface Assignment {
   instructions: string | null;
   due_date: string | null;
   max_points: number;
+  file_url?: string | null;
+  correction_url?: string | null;
 }
 
 interface CourseFile {
@@ -95,7 +98,6 @@ const CourseView = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { toast } = useToast();
   const { isLessonRead, markAsRead, markAsUnread, getReadCount } = useLessonProgress(courseId);
   
   const [course, setCourse] = useState<Course | null>(null);
@@ -106,6 +108,7 @@ const CourseView = () => {
   const [courseFiles, setCourseFiles] = useState<CourseFile[]>([]);
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
   const [showAnswer, setShowAnswer] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState('lessons');
 
@@ -117,6 +120,7 @@ const CourseView = () => {
 
   const fetchCourseAndContent = async () => {
     setIsLoading(true);
+    setNotFound(false);
     
     // Fetch course
     const { data: courseData, error: courseError } = await supabase
@@ -127,12 +131,8 @@ const CourseView = () => {
       .maybeSingle();
 
     if (courseError || !courseData) {
-      toast({
-        title: "Erreur",
-        description: "Cours non trouvé",
-        variant: "destructive",
-      });
-      navigate('/');
+      setNotFound(true);
+      setIsLoading(false);
       return;
     }
 
@@ -170,18 +170,7 @@ const CourseView = () => {
     return colors[difficulty - 1] || 'text-rainbow-orange';
   };
 
-  const getLevelLabel = (level: string) => {
-    const labels: Record<string, string> = {
-      '6eme': '6ème',
-      '5eme': '5ème',
-      '4eme': '4ème',
-      '3eme': '3ème',
-      'seconde': 'Seconde',
-      'premiere': 'Première',
-      'terminale': 'Terminale',
-    };
-    return labels[level] || level;
-  };
+  const getLevelLabel = levelLabel;
 
   const getContentCounts = () => ({
     lessons: lessons.length,
@@ -191,10 +180,15 @@ const CourseView = () => {
     assignments: assignments.length,
   });
 
+  if (notFound) return <NotFound />;
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-hero-gradient flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-hero-gradient">
+        <Header />
+        <div className="flex items-center justify-center pt-40" role="status" aria-label="Chargement">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
       </div>
     );
   }
@@ -206,7 +200,7 @@ const CourseView = () => {
     <div className="min-h-screen bg-hero-gradient">
       <Header />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 pt-24 pb-12">
         {/* Back button and course header */}
         <div className="mb-8">
           <Button 
@@ -325,7 +319,7 @@ const CourseView = () => {
         {hasContent ? (
           <div className="card-sticker bg-card p-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 mb-6 h-auto">
+              <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 mb-6 h-auto">
                 <TabsTrigger value="lessons" className="flex items-center gap-1 py-2">
                   <FileText className="w-4 h-4" />
                   <span className="hidden sm:inline">Leçons</span>
@@ -422,7 +416,7 @@ const CourseView = () => {
                             )}
                           </div>
                           <div 
-                            className="prose prose-sm max-w-none text-muted-foreground font-body"
+                            className="prose prose-sm max-w-none font-body text-foreground/90 prose-headings:font-display prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary"
                             dangerouslySetInnerHTML={{ __html: lesson.content }}
                           />
                           
@@ -475,40 +469,32 @@ const CourseView = () => {
                           </div>
                         )}
                         
-                        {user ? (
-                          <>
-                            <Button 
-                              variant="outline"
-                              onClick={() => toggleAnswer(exercise.id)}
-                              className="mb-4"
-                            >
-                              {showAnswer[exercise.id] ? 'Masquer' : 'Voir'} le corrigé
-                            </Button>
-                            
-                            {showAnswer[exercise.id] && (
-                              <div className="space-y-4 animate-fade-in">
-                                <div className="bg-rainbow-green/10 border border-rainbow-green/30 p-4 rounded-lg">
-                                  <h4 className="font-semibold text-rainbow-green mb-2 flex items-center gap-2">
-                                    <CheckCircle className="w-4 h-4" />
-                                    Réponse
-                                  </h4>
-                                  <p className="font-body text-foreground whitespace-pre-wrap">{exercise.answer}</p>
-                                </div>
-                                
-                                {exercise.explanation && (
-                                  <div className="bg-rainbow-blue/10 border border-rainbow-blue/30 p-4 rounded-lg">
-                                    <h4 className="font-semibold text-rainbow-blue mb-2">Explication</h4>
-                                    <p className="font-body text-foreground whitespace-pre-wrap">{exercise.explanation}</p>
-                                  </div>
-                                )}
+                        {/* Les élèves n'ont pas de compte : le corrigé est accessible à tous */}
+                        <Button
+                          variant="outline"
+                          onClick={() => toggleAnswer(exercise.id)}
+                          aria-expanded={!!showAnswer[exercise.id]}
+                          className="mb-4"
+                        >
+                          {showAnswer[exercise.id] ? 'Masquer' : 'Voir'} le corrigé
+                        </Button>
+
+                        {showAnswer[exercise.id] && (
+                          <div className="space-y-4">
+                            <div className="bg-rainbow-green/10 border border-rainbow-green/30 p-4 rounded-lg">
+                              <h4 className="font-semibold text-rainbow-green mb-2 flex items-center gap-2">
+                                <CheckCircle className="w-4 h-4" />
+                                Réponse
+                              </h4>
+                              <p className="font-body text-foreground whitespace-pre-wrap">{exercise.answer}</p>
+                            </div>
+
+                            {exercise.explanation && (
+                              <div className="bg-rainbow-blue/10 border border-rainbow-blue/30 p-4 rounded-lg">
+                                <h4 className="font-semibold text-rainbow-blue mb-2">Explication</h4>
+                                <p className="font-body text-foreground whitespace-pre-wrap">{exercise.explanation}</p>
                               </div>
                             )}
-                          </>
-                        ) : (
-                          <div className="bg-rainbow-orange/10 border border-rainbow-orange/30 rounded-lg p-3 mt-2">
-                            <p className="text-sm text-rainbow-orange">
-                              🔐 <a href="/auth" className="underline hover:no-underline">Connecte-toi</a> pour voir le corrigé
-                            </p>
                           </div>
                         )}
                       </div>
@@ -625,18 +611,21 @@ const CourseView = () => {
                           </div>
                         )}
                         
-                        {user ? (
-                          <Button 
-                            className="btn-3d bg-primary"
-                            onClick={() => navigate(`/assignment/${assignment.id}`)}
-                          >
-                            <Upload className="w-4 h-4 mr-2" />
-                            Rendre le devoir
-                          </Button>
-                        ) : (
-                          <Button variant="outline" onClick={() => navigate('/auth')}>
-                            <a href="/auth">Connexion pour rendre</a>
-                          </Button>
+                        {(assignment.file_url || assignment.correction_url) && (
+                          <div className="flex flex-wrap gap-4">
+                            {assignment.file_url && (
+                              <a href={assignment.file_url} target="_blank" rel="noopener noreferrer" className="text-sm text-rainbow-blue hover:underline flex items-center gap-1">
+                                <FileText className="w-4 h-4" />
+                                Sujet
+                              </a>
+                            )}
+                            {assignment.correction_url && (
+                              <a href={assignment.correction_url} target="_blank" rel="noopener noreferrer" className="text-sm text-rainbow-green hover:underline flex items-center gap-1">
+                                <BookOpen className="w-4 h-4" />
+                                Corrigé
+                              </a>
+                            )}
+                          </div>
                         )}
                       </div>
                     ))}

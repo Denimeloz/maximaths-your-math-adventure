@@ -14,7 +14,7 @@ import {
   ArrowRight,
   Mail
 } from 'lucide-react';
-import brainIcon from '@/assets/brain-icon.png';
+import brainIcon from '@/assets/new-logo.png';
 
 const About = () => {
   const navigate = useNavigate();
@@ -149,7 +149,7 @@ const About = () => {
             
             <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               <div 
-                onClick={() => navigate('/college')}
+                onClick={() => navigate('/#classes')}
                 className="card-sticker bg-gradient-to-br from-rainbow-blue/10 to-rainbow-green/10 border-rainbow-blue/30 p-8 cursor-pointer group"
               >
                 <div className="flex items-center gap-4 mb-4">
@@ -171,7 +171,7 @@ const About = () => {
               </div>
 
               <div 
-                onClick={() => navigate('/lycee')}
+                onClick={() => navigate('/#classes')}
                 className="card-sticker bg-gradient-to-br from-rainbow-purple/10 to-rainbow-pink/10 border-rainbow-purple/30 p-8 cursor-pointer group"
               >
                 <div className="flex items-center gap-4 mb-4">

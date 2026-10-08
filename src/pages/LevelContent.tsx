@@ -4,7 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CoursChapterView from '@/components/CoursChapterView';
+import NotFound from '@/pages/NotFound';
 import { fetchSiteLabels } from '@/lib/siteLabels';
+import { LEVEL_LABELS, isLevelId, levelStyle, type LevelId } from '@/lib/levels';
+import { CHAPTER_SECTIONS, isLevelContentType, usesNewArchitecture, type LevelContentType } from '@/lib/levelMenus';
 
 import { Button } from '@/components/ui/button';
 import { ResourceLinks } from '@/components/ResourceLinks';
@@ -25,37 +28,10 @@ import {
   ExternalLink
 } from 'lucide-react';
 
-type ContentType = 'cours' | 'activites' | 'infos' | 'exercices-entrainement' | 'tests-entrainement' | 'devoirs' | 'evaluations' | 'prepa-dnb' | 'classe-activite' | 'jeux-genially' | 'chap-activite' | 'chap-cours' | 'chap-exercices' | 'chap-accompagnement' | 'chap-multimedia';
+type ContentType = LevelContentType;
+type CourseLevel = LevelId;
 
-// Rubriques de chapitre (nouvelle architecture) -> section en base
-const CHAPTER_SECTIONS: Record<string, string> = {
-  'chap-activite': 'activite_decouverte',
-  'chap-cours': 'cours',
-  'chap-exercices': 'exercices_entrainement',
-  'chap-accompagnement': 'accompagnement_personnalise',
-  'chap-multimedia': 'multimedia',
-};
-type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
-
-const levelLabels: Record<CourseLevel, string> = {
-  '6eme': '6ème',
-  '5eme': '5ème',
-  '4eme': '4ème',
-  '3eme': '3ème',
-  'seconde': 'Seconde',
-  'premiere': 'Première',
-  'terminale': 'Terminale',
-};
-
-const levelColors: Record<CourseLevel, string> = {
-  '6eme': 'rainbow-blue',
-  '5eme': 'rainbow-green',
-  '4eme': 'rainbow-orange',
-  '3eme': 'rainbow-coral',
-  'seconde': 'rainbow-pink',
-  'premiere': 'rainbow-purple',
-  'terminale': 'rainbow-yellow',
-};
+const levelLabels = LEVEL_LABELS;
 
 const contentConfig: Record<ContentType, { icon: React.ElementType; title: string; description: string }> = {
   infos: {
@@ -277,12 +253,15 @@ const LevelContent = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [resolvedYearId, setResolvedYearId] = useState<string | null>(yearId);
   const [yearStartYear, setYearStartYear] = useState<number | null>(null);
+  // Tant que l'année n'est pas connue, on affiche le chargement plutôt qu'un faux « contenu bientôt disponible »
+  const [yearResolved, setYearResolved] = useState(false);
   const [siteLabels, setSiteLabels] = useState<Record<string, string>>({});
 
   const level = levelId as CourseLevel;
   const type = contentType as ContentType;
-  const color = levelColors[level] || 'rainbow-blue';
-  const isNewArchitecture = yearStartYear !== null && yearStartYear >= 2026;
+  const style = levelStyle(level);
+  const isNewArchitecture = usesNewArchitecture(yearStartYear);
+  const isValidPage = isLevelId(levelId) && isLevelContentType(contentType);
 
   const displayConfig = useMemo(() => {
     const config = { ...(contentConfig[type] || contentConfig.cours) };
@@ -306,18 +285,26 @@ const LevelContent = () => {
 
   // If no year in URL, fall back to active year; also fetch start_year of resolved year
   useEffect(() => {
+    let cancelled = false;
+    setYearResolved(false);
     (async () => {
       let id = yearId;
+      let startYear: number | null = null;
       if (!id) {
-        const { data } = await (supabase as any).from('academic_years').select('id').eq('is_active', true).maybeSingle();
-        id = data?.id || null;
-      }
-      setResolvedYearId(id);
-      if (id) {
+        // `limit(1)` : ne plante pas si deux années se retrouvent actives par erreur
+        const { data } = await (supabase as any).from('academic_years').select('id,start_year').eq('is_active', true).order('start_year', { ascending: false }).limit(1);
+        id = data?.[0]?.id || null;
+        startYear = data?.[0]?.start_year ?? null;
+      } else {
         const { data: y } = await (supabase as any).from('academic_years').select('start_year').eq('id', id).maybeSingle();
-        setYearStartYear(y?.start_year ?? null);
+        startYear = y?.start_year ?? null;
       }
+      if (cancelled) return;
+      setResolvedYearId(id);
+      setYearStartYear(startYear);
+      setYearResolved(true);
     })();
+    return () => { cancelled = true; };
   }, [yearId]);
 
   useEffect(() => {
@@ -346,10 +333,10 @@ const LevelContent = () => {
       navigate('/ressources-dnb', { replace: true });
       return;
     }
-    if (levelId && contentType) {
+    if (isValidPage && yearResolved) {
       fetchContent();
     }
-  }, [levelId, contentType, navigate, resolvedYearId]);
+  }, [levelId, contentType, navigate, resolvedYearId, yearResolved, isValidPage]);
 
   const fetchContent = async () => {
     setIsLoading(true);
@@ -476,12 +463,12 @@ const LevelContent = () => {
 
   const renderEmptyState = () => (
     <div className="card-sticker bg-card border-border p-12 text-center max-w-xl mx-auto">
-      <Icon className={`w-20 h-20 mx-auto mb-6 text-${color} opacity-50`} />
+      <Icon className={`w-20 h-20 mx-auto mb-6 ${style.text} opacity-50`} />
       <h2 className="text-2xl font-display text-foreground mb-4">
         Contenu bientôt disponible !
       </h2>
       <p className="text-muted-foreground font-body mb-6">
-        Les {displayConfig.title.toLowerCase()} pour ce niveau seront ajoutés prochainement.
+        Cette rubrique sera complétée prochainement pour la classe de {levelLabels[level]}.
       </p>
       <Button onClick={() => navigate('/')} className="btn-3d bg-primary rounded-xl">
         <Star className="w-4 h-4 mr-2" />
@@ -495,10 +482,10 @@ const LevelContent = () => {
       {courses.map((course) => (
         <div 
           key={course.id}
-          className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 cursor-pointer group`}
+          className={`card-sticker bg-card ${style.border} ${style.borderHover} p-6 cursor-pointer group`}
           onClick={() => navigate(`/course/${course.id}`)}
         >
-          <h3 className={`text-xl font-display text-foreground mb-2 group-hover:text-${color} transition-colors`}>
+          <h3 className={`text-xl font-display text-foreground mb-2 ${style.groupHoverText} transition-colors`}>
             {course.title}
           </h3>
           
@@ -551,7 +538,7 @@ const LevelContent = () => {
             <span className="text-sm text-muted-foreground font-body capitalize">
               {course.category}
             </span>
-            <ArrowRight className={`w-5 h-5 text-${color} group-hover:translate-x-1 transition-transform`} />
+            <ArrowRight className={`w-5 h-5 ${style.text} group-hover:translate-x-1 transition-transform`} />
           </div>
         </div>
       ))}
@@ -563,10 +550,10 @@ const LevelContent = () => {
       {activities.map((activity) => (
         <div 
           key={activity.id}
-          className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 group`}
+          className={`card-sticker bg-card ${style.border} ${style.borderHover} p-6 group`}
         >
           <div className="flex items-center gap-2 mb-3">
-            <Lightbulb className={`w-5 h-5 text-${color}`} />
+            <Lightbulb className={`w-5 h-5 ${style.text}`} />
             <span className="text-xs font-body text-muted-foreground">
               {isNewArchitecture ? "Espace d'approfondissement" : 'Activité de découverte'}
             </span>
@@ -617,10 +604,10 @@ const LevelContent = () => {
       {classInfos.map((info) => (
         <div 
           key={info.id}
-          className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 group`}
+          className={`card-sticker bg-card ${style.border} ${style.borderHover} p-6 group`}
         >
           <div className="flex items-center gap-2 mb-3">
-            <Megaphone className={`w-5 h-5 text-${color}`} />
+            <Megaphone className={`w-5 h-5 ${style.text}`} />
             <span className="text-xs font-body text-muted-foreground">
               Information importante
             </span>
@@ -676,10 +663,10 @@ const LevelContent = () => {
       {assignments.map((assignment) => (
         <div 
           key={assignment.id}
-          className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 group`}
+          className={`card-sticker bg-card ${style.border} ${style.borderHover} p-6 group`}
         >
           <div className="flex items-center gap-2 mb-3">
-            <FileText className={`w-5 h-5 text-${color}`} />
+            <FileText className={`w-5 h-5 ${style.text}`} />
             <span className="text-xs font-body text-muted-foreground">
               Devoir de niveau
             </span>
@@ -730,10 +717,10 @@ const LevelContent = () => {
       {trainingExercises.map((exercise) => (
         <div 
           key={exercise.id}
-          className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 group`}
+          className={`card-sticker bg-card ${style.border} ${style.borderHover} p-6 group`}
         >
           <div className="flex items-center gap-2 mb-3">
-            <Dumbbell className={`w-5 h-5 text-${color}`} />
+            <Dumbbell className={`w-5 h-5 ${style.text}`} />
             <span className="text-xs font-body text-muted-foreground">
               Exercice d'entraînement
             </span>
@@ -784,10 +771,10 @@ const LevelContent = () => {
       {trainingTests.map((test) => (
         <div 
           key={test.id}
-          className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 group`}
+          className={`card-sticker bg-card ${style.border} ${style.borderHover} p-6 group`}
         >
           <div className="flex items-center gap-2 mb-3">
-            <Target className={`w-5 h-5 text-${color}`} />
+            <Target className={`w-5 h-5 ${style.text}`} />
             <span className="text-xs font-body text-muted-foreground">
               Test d'entraînement
             </span>
@@ -838,10 +825,10 @@ const LevelContent = () => {
       {evaluations.map((evaluation) => (
         <div 
           key={evaluation.id}
-          className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 group`}
+          className={`card-sticker bg-card ${style.border} ${style.borderHover} p-6 group`}
         >
           <div className="flex items-center gap-2 mb-3">
-            <ClipboardCheck className={`w-5 h-5 text-${color}`} />
+            <ClipboardCheck className={`w-5 h-5 ${style.text}`} />
             <span className="text-xs font-body text-muted-foreground">
               Évaluation
             </span>
@@ -892,10 +879,10 @@ const LevelContent = () => {
       {dnbContent.map((item) => (
         <div 
           key={item.id}
-          className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 group`}
+          className={`card-sticker bg-card ${style.border} ${style.borderHover} p-6 group`}
         >
           <div className="flex items-center gap-2 mb-3">
-            <Star className={`w-5 h-5 text-${color}`} />
+            <Star className={`w-5 h-5 ${style.text}`} />
             <span className="text-xs font-body text-muted-foreground capitalize">
               {item.category}
               {item.year && ` • ${item.year}`}
@@ -945,9 +932,9 @@ const LevelContent = () => {
   const renderClassPhotos = () => (
     <div className="space-y-8">
       {classPhotos.map((album) => (
-        <div key={album.id} className={`card-sticker bg-card border-${color}/30 p-6`}>
+        <div key={album.id} className={`card-sticker bg-card ${style.border} p-6`}>
           <div className="flex items-center gap-2 mb-3">
-            <Camera className={`w-5 h-5 text-${color}`} />
+            <Camera className={`w-5 h-5 ${style.text}`} />
             <span className="text-xs font-body text-muted-foreground">Classe en activité</span>
           </div>
           
@@ -987,10 +974,10 @@ const LevelContent = () => {
       {gamesGenially.map((item) => (
         <div 
           key={item.id}
-          className={`card-sticker bg-card border-${color}/30 hover:border-${color} p-6 group`}
+          className={`card-sticker bg-card ${style.border} ${style.borderHover} p-6 group`}
         >
           <div className="flex items-center gap-2 mb-3">
-            <Gamepad2 className={`w-5 h-5 text-${color}`} />
+            <Gamepad2 className={`w-5 h-5 ${style.text}`} />
             <span className="text-xs font-body text-muted-foreground">
               Jeux et Genially
             </span>
@@ -1038,7 +1025,7 @@ const LevelContent = () => {
   );
 
   const getContent = () => {
-    if (isLoading) {
+    if (isLoading || !yearResolved) {
       return (
         <div className="flex justify-center py-20">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -1081,9 +1068,9 @@ const LevelContent = () => {
     return renderEmptyState();
   };
 
-  if (!level || !type) {
-    return null;
-  }
+  // La redirection vers /ressources-dnb est gérée plus haut ; toute autre adresse inconnue → page 404
+  if (contentType === 'ressources-dnb') return null;
+  if (!isValidPage) return <NotFound />;
 
   return (
     <div className="min-h-screen bg-hero-gradient">
@@ -1102,9 +1089,9 @@ const LevelContent = () => {
 
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <div className={`inline-flex items-center gap-2 px-4 py-2 bg-${color}/20 rounded-full mb-6`}>
-            <Icon className={`w-5 h-5 text-${color}`} />
-            <span className={`text-${color} font-body font-semibold`}>
+          <div className={`inline-flex items-center gap-2 px-4 py-2 ${style.tintStrong} rounded-full mb-6`}>
+            <Icon className={`w-5 h-5 ${style.text}`} />
+            <span className={`${style.text} font-body font-semibold`}>
               {levelLabels[level]} • {displayConfig.title}
             </span>
           </div>
