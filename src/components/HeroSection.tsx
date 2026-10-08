@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ZoomIn } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useAcademicYears } from "@/contexts/AcademicYearContext";
 import { fetchSiteLabels } from "@/lib/siteLabels";
 import { levelLabel } from "@/lib/levels";
@@ -10,6 +11,7 @@ const HeroSection = () => {
   const { years, classes, loading, activeYear } = useAcademicYears();
   const [labelMap, setLabelMap] = useState<Record<string, string>>({});
   const [expanded, setExpanded] = useState<string | null>(null); // clé : `${yearId}:${classe}`
+  const [bannerZoom, setBannerZoom] = useState(false);
 
   // Libellés personnalisés : ils ne concernent que l'année en cours
   useEffect(() => {
@@ -62,6 +64,38 @@ const HeroSection = () => {
             </picture>
           </div>
         </div>
+
+        {/* Sur téléphone, le texte de la bannière est trop petit : ce bouton l'ouvre en grand */}
+        <div className="mt-3 flex justify-end md:hidden">
+          <button
+            type="button"
+            onClick={() => setBannerZoom(true)}
+            className="inline-flex items-center gap-2 rounded-full border-2 border-border bg-card px-4 py-2 text-sm font-body font-semibold text-primary"
+          >
+            <ZoomIn className="w-4 h-4" aria-hidden="true" />
+            Agrandir la bannière
+          </button>
+        </div>
+
+        <Dialog open={bannerZoom} onOpenChange={setBannerZoom}>
+          <DialogContent className="max-w-[100vw] w-screen h-[100dvh] p-0 gap-0 flex flex-col rounded-none sm:rounded-none">
+            <div className="shrink-0 px-4 py-3 pr-12 border-b border-border">
+              <DialogTitle className="font-display text-base text-foreground">Bannière MAXIMATHS</DialogTitle>
+              <DialogDescription className="text-xs font-body text-muted-foreground">
+                Fais glisser l'image pour la parcourir.
+              </DialogDescription>
+            </div>
+            <div className="flex-1 overflow-auto bg-muted">
+              <img
+                src="/images/maximaths-banner.webp"
+                alt="MAXIMATHS, École Internationale Jules Verne — Curiosité, Assiduité, Rigueur. Comprendre, s'entraîner, progresser."
+                width={1536}
+                height={1024}
+                className="block h-auto w-[960px] max-w-none"
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Choix de la classe, toutes années confondues */}
         <div id="classes" className="scroll-mt-28 mt-10 md:mt-12 rounded-3xl border-2 border-primary/15 bg-card p-5 md:p-8 shadow-[0_18px_40px_-24px_hsl(218_81%_18%/0.35)]">

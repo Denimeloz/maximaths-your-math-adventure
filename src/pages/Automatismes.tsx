@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Zap, ArrowLeft, Download } from 'lucide-react';
 import { levelLabel } from '@/lib/levels';
+import FilePreview from '@/components/FilePreview';
 
 interface Year { id: string; label: string; start_year: number; is_active: boolean; }
 interface YearClass { academic_year_id: string; class_level: string; }
@@ -96,6 +97,7 @@ const Automatismes = () => {
                   <Download className="w-4 h-4" />{it.file_name || 'Télécharger le fichier'}
                 </a>
               )}
+              {it.file_url && <FilePreview url={it.file_url} fileName={it.file_name} title={it.title} />}
               {it.canva_embed_url && (
                 <div className="mt-4 aspect-video">
                   <iframe src={it.canva_embed_url} title={it.title} className="w-full h-full rounded-lg border" allow="fullscreen" />

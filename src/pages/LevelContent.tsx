@@ -5,6 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CoursChapterView from '@/components/CoursChapterView';
 import NotFound from '@/pages/NotFound';
+import PhotoLightbox, { type LightboxImage } from '@/components/PhotoLightbox';
 import { fetchSiteLabels } from '@/lib/siteLabels';
 import { LEVEL_LABELS, isLevelId, levelStyle, type LevelId } from '@/lib/levels';
 import { CHAPTER_SECTIONS, isLevelContentType, usesNewArchitecture, type LevelContentType } from '@/lib/levelMenus';
@@ -255,6 +256,8 @@ const LevelContent = () => {
   const [yearStartYear, setYearStartYear] = useState<number | null>(null);
   // Tant que l'année n'est pas connue, on affiche le chargement plutôt qu'un faux « contenu bientôt disponible »
   const [yearResolved, setYearResolved] = useState(false);
+  // Album ouvert dans la visionneuse et position de la photo affichée
+  const [lightbox, setLightbox] = useState<{ title: string; images: LightboxImage[]; index: number } | null>(null);
   const [siteLabels, setSiteLabels] = useState<Record<string, string>>({});
 
   const level = levelId as CourseLevel;
@@ -947,20 +950,20 @@ const LevelContent = () => {
           {Array.isArray(album.image_urls) && album.image_urls.length > 0 && (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4">
               {album.image_urls.map((img, idx) => (
-                <a
+                <button
                   key={idx}
-                  href={img.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  type="button"
+                  onClick={() => setLightbox({ title: album.title, images: album.image_urls || [], index: idx })}
+                  aria-label={`Ouvrir la photo ${idx + 1} sur ${album.image_urls?.length} de l'album ${album.title}`}
                   className="block rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-colors group"
                 >
                   <img
                     src={img.url}
-                    alt={img.name}
+                    alt={img.name || album.title}
                     className="w-full h-32 sm:h-40 object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
                   />
-                </a>
+                </button>
               ))}
             </div>
           )}
@@ -1109,6 +1112,13 @@ const LevelContent = () => {
         {/* Content */}
         {getContent()}
       </main>
+
+      <PhotoLightbox
+        images={lightbox?.images ?? []}
+        index={lightbox ? lightbox.index : null}
+        title={lightbox?.title}
+        onIndexChange={(index) => setLightbox(prev => (index === null || !prev ? null : { ...prev, index }))}
+      />
       
       <Footer />
     </div>

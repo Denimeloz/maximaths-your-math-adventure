@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import PhotoLightbox, { type LightboxImage } from "@/components/PhotoLightbox";
 
 interface ClassPhoto {
   id: string;
@@ -32,8 +32,8 @@ const ClassPhotosSection = () => {
   const [photos, setPhotos] = useState<ClassPhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedLevel, setSelectedLevel] = useState<string>("all");
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxImage, setLightboxImage] = useState("");
+  // Album ouvert dans la visionneuse et position de la photo affichée
+  const [lightbox, setLightbox] = useState<{ title: string; images: LightboxImage[]; index: number } | null>(null);
 
   const { loading: yearsLoading } = useAcademicYears();
   const { yearsWithItems, currentYearId, setYear, visible } = useYearTabs(photos);
@@ -185,7 +185,8 @@ const ClassPhotosSection = () => {
                     {previewImages.map((img, idx) => (
                       <button
                         key={idx}
-                        onClick={() => { setLightboxImage(img.url); setLightboxOpen(true); }}
+                        onClick={() => setLightbox({ title: photo.title, images, index: idx })}
+                        aria-label={`Ouvrir la photo ${idx + 1} sur ${images.length} de l'album ${photo.title}`}
                         className={`relative overflow-hidden rounded-xl ${previewImages.length === 1 ? "aspect-video" : previewImages.length === 3 && idx === 0 ? "row-span-2 aspect-square" : "aspect-square"} cursor-pointer`}
                       >
                         <img
@@ -229,6 +230,15 @@ const ClassPhotosSection = () => {
                       {images.length} photo{images.length > 1 ? "s" : ""}
                     </span>
                   </div>
+                  {images.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setLightbox({ title: photo.title, images, index: 0 })}
+                      className="mt-3 text-sm font-body font-semibold text-primary underline underline-offset-4"
+                    >
+                      Voir les {images.length} photos
+                    </button>
+                  )}
                 </CardContent>
               </Card>
             );
@@ -243,17 +253,12 @@ const ClassPhotosSection = () => {
         )}
       </div>
 
-      {/* Lightbox */}
-      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
-        <DialogContent className="max-w-4xl p-2 bg-background/95 backdrop-blur-sm border-border">
-          <DialogTitle className="sr-only">Photo</DialogTitle>
-          <img
-            src={lightboxImage}
-            alt="Photo agrandie"
-            className="w-full h-auto max-h-[85vh] object-contain rounded-xl"
-          />
-        </DialogContent>
-      </Dialog>
+      <PhotoLightbox
+        images={lightbox?.images ?? []}
+        index={lightbox ? lightbox.index : null}
+        title={lightbox?.title}
+        onIndexChange={(index) => setLightbox(prev => (index === null || !prev ? null : { ...prev, index }))}
+      />
     </section>
   );
 };
