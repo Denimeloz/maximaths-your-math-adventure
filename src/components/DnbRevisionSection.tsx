@@ -34,7 +34,7 @@ const DnbRevisionSection = () => {
         .select("*")
         .eq("is_published", true)
         .order("created_at", { ascending: false })
-        .limit(6);
+        .limit(3);
 
       if (error) throw error;
       setItems(data || []);
@@ -79,7 +79,7 @@ const DnbRevisionSection = () => {
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-3 mb-4">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-rainbow-coral to-rainbow-orange flex items-center justify-center shadow-lg shadow-rainbow-coral/30">
-              <GraduationCap className="w-7 h-7 text-white" />
+              <GraduationCap className="w-7 h-7 text-primary" />
             </div>
           </div>
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-display mb-3">
@@ -97,7 +97,7 @@ const DnbRevisionSection = () => {
             return (
               <Card
                 key={item.id}
-                className="group overflow-hidden border-2 border-rainbow-coral/30 hover:border-rainbow-coral hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                className="group overflow-hidden border-2 border-rainbow-coral/30 hover:border-rainbow-coral transition-shadow hover:shadow-lg"
               >
                 <CardHeader className="pb-2 pt-5">
                   <div className="flex items-center justify-between">
@@ -121,7 +121,7 @@ const DnbRevisionSection = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       download
-                      className="flex items-center gap-2 p-3 rounded-xl bg-rainbow-coral text-white hover:bg-rainbow-coral/90 transition-colors mb-3 group/link font-medium"
+                      className="flex items-center gap-2 p-3 rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/85 transition-colors mb-3 group/link font-semibold"
                     >
                       <Download className="w-5 h-5 shrink-0" />
                       <span className="text-sm line-clamp-1">Télécharger</span>
@@ -147,7 +147,7 @@ const DnbRevisionSection = () => {
         <div className="text-center mt-8">
           <Button
             onClick={() => navigate("/ressources-dnb")}
-            className="rounded-xl bg-rainbow-coral text-white hover:bg-rainbow-coral/90 shadow-btn hover:shadow-btn-hover"
+            variant="outline" className="rounded-xl"
           >
             <GraduationCap className="w-4 h-4 mr-2" />
             Voir toutes les ressources DNB

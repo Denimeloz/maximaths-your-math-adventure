@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
+import { levelLabel } from '@/lib/levels';
 import { Route, ArrowLeft, FileText, Video, Mic, Link as LinkIcon, ExternalLink, Download, Image as ImageIcon, FileType, Presentation, CheckCircle2 } from 'lucide-react';
 
 const STEPS = [
@@ -16,16 +17,35 @@ const STEPS = [
   { id: 5, label: "S'autoévaluer" },
 ];
 
-const LEVEL_LABELS: Record<string, string> = {
-  '6eme': '6ème', '5eme': '5ème', '4eme': '4ème', '3eme': '3ème',
-  'seconde': 'Seconde', 'premiere': 'Première', 'terminale': 'Terminale',
-};
 
 const ICONS: Record<string, any> = { pdf: FileText, word: FileType, powerpoint: Presentation, image: ImageIcon, audio: Mic, podcast: Mic, video: Video, canva: ExternalLink, link: LinkIcon, lesson: FileText };
 const FILE_KINDS = ['pdf', 'word', 'powerpoint', 'image', 'audio', 'podcast'];
+// La progression est gardée dans le navigateur de l'élève (aucun compte, rien en base)
+const progressKey = (yearId: string, level: string) => `maximaths:parcours:${yearId}:${level}`;
+
+const readProgress = (yearId: string | null, level: string | null): Set<number> => {
+  if (!yearId || !level) return new Set();
+  try {
+    const raw = localStorage.getItem(progressKey(yearId, level));
+    const parsed = raw ? JSON.parse(raw) : [];
+    return new Set(Array.isArray(parsed) ? parsed.filter((n: unknown) => typeof n === 'number') : []);
+  } catch {
+    return new Set();
+  }
+};
+
+const writeProgress = (yearId: string | null, level: string | null, steps: Set<number>) => {
+  if (!yearId || !level) return;
+  try {
+    localStorage.setItem(progressKey(yearId, level), JSON.stringify([...steps]));
+  } catch {
+    // Stockage indisponible (navigation privée…) : la progression reste valable pour la visite en cours
+  }
+};
+
 const isFileResource = (kind: string, url: string | null) => FILE_KINDS.includes(kind) || /\.(pdf|docx?|pptx?|png|jpe?g|gif|webp|mp3|m4a|wav)(\?|$)/i.test(url || '');
 
-interface Year { id: string; label: string; start_year: number; }
+interface Year { id: string; label: string; start_year: number; is_active: boolean; }
 interface YearClass { academic_year_id: string; class_level: string; }
 interface Resource { id: string; step: number; kind: string; title: string; description: string | null; url: string | null; correction_url: string | null; }
 
@@ -34,6 +54,7 @@ const ParcoursRevision = () => {
   const navigate = useNavigate();
   const [years, setYears] = useState<Year[]>([]);
   const [classes, setClasses] = useState<YearClass[]>([]);
+  const [yearsLoaded, setYearsLoaded] = useState(false);
   const [items, setItems] = useState<Resource[]>([]);
   const [completed, setCompleted] = useState<Set<number>>(new Set());
 
@@ -48,7 +69,12 @@ const ParcoursRevision = () => {
       ]);
       setYears(y || []);
       setClasses(c || []);
-      if (!yearId && y?.length) setParams({ year: y[0].id });
+      // Année absente de l'adresse : on prend l'année en cours (sinon la plus récente) sans perdre la classe
+      if (!yearId && y?.length) {
+        const fallback = (y.find((item: Year) => item.is_active) || y[0]).id;
+        setParams(level ? { year: fallback, level } : { year: fallback }, { replace: true });
+      }
+      setYearsLoaded(true);
     })();
   }, []);
 
@@ -62,21 +88,29 @@ const ParcoursRevision = () => {
     })();
   }, [yearId, level]);
 
+  // Chaque classe a sa propre progression : on recharge celle de la classe affichée
+  useEffect(() => {
+    setCompleted(readProgress(yearId, level));
+  }, [yearId, level]);
+
   const yClasses = classes.filter(c => c.academic_year_id === yearId);
   const stepsWithContent = useMemo(() => new Set(items.map(i => i.step)), [items]);
   const totalSteps = stepsWithContent.size || 5;
-  const progress = Math.round((completed.size / totalSteps) * 100);
+  const doneCount = [...completed].filter(id => stepsWithContent.size === 0 || stepsWithContent.has(id)).length;
+  const progress = Math.min(100, Math.round((doneCount / totalSteps) * 100));
 
   const toggleStep = (id: number) => setCompleted(prev => {
     const next = new Set(prev);
-    next.has(id) ? next.delete(id) : next.add(id);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    writeProgress(yearId, level, next);
     return next;
   });
 
   return (
     <div className="min-h-screen bg-hero-gradient">
       <Header />
-      <main className="container mx-auto px-4 py-12 max-w-4xl">
+      <main className="container mx-auto px-4 pt-24 pb-12 max-w-4xl">
         <Button variant="ghost" onClick={() => navigate('/')} className="mb-6"><ArrowLeft className="w-4 h-4 mr-2" /> Accueil</Button>
         <div className="flex items-center gap-3 mb-2">
           <Route className="w-8 h-8 text-rainbow-purple" />
@@ -91,7 +125,7 @@ const ParcoursRevision = () => {
           </Select>
           <Select value={level || ''} onValueChange={v => setParams({ year: yearId || '', level: v })}>
             <SelectTrigger className="w-52"><SelectValue placeholder="Classe" /></SelectTrigger>
-            <SelectContent>{yClasses.map(c => <SelectItem key={c.class_level} value={c.class_level}>{LEVEL_LABELS[c.class_level] || c.class_level}</SelectItem>)}</SelectContent>
+            <SelectContent>{yClasses.map(c => <SelectItem key={c.class_level} value={c.class_level}>{levelLabel(c.class_level)}</SelectItem>)}</SelectContent>
           </Select>
         </div>
 
@@ -105,7 +139,10 @@ const ParcoursRevision = () => {
           </div>
         )}
 
-        {!level && <p className="text-muted-foreground italic">Choisis une classe pour démarrer ton parcours.</p>}
+        {yearsLoaded && years.length === 0 && (
+          <p className="text-muted-foreground italic">Les parcours de révision seront disponibles à partir de l'année 2026-2027.</p>
+        )}
+        {years.length > 0 && !level && <p className="text-muted-foreground italic">Choisis une classe pour démarrer ton parcours.</p>}
 
         <div className="space-y-6">
           {level && STEPS.map(step => {
@@ -113,9 +150,9 @@ const ParcoursRevision = () => {
             const isDone = completed.has(step.id);
             return (
               <div key={step.id} className={`card-sticker bg-card border-2 p-5 ${isDone ? 'border-rainbow-green' : 'border-rainbow-purple/30'}`}>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-display ${isDone ? 'bg-rainbow-green text-white' : 'bg-rainbow-purple/20 text-rainbow-purple'}`}>{step.id}</div>
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`w-10 h-10 rounded-full shrink-0 flex items-center justify-center font-display ${isDone ? 'bg-rainbow-green text-white' : 'bg-rainbow-purple/20 text-rainbow-purple'}`}>{step.id}</div>
                     <h3 className="font-display text-lg">{step.label}</h3>
                   </div>
                   {stepItems.length > 0 && (
@@ -124,9 +161,9 @@ const ParcoursRevision = () => {
                     </Button>
                   )}
                 </div>
-                <div className="space-y-2 pl-13">
+                <div className="space-y-2 sm:pl-[3.25rem]">
                   {stepItems.length === 0 ? (
-                    <p className="text-xs text-muted-foreground italic ml-13">Aucune ressource.</p>
+                    <p className="text-xs text-muted-foreground italic">Aucune ressource.</p>
                   ) : stepItems.map(r => {
                     const Icon = ICONS[r.kind] || LinkIcon;
                     const isFile = isFileResource(r.kind, r.url);
@@ -134,11 +171,15 @@ const ParcoursRevision = () => {
                       <div key={r.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted/70 transition">
                         <Icon className="w-5 h-5 text-rainbow-purple mt-0.5 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <a href={r.url || '#'} target={r.url ? '_blank' : undefined} rel="noreferrer" className="font-semibold text-sm hover:underline">{r.title}</a>
+                          {r.url ? (
+                            <a href={r.url} target="_blank" rel="noreferrer" className="font-semibold text-sm hover:underline">{r.title}</a>
+                          ) : (
+                            <span className="font-semibold text-sm">{r.title}</span>
+                          )}
                           {r.description && <p className="text-xs text-muted-foreground">{r.description}</p>}
                           <div className="flex flex-wrap items-center gap-3 mt-1">
                             {isFile && r.url && (
-                              <a href={r.url} download className="inline-flex items-center gap-1 text-xs text-rainbow-purple hover:underline">
+                              <a href={r.url} download target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-rainbow-purple hover:underline">
                                 <Download className="w-3 h-3" /> Télécharger le fichier
                               </a>
                             )}

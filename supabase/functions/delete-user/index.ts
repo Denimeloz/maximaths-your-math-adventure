@@ -15,30 +15,71 @@ const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   },
 });
 
+// Nécessaire pour que le navigateur accepte l'appel depuis le site
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+const json = (body: unknown, status = 200, extra: Record<string, string> = {}) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json", ...extra },
+  });
+
 serve(async (req: Request) => {
-  if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
-      status: 405,
-      headers: { "Content-Type": "application/json", Allow: "POST" },
-    });
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
   }
 
-  let body: any;
+  if (req.method !== "POST") {
+    return json({ error: "Method not allowed" }, 405, { Allow: "POST, OPTIONS" });
+  }
+
+  // 1. Qui appelle ? La clé publique du site ne suffit pas : il faut la session d'un utilisateur connecté.
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+  if (!token) {
+    return json({ error: "Authentification requise" }, 401);
+  }
+
+  const { data: callerData, error: callerError } = await supabaseAdmin.auth.getUser(token);
+  const caller = callerData?.user;
+  if (callerError || !caller) {
+    return json({ error: "Session invalide ou expirée" }, 401);
+  }
+
+  // 2. Cet utilisateur est-il administrateur ?
+  const { data: adminRole, error: roleError } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", caller.id)
+    .eq("role", "admin")
+    .maybeSingle();
+
+  if (roleError) {
+    return json({ error: roleError.message }, 500);
+  }
+  if (!adminRole) {
+    return json({ error: "Réservé aux administrateurs" }, 403);
+  }
+
+  // 3. Quel compte supprimer ?
+  let body: { userId?: unknown };
   try {
     body = await req.json();
   } catch {
-    return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: "Invalid JSON body" }, 400);
   }
 
   const userId = body?.userId;
   if (!userId || typeof userId !== "string") {
-    return new Response(JSON.stringify({ error: "Missing userId" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: "Missing userId" }, 400);
+  }
+
+  if (userId === caller.id) {
+    return json({ error: "Vous ne pouvez pas supprimer votre propre compte" }, 400);
   }
 
   const { error: rolesError } = await supabaseAdmin
@@ -47,10 +88,7 @@ serve(async (req: Request) => {
     .eq("user_id", userId);
 
   if (rolesError) {
-    return new Response(JSON.stringify({ error: rolesError.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: rolesError.message }, 500);
   }
 
   const { error: profileError } = await supabaseAdmin
@@ -59,22 +97,13 @@ serve(async (req: Request) => {
     .eq("user_id", userId);
 
   if (profileError) {
-    return new Response(JSON.stringify({ error: profileError.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: profileError.message }, 500);
   }
 
   const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId);
   if (authError) {
-    return new Response(JSON.stringify({ error: authError.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: authError.message }, 500);
   }
 
-  return new Response(JSON.stringify({ success: true }), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+  return json({ success: true });
 });

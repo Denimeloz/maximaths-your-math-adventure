@@ -55,6 +55,10 @@
     --rainbow-green: 218 50% 40%;
     --rainbow-coral: 38 95% 50%;
 
+    /* Or et orange utilisés comme COULEUR DE TEXTE : version foncée, lisible sur fond clair (contraste > 4,5:1).
+       Les fonds et bordures gardent les teintes vives ci-dessus. */
+    --accent-ink: 36 100% 30%;
+
     /* Surface Colors */
     --sky-light: 210 30% 98%;
     --sky-base: 210 25% 94%;
@@ -67,6 +71,7 @@
     --card-orange: 44 80% 95%;
     --card-blue: 210 40% 96%;
     --card-pink: 44 80% 95%;
+    --card-yellow: 44 80% 95%;
 
     /* Sidebar - light, airy */
     --sidebar-background: 210 30% 98%;
@@ -169,36 +174,22 @@
                 0 4px 15px hsl(var(--primary) / 0.4);
   }
 
-  /* Card cartoon sticker style - enhanced */
-  .card-cartoon {
-    @apply rounded-3xl border-[5px] transition-all duration-300;
-    box-shadow: 
-      0 10px 0 -2px hsl(var(--border)),
-      0 15px 35px -5px hsl(var(--foreground) / 0.12);
-  }
-
-  .card-cartoon:hover {
-    @apply -translate-y-2;
-    box-shadow: 
-      0 16px 0 -2px hsl(var(--border)),
-      0 22px 50px -5px hsl(var(--foreground) / 0.18);
-  }
-
-  /* Super sticker card - more pronounced 3D effect */
+  /* Cartes : un seul style pour tout le site (bordure fine, ombre douce).
+     `.card-cartoon` et `.card-sticker` sont conservés pour ne pas toucher à chaque page. */
+  .card-cartoon,
   .card-sticker {
-    @apply rounded-[2rem] border-[6px] transition-all duration-300;
-    box-shadow: 
-      0 12px 0 -3px rgba(0,0,0,0.1),
-      0 20px 40px -10px rgba(0,0,0,0.15),
-      inset 0 -4px 0 0 rgba(0,0,0,0.05);
+    @apply rounded-3xl border-2 transition-[transform,box-shadow,border-color] duration-200;
+    box-shadow:
+      0 1px 2px hsl(218 81% 18% / 0.06),
+      0 10px 24px -14px hsl(218 81% 18% / 0.22);
   }
 
-  .card-sticker:hover {
-    @apply -translate-y-3 scale-[1.02];
-    box-shadow: 
-      0 20px 0 -3px rgba(0,0,0,0.1),
-      0 30px 60px -15px rgba(0,0,0,0.2),
-      inset 0 -4px 0 0 rgba(0,0,0,0.05);
+  /* Seules les cartes cliquables réagissent au survol : un bloc de contenu ne doit pas bouger sous la souris. */
+  :is(a, button, .cursor-pointer):is(.card-cartoon, .card-sticker):hover {
+    @apply -translate-y-1;
+    box-shadow:
+      0 2px 4px hsl(218 81% 18% / 0.08),
+      0 18px 32px -16px hsl(218 81% 18% / 0.3);
   }
 
   /* Cloud shapes */
@@ -277,6 +268,18 @@
   /* Decorative math symbols background */
   .math-pattern {
     background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239370DB' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+}
+
+/* Animations coupées pour les personnes qui ont demandé moins de mouvement à leur système */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

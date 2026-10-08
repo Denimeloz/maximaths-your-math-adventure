@@ -82,6 +82,15 @@ export default {
           orange: "hsl(var(--card-orange))",
           blue: "hsl(var(--card-blue))",
           pink: "hsl(var(--card-pink))",
+          yellow: "hsl(var(--card-yellow))",
+        },
+      },
+      // Or / orange en tant que texte : teinte foncée lisible (voir --accent-ink dans index.css)
+      textColor: {
+        rainbow: {
+          yellow: "hsl(var(--accent-ink))",
+          orange: "hsl(var(--accent-ink))",
+          coral: "hsl(var(--accent-ink))",
         },
       },
       borderRadius: {
@@ -171,5 +180,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 } satisfies Config;

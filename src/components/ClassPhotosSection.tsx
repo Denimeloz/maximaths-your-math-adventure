@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAcademicYears } from "@/contexts/AcademicYearContext";
+import { useYearTabs } from "@/hooks/useYearTabs";
+import { levelLabel, levelStyle } from "@/lib/levels";
 import { Camera, Calendar, Images } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,22 +20,13 @@ interface ClassPhoto {
   is_published: boolean;
   order_index: number;
   created_at: string;
+  academic_year_id?: string | null;
 }
 
 interface ImageItem {
   url: string;
   name: string;
 }
-
-const levelLabels: Record<string, string> = {
-  "3eme": "3ème",
-  "seconde": "Seconde",
-};
-
-const levelColors: Record<string, { bg: string; text: string; border: string }> = {
-  "3eme": { bg: "bg-rainbow-orange/10", text: "text-rainbow-orange", border: "border-rainbow-orange/30" },
-  "seconde": { bg: "bg-rainbow-pink/10", text: "text-rainbow-pink", border: "border-rainbow-pink/30" },
-};
 
 const ClassPhotosSection = () => {
   const [photos, setPhotos] = useState<ClassPhoto[]>([]);
@@ -41,18 +35,22 @@ const ClassPhotosSection = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImage, setLightboxImage] = useState("");
 
+  const { loading: yearsLoading } = useAcademicYears();
+  const { yearsWithItems, currentYearId, setYear, visible } = useYearTabs(photos);
+
   useEffect(() => {
     fetchPhotos();
   }, []);
 
   const fetchPhotos = async () => {
     try {
+      // Toutes les années sont chargées ; le tri par année se fait à l'affichage (6 albums récents par année)
       const { data, error } = await supabase
         .from("class_photos")
         .select("*")
         .eq("is_published", true)
         .order("created_at", { ascending: false })
-        .limit(6);
+        .limit(60);
 
       if (error) throw error;
       setPhotos(data || []);
@@ -70,12 +68,12 @@ const ClassPhotosSection = () => {
     return [];
   };
 
-  const availableLevels = [...new Set(photos.map((p) => p.level))];
-  const filteredPhotos = selectedLevel === "all"
-    ? photos
-    : photos.filter((p) => p.level === selectedLevel);
+  const availableLevels = [...new Set(visible.map((p) => p.level))];
+  const filteredPhotos = (selectedLevel === "all"
+    ? visible
+    : visible.filter((p) => p.level === selectedLevel)).slice(0, 6);
 
-  if (loading) {
+  if (loading || yearsLoading) {
     return (
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
@@ -121,6 +119,26 @@ const ClassPhotosSection = () => {
           </p>
         </div>
 
+        {/* Années : l'année en cours par défaut, les précédentes restent consultables */}
+        {yearsWithItems.length > 1 && (
+          <div className="flex justify-center mb-4">
+            <div className="inline-flex flex-wrap gap-2 p-2 bg-card rounded-2xl border border-border shadow-sm" role="group" aria-label="Année scolaire">
+              {yearsWithItems.map((year) => (
+                <Button
+                  key={year.id}
+                  variant={currentYearId === year.id ? "default" : "ghost"}
+                  size="sm"
+                  aria-pressed={currentYearId === year.id}
+                  onClick={() => { setYear(year.id); setSelectedLevel("all"); }}
+                  className="rounded-xl"
+                >
+                  {year.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Level filter */}
         {availableLevels.length > 1 && (
           <div className="flex justify-center mb-8">
@@ -139,9 +157,9 @@ const ClassPhotosSection = () => {
                   variant={selectedLevel === level ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setSelectedLevel(level)}
-                  className={`rounded-xl ${selectedLevel === level ? "" : levelColors[level]?.text}`}
+                  className={`rounded-xl ${selectedLevel === level ? "" : levelStyle(level).text}`}
                 >
-                  {levelLabels[level] || level}
+                  {levelLabel(level)}
                 </Button>
               ))}
             </div>
@@ -152,13 +170,14 @@ const ClassPhotosSection = () => {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
           {filteredPhotos.map((photo) => {
             const images = getImages(photo);
-            const colors = levelColors[photo.level] || levelColors["3eme"];
+            const style = levelStyle(photo.level);
+            const colors = { bg: style.tint, text: style.text, border: style.border };
             const previewImages = images.slice(0, 4);
 
             return (
               <Card
                 key={photo.id}
-                className={`group overflow-hidden border-2 ${colors.border} hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}
+                className={`group overflow-hidden border-2 ${colors.border} transition-shadow hover:shadow-lg`}
               >
                 {/* Image grid preview */}
                 {previewImages.length > 0 && (
@@ -191,7 +210,7 @@ const ClassPhotosSection = () => {
                       {photo.title}
                     </CardTitle>
                     <Badge variant="secondary" className={`${colors.bg} ${colors.text} border ${colors.border} font-medium shrink-0 ml-2`}>
-                      {levelLabels[photo.level] || photo.level}
+                      {levelLabel(photo.level)}
                     </Badge>
                   </div>
                 </CardHeader>

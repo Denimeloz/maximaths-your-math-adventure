@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, GraduationCap, Download, FileText, Star, Link as LinkIcon } from 'lucide-react';
 
@@ -84,7 +85,7 @@ const DnbRevisionResources: React.FC = () => {
                 )}
                 {item.file_url ? (
                   <a href={item.file_url} target="_blank" rel="noopener noreferrer" download
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rainbow-coral text-white font-body font-semibold hover:bg-rainbow-coral/90 transition-colors shadow-btn hover:shadow-btn-hover">
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-secondary text-secondary-foreground font-body font-semibold hover:bg-secondary/85 transition-colors">
                     <Download className="w-4 h-4" /> Télécharger
                   </a>
                 ) : null}
@@ -109,6 +110,7 @@ const DnbRevisionResources: React.FC = () => {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 };

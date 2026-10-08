@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Zap, ArrowLeft, Download } from 'lucide-react';
+import { levelLabel } from '@/lib/levels';
 
 interface Year { id: string; label: string; start_year: number; is_active: boolean; }
 interface YearClass { academic_year_id: string; class_level: string; }
@@ -15,16 +16,13 @@ interface Item {
   academic_year_id: string; file_url: string | null; file_name: string | null;
 }
 
-const LEVEL_LABELS: Record<string, string> = {
-  '6eme': '6ème', '5eme': '5ème', '4eme': '4ème', '3eme': '3ème',
-  'seconde': 'Seconde', 'premiere': 'Première', 'terminale': 'Terminale',
-};
 
 const Automatismes = () => {
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   const [years, setYears] = useState<Year[]>([]);
   const [classes, setClasses] = useState<YearClass[]>([]);
+  const [yearsLoaded, setYearsLoaded] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
 
   const yearId = params.get('year');
@@ -38,7 +36,12 @@ const Automatismes = () => {
       ]);
       setYears(y || []);
       setClasses(c || []);
-      if (!yearId && y?.length) setParams({ year: y[0].id });
+      // Année absente de l'adresse : on prend l'année en cours (sinon la plus récente) sans perdre la classe
+      if (!yearId && y?.length) {
+        const fallback = (y.find((item: Year) => item.is_active) || y[0]).id;
+        setParams(level ? { year: fallback, level } : { year: fallback }, { replace: true });
+      }
+      setYearsLoaded(true);
     })();
   }, []);
 
@@ -57,7 +60,7 @@ const Automatismes = () => {
   return (
     <div className="min-h-screen bg-hero-gradient">
       <Header />
-      <main className="container mx-auto px-4 py-12">
+      <main className="container mx-auto px-4 pt-24 pb-12">
         <Button variant="ghost" onClick={() => navigate('/')} className="mb-6"><ArrowLeft className="w-4 h-4 mr-2" /> Accueil</Button>
         <div className="flex items-center gap-3 mb-2">
           <Zap className="w-8 h-8 text-rainbow-yellow" />
@@ -72,11 +75,14 @@ const Automatismes = () => {
           </Select>
           <Select value={level || ''} onValueChange={v => setParams({ year: yearId || '', level: v })}>
             <SelectTrigger className="w-52"><SelectValue placeholder="Classe" /></SelectTrigger>
-            <SelectContent>{yClasses.map(c => <SelectItem key={c.class_level} value={c.class_level}>{LEVEL_LABELS[c.class_level] || c.class_level}</SelectItem>)}</SelectContent>
+            <SelectContent>{yClasses.map(c => <SelectItem key={c.class_level} value={c.class_level}>{levelLabel(c.class_level)}</SelectItem>)}</SelectContent>
           </Select>
         </div>
 
-        {!level && <p className="text-muted-foreground italic">Choisis une classe.</p>}
+        {yearsLoaded && years.length === 0 && (
+          <p className="text-muted-foreground italic">Les automatismes seront disponibles à partir de l'année 2026-2027.</p>
+        )}
+        {years.length > 0 && !level && <p className="text-muted-foreground italic">Choisis une classe.</p>}
         {level && items.length === 0 && <p className="text-muted-foreground italic">Aucun support pour cette classe.</p>}
 
         <div className="grid md:grid-cols-2 gap-6">
@@ -92,7 +98,7 @@ const Automatismes = () => {
               )}
               {it.canva_embed_url && (
                 <div className="mt-4 aspect-video">
-                  <iframe src={it.canva_embed_url} className="w-full h-full rounded-lg border" allow="fullscreen" />
+                  <iframe src={it.canva_embed_url} title={it.title} className="w-full h-full rounded-lg border" allow="fullscreen" />
                 </div>
               )}
             </div>

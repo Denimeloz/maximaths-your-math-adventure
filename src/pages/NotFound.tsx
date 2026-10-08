@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Home, Search } from "lucide-react";
@@ -41,10 +41,10 @@ const NotFound = () => {
         
         {/* CTA Button */}
         <Button variant="hero" size="lg" asChild>
-          <a href="/" className="gap-2">
+          <Link to="/" className="gap-2">
             <Home className="w-5 h-5" />
             Retour à l'accueil
-          </a>
+          </Link>
         </Button>
       </div>
     </div>

@@ -11,12 +11,12 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import {
   LayoutDashboard,
   BookOpen,
   Users,
-  User,
   LogOut,
   Shield,
   ClipboardList,
@@ -128,7 +128,6 @@ const getSubSections = (level: AdminCourseLevel, isNewArchitecture: boolean = fa
 
 const accountItems = [
   { title: 'Accueil', url: '/', icon: Home },
-  { title: 'Mon profil', url: '/profile', icon: User },
 ];
 
 interface AdminSidebarProps {
@@ -137,8 +136,15 @@ interface AdminSidebarProps {
   onTabChange?: (tab: string, level?: AdminCourseLevel | null, academicYearId?: string | null) => void;
 }
 
-export function AdminSidebar({ activeTab, activeLevel, onTabChange }: AdminSidebarProps) {
+export function AdminSidebar({ activeTab, activeLevel, onTabChange: onTabChangeProp }: AdminSidebarProps) {
   const navigate = useNavigate();
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  // Sur téléphone, le menu se referme dès qu'une rubrique est choisie
+  const onTabChange: AdminSidebarProps['onTabChange'] = (tab, level, academicYearId) => {
+    onTabChangeProp?.(tab, level, academicYearId);
+    if (isMobile) setOpenMobile(false);
+  };
   const { profile, signOut } = useAuth();
   const { years, classes, selectedYearId } = useAcademicYears();
 

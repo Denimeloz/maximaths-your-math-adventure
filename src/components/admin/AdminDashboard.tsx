@@ -62,6 +62,7 @@ export const AdminDashboard: React.FC = () => {
     setIsLoading(true);
     try {
       const [
+        usersCountRes,
         usersRes,
         rolesRes,
         coursesRes,
@@ -72,6 +73,8 @@ export const AdminDashboard: React.FC = () => {
         trainingExercisesRes,
         trainingTestsRes,
       ] = await Promise.all([
+        // Compte exact : la liste ci-dessous est limitée aux 10 derniers inscrits
+        supabase.from('profiles').select('id', { count: 'exact', head: true }),
         supabase.from('profiles').select('id, first_name, last_name, email, created_at').order('created_at', { ascending: false }).limit(10),
         supabase.from('user_roles').select('*'),
         supabase.from('courses').select('id, level, is_published'),
@@ -93,7 +96,7 @@ export const AdminDashboard: React.FC = () => {
       });
 
       setStats({
-        totalUsers: usersRes.data?.length || 0,
+        totalUsers: usersCountRes.count ?? usersRes.data?.length ?? 0,
         totalCourses: courses.length,
         publishedCourses: courses.filter(c => c.is_published).length,
         totalAdmins: roles.filter(r => r.role === 'admin').length,
