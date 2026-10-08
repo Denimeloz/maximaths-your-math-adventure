@@ -49,9 +49,9 @@ export const ParentResourcesManager: React.FC = () => {
   useEffect(() => { fetchData(); }, [academicYearId]);
 
   const fetchData = async () => {
-    let query = (supabase as any).from('parent_resources').select('*').order('order_index', { ascending: true });
-    if (academicYearId) query = query.or(`academic_year_id.eq.${academicYearId},academic_year_id.is.null`);
-    const { data } = await query;
+    // Pas de filtre par année : la page publique affiche toutes les ressources,
+    // l'admin doit donc toutes les voir pour pouvoir les modifier ou les supprimer.
+    const { data } = await (supabase as any).from('parent_resources').select('*').order('order_index', { ascending: true });
     setItems(data || []);
   };
 

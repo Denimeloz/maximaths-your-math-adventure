@@ -52,16 +52,28 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
   const [uploading, setUploading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  useEffect(() => { fetchChapters(); }, [selectedLevel, academicYearId]);
+  // En changeant de classe ou d'année, on repart du premier chapitre de la nouvelle liste :
+  // sinon les ressources affichées (et celles qu'on ajoute) restaient celles de la classe précédente.
+  useEffect(() => {
+    setSelectedChapter(null);
+    setResources([]);
+    setPodcasts([]);
+    setEditingId(null);
+    fetchChapters(true);
+  }, [selectedLevel, academicYearId]);
   useEffect(() => { if (selectedChapter) fetchResources(); }, [selectedChapter]);
 
-  const fetchChapters = async () => {
-    if (!academicYearId) return;
+  const fetchChapters = async (selectFirst = false) => {
+    if (!academicYearId) { setChapters([]); return; }
     const { data } = await (supabase as any).from('tab_chapters').select('*')
       .eq('level', selectedLevel).eq('academic_year_id', academicYearId)
       .order('display_order');
-    setChapters(data || []);
-    if (data?.length && !selectedChapter) setSelectedChapter(data[0].id);
+    const list: Chapter[] = data || [];
+    setChapters(list);
+    setSelectedChapter(current => {
+      if (!selectFirst && current && list.some(c => c.id === current)) return current;
+      return list[0]?.id ?? null;
+    });
   };
 
   const fetchResources = async () => {
@@ -88,7 +100,7 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
     if (!confirm('Supprimer ce chapitre et toutes ses ressources ?')) return;
     await (supabase as any).from('tab_chapters').delete().eq('id', id);
     setSelectedChapter(null);
-    fetchChapters();
+    fetchChapters(true);
   };
 
   const uploadFile = async (file: File): Promise<string | null> => {
@@ -162,7 +174,7 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
         <div className="flex flex-wrap gap-2">
           {chapters.map((c, i) => (
             <div key={c.id} className="flex items-center gap-1">
-              <MoveButtons index={i} total={chapters.length} horizontal onMove={d => move('tab_chapters', chapters, i, d, fetchChapters)} />
+              <MoveButtons index={i} total={chapters.length} horizontal onMove={d => move('tab_chapters', chapters, i, d, () => fetchChapters())} />
               <Button variant={selectedChapter === c.id ? 'default' : 'outline'} size="sm" onClick={() => setSelectedChapter(c.id)}>{c.title}</Button>
               <Button variant="ghost" size="icon" onClick={() => deleteChapter(c.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
             </div>
@@ -322,6 +334,7 @@ const ResourceForm: React.FC<{ onAdd: (kind: string, title: string, url: string,
   };
 
   const submit = () => {
+    if (!title.trim()) return; // sans titre rien n'est enregistré : on garde le formulaire tel quel
     onAdd(kind, title, url, desc, correction);
     setTitle(''); setUrl(''); setDesc(''); setFileName(''); setCorrection('');
   };
@@ -345,7 +358,7 @@ const ResourceForm: React.FC<{ onAdd: (kind: string, title: string, url: string,
         {fileName && <span className="text-xs text-muted-foreground truncate max-w-[220px]">{fileName}</span>}
       </div>
       {showCorrection && <CorrectionField value={correction} onChange={setCorrection} onUpload={onUpload} uploading={uploading} />}
-      <Button onClick={submit} disabled={uploading}><Plus className="w-4 h-4 mr-1" /> Ajouter</Button>
+      <Button onClick={submit} disabled={uploading || !title.trim()}><Plus className="w-4 h-4 mr-1" /> Ajouter</Button>
     </Card>
   );
 };

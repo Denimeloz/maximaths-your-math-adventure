@@ -79,16 +79,12 @@ export const SpiralResourcesManager: React.FC<Props> = ({ selectedLevel }) => {
   useEffect(() => { fetchData(); }, [selectedLevel, academicYearId]);
 
   const fetchData = async () => {
-    if (!academicYearId) {
-      setItems([]);
-      return;
-    }
-
+    // Pas de filtre par année : la page publique affiche toutes les ressources,
+    // l'admin doit donc toutes les voir pour pouvoir les modifier ou les supprimer.
     const { data, error } = await (supabase as any)
       .from('spiral_resources')
       .select('*')
       .eq('level', selectedLevel)
-      .or(`academic_year_id.eq.${academicYearId},academic_year_id.is.null`)
       .order('order_index', { ascending: true });
     if (error) {
       console.error('Error loading spiral resources:', error);

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from '@/components/AdminSidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -588,6 +588,8 @@ const AdminInner = () => {
         <main className="flex-1 p-6 lg:p-8 overflow-auto">
           {/* Header */}
           <div className="mb-8">
+            {/* Sur téléphone, le menu latéral est replié : ce bouton l'ouvre */}
+            <SidebarTrigger className="md:hidden mb-4 h-11 w-11 border-2 border-border bg-card" aria-label="Ouvrir le menu d'administration" />
             <h1 className="text-3xl font-display text-foreground flex items-center gap-3">
               <Shield className="w-8 h-8 text-rainbow-purple" />
               Panel Administrateur
@@ -1124,8 +1126,8 @@ const AdminInner = () => {
             <DnbManager />
           )}
 
-          {/* Class Photos Tab - only for 3eme and seconde */}
-          {activeTab === 'classe-activite' && activeLevel && (activeLevel === '3eme' || activeLevel === 'seconde') && (
+          {/* Classe en activité : toutes les classes depuis 2026-2027, 3ème et Seconde avant (comme dans le menu latéral) */}
+          {activeTab === 'classe-activite' && activeLevel && (isNewArchitecture || activeLevel === '3eme' || activeLevel === 'seconde') && (
             <ClassPhotosManager selectedLevel={activeLevel as CourseLevel} />
           )}
 
