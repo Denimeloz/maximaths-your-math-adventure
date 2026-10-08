@@ -1,12 +1,13 @@
-import { Menu, X, Home, Info, ChevronDown, GraduationCap, UsersRound, Zap, Route, Spline, Puzzle, type LucideIcon } from "lucide-react";
+import { Menu, X, Home, Info, ChevronDown, GraduationCap, UsersRound, Zap, Route, Spline, Puzzle, Search, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import newLogo from "@/assets/new-logo.png";
 import { useAcademicYears } from '@/contexts/AcademicYearContext';
 import { fetchSiteLabels } from '@/lib/siteLabels';
-import { LEVEL_GROUPS, LEVEL_LABELS, LEVEL_STYLES } from '@/lib/levels';
+import { LEVEL_GROUPS, LEVEL_LABELS, LEVEL_STYLES, type LevelId } from '@/lib/levels';
 import { getLevelMenu, levelMenuPath, usesNewArchitecture } from '@/lib/levelMenus';
+import SiteSearch from '@/components/SiteSearch';
 
 interface ResourceEntry {
   to: string;
@@ -33,8 +34,49 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
-  const { years, selectedYearId } = useAcademicYears();
+  const [searchOpen, setSearchOpen] = useState(false);
+  const { years, classes, selectedYearId, setSelectedYearId } = useAcademicYears();
   const selectedYear = years.find(y => y.id === selectedYearId);
+
+  // Années qui ont des classes ouvertes : année en cours d'abord, puis de la plus récente à la plus ancienne
+  const browsableYears = years
+    .filter(y => classes.some(c => c.academic_year_id === y.id))
+    .sort((a, b) => (a.is_active !== b.is_active ? (a.is_active ? -1 : 1) : b.start_year - a.start_year));
+
+  // Le menu ne propose que les classes ouvertes pour l'année choisie (toutes si la liste n'est pas encore chargée)
+  const openLevels = new Set(classes.filter(c => c.academic_year_id === selectedYearId).map(c => c.class_level));
+  const levelGroups = LEVEL_GROUPS
+    .map(group => ({ ...group, levelIds: openLevels.size ? group.levelIds.filter((id: LevelId) => openLevels.has(id)) : group.levelIds }))
+    .filter(group => group.levelIds.length > 0);
+
+  const chooseYear = (yearId: string) => {
+    setSelectedYearId(yearId);
+    setExpandedLevel(null);
+  };
+
+  // Choix de l'année, affiché en haut des menus Collège / Lycée quand plusieurs années existent
+  const yearSwitch = browsableYears.length > 1 && (
+    <div className="px-2 pt-1 pb-2 mb-1 border-b border-border" role="group" aria-label="Année scolaire">
+      <p className="text-xs font-body text-muted-foreground mb-1.5">Année scolaire</p>
+      <div className="flex flex-wrap gap-1.5">
+        {browsableYears.map(year => (
+          <button
+            key={year.id}
+            type="button"
+            onClick={() => chooseYear(year.id)}
+            aria-pressed={selectedYearId === year.id}
+            className={`px-2.5 py-1 rounded-full text-xs font-body font-semibold border transition-colors ${
+              selectedYearId === year.id
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'bg-card text-foreground border-border hover:border-primary'
+            }`}
+          >
+            {year.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
   const isNewArchitecture = usesNewArchitecture(selectedYear?.start_year);
   const hasNewArchitectureYear = years.some(y => usesNewArchitecture(y.start_year));
   const [labelMap, setLabelMap] = useState<Record<string, string>>({});
@@ -120,7 +162,7 @@ const Header = () => {
             </Button>
           )}
 
-          {LEVEL_GROUPS.map((group) => (
+          {levelGroups.map((group) => (
             <div key={group.id} className="relative">
               <button
                 onClick={() => toggleGroup(group.id)}
@@ -132,7 +174,8 @@ const Header = () => {
               </button>
 
               {openGroup === group.id && (
-                <div className="absolute top-full left-0 mt-2 w-52 bg-card rounded-xl shadow-xl border border-border p-2 z-50">
+                <div className="absolute top-full left-0 mt-2 w-56 bg-card rounded-xl shadow-xl border border-border p-2 z-50">
+                  {yearSwitch}
                   {group.levelIds.map(levelId => {
                     const style = LEVEL_STYLES[levelId];
                     const isOpen = expandedLevel === levelId;
@@ -199,6 +242,15 @@ const Header = () => {
             )}
           </div>
 
+          <button
+            type="button"
+            onClick={() => { closeAll(); setSearchOpen(true); }}
+            aria-label="Rechercher sur le site"
+            className="flex items-center justify-center h-10 w-10 rounded-full transition-colors hover:bg-rainbow-blue/20"
+          >
+            <Search className="w-5 h-5" />
+          </button>
+
           <Button asChild size="sm" className="gap-2 rounded-full ml-1">
             <Link to="/ressources-parents">
               <UsersRound className="w-4 h-4" />
@@ -214,16 +266,28 @@ const Header = () => {
           </Button>
         </nav>
 
-        {/* Bouton du menu mobile */}
+        {/* Recherche et menu sur téléphone */}
+        <div className="lg:hidden flex items-center gap-2">
         <button
-          className="lg:hidden p-2 rounded-xl bg-muted hover:bg-rainbow-blue/20 transition-colors"
+          type="button"
+          onClick={() => { closeAll(); setSearchOpen(true); }}
+          aria-label="Rechercher sur le site"
+          className="p-2 rounded-xl bg-muted hover:bg-rainbow-blue/20 transition-colors"
+        >
+          <Search className="w-6 h-6" />
+        </button>
+        <button
+          className="p-2 rounded-xl bg-muted hover:bg-rainbow-blue/20 transition-colors"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-expanded={mobileMenuOpen}
           aria-label={mobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
         >
           {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
+        </div>
       </div>
+
+      <SiteSearch open={searchOpen} onOpenChange={setSearchOpen} />
 
       {/* Menu mobile */}
       {mobileMenuOpen && (
@@ -236,7 +300,9 @@ const Header = () => {
               </Link>
             )}
 
-            {LEVEL_GROUPS.map((group) => (
+            {yearSwitch}
+
+            {levelGroups.map((group) => (
               <div key={group.id} className="border-b border-border/50">
                 <button
                   onClick={() => toggleGroup(group.id)}
