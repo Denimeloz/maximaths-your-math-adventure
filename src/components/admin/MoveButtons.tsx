@@ -3,12 +3,27 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react';
 
-export const move = async (table: string, list: { id: string }[], index: number, dir: -1 | 1, refresh: () => void) => {
+/**
+ * Enregistre un nouvel ordre : chaque élément reçoit sa position dans la liste.
+ * Seules les lignes dont la position change sont écrites, ce qui rend un déplacement
+ * presque instantané même dans une longue liste.
+ */
+export const saveOrder = async (table: string, ordered: { id: string; display_order?: number | null }[]) => {
+  const changed = ordered
+    .map((item, position) => ({ item, position }))
+    .filter(({ item, position }) => item.display_order !== position);
+  const results = await Promise.all(
+    changed.map(({ item, position }) => (supabase as any).from(table).update({ display_order: position }).eq('id', item.id)),
+  );
+  return results.find(r => r?.error)?.error ?? null;
+};
+
+export const move = async (table: string, list: { id: string; display_order?: number | null }[], index: number, dir: -1 | 1, refresh: () => void) => {
   const target = index + dir;
   if (target < 0 || target >= list.length) return;
   const reordered = [...list];
   [reordered[index], reordered[target]] = [reordered[target], reordered[index]];
-  await Promise.all(reordered.map((item, i) => (supabase as any).from(table).update({ display_order: i }).eq('id', item.id)));
+  await saveOrder(table, reordered);
   refresh();
 };
 

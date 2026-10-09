@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { move, MoveButtons, PublishToggle } from './MoveButtons';
+import { move, MoveButtons, PublishToggle, saveOrder } from './MoveButtons';
+import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, arrayMove, rectSortingStrategy, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Zap, Upload, FileText, Pencil, X, Save } from 'lucide-react';
+import { Plus, Trash2, Zap, Upload, FileText, Pencil, X, Save, GripVertical } from 'lucide-react';
 import { useAcademicYears, useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 type Level = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
@@ -18,6 +21,30 @@ interface Item {
   academic_year_id: string | null; display_order: number;
   file_url: string | null; file_name: string | null;
 }
+
+/** Carte déplaçable : on l'attrape par la poignée (souris, doigt ou clavier). */
+const SortableCard: React.FC<{ id: string; title: string; children: React.ReactNode }> = ({ id, title, children }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  return (
+    <Card
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={`p-4 flex gap-2 ${isDragging ? 'relative z-10 shadow-xl ring-2 ring-primary/40' : ''}`}
+    >
+      <button
+        type="button"
+        className="shrink-0 self-start -ml-1 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted cursor-grab active:cursor-grabbing touch-none"
+        aria-label={`Déplacer « ${title} »`}
+        title="Glisser pour déplacer"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="w-5 h-5" />
+      </button>
+      <div className="min-w-0 flex-1">{children}</div>
+    </Card>
+  );
+};
 
 export const AutomatismsManager: React.FC = () => {
   const { toast } = useToast();
@@ -82,8 +109,31 @@ export const AutomatismsManager: React.FC = () => {
   };
 
   const remove = async (id: string) => {
+    if (!confirm('Supprimer ce support ?')) return;
     await (supabase as any).from('automatisms').delete().eq('id', id);
     fetch();
+  };
+
+  // Un petit déplacement de la souris est exigé avant de « prendre » la carte, pour ne pas gêner les clics
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const from = items.findIndex(i => i.id === active.id);
+    const to = items.findIndex(i => i.id === over.id);
+    if (from < 0 || to < 0) return;
+    const reordered = arrayMove(items, from, to);
+    // Affichage immédiat du nouvel ordre, puis enregistrement des seules positions modifiées
+    setItems(reordered.map((item, position) => ({ ...item, display_order: position })));
+    const error = await saveOrder('automatisms', reordered);
+    if (error) {
+      toast({ title: "L'ordre n'a pas pu être enregistré", description: error.message, variant: 'destructive' });
+      fetch();
+    }
   };
 
   return (
@@ -126,12 +176,20 @@ export const AutomatismsManager: React.FC = () => {
         </div>
       </Card>
 
+      {items.length > 1 && (
+        <p className="text-sm text-muted-foreground">
+          Pour changer l'ordre, fais glisser une carte par sa poignée <GripVertical className="inline w-4 h-4 align-text-bottom" aria-hidden="true" /> et dépose-la où tu veux.
+        </p>
+      )}
+
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={items.map(i => i.id)} strategy={rectSortingStrategy}>
       <div className="grid md:grid-cols-2 gap-4">
         {items.map((it, i) => (
-          <Card key={it.id} className="p-4">
-            <div className="flex items-start justify-between mb-2">
+          <SortableCard key={it.id} id={it.id} title={it.title}>
+            <div className="flex items-start justify-between gap-2 mb-2">
               <h4 className="font-display">{it.title}</h4>
-              <div className="flex">
+              <div className="flex shrink-0">
               <Button variant="ghost" size="icon" onClick={() => startEdit(it)}><Pencil className="w-4 h-4" /></Button>
               <PublishToggle table="automatisms" id={it.id} published={(it as any).is_published} onDone={fetch} /><MoveButtons index={i} total={items.length} onMove={d => move('automatisms', items, i, d, fetch)} />
               <Button variant="ghost" size="icon" onClick={() => remove(it.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
@@ -146,13 +204,15 @@ export const AutomatismsManager: React.FC = () => {
             )}
             {it.canva_embed_url && (
               <div className="mt-3 aspect-video">
-                <iframe src={it.canva_embed_url} className="w-full h-full rounded-lg border" allow="fullscreen" />
+                <iframe src={it.canva_embed_url} title={it.title} className="w-full h-full rounded-lg border" allow="fullscreen" />
               </div>
             )}
-          </Card>
+          </SortableCard>
         ))}
         {items.length === 0 && <p className="text-muted-foreground text-sm">Aucun support pour cette classe.</p>}
       </div>
+      </SortableContext>
+      </DndContext>
     </div>
   );
 };
