@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Pencil, Trash2, FileText, BookOpen, Lightbulb, Upload, Loader2, X, BookCheck, GripVertical } from 'lucide-react';
+import { Plus, Pencil, Trash2, FileText, BookOpen, Lightbulb, Upload, Loader2, X, BookCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   DndContext,
@@ -24,7 +24,8 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
-import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
+import { useAcademicYears, useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
+import { usesNewArchitecture } from '@/lib/levelMenus';
 import { LinksEditor, ResourceLink } from './LinksEditor';
 
 interface Activity {
@@ -59,6 +60,11 @@ interface ActivityManagerProps {
 const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const academicYearId = useCurrentAcademicYearId();
+  const { years } = useAcademicYears();
+  // Depuis 2026-2027, cette rubrique s'appelle « Espace d'approfondissement » côté élèves
+  const sectionName = usesNewArchitecture(years.find(y => y.id === academicYearId)?.start_year)
+    ? "Espace d'approfondissement"
+    : 'Activités de découverte';
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
@@ -307,7 +313,7 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-display text-foreground">
-          Activités de découverte
+          {sectionName}
           {selectedLevel && ` - ${levels.find(l => l.id === selectedLevel)?.label}`}
         </h2>
         <Button onClick={() => setShowForm(true)} className="gap-2">
@@ -439,7 +445,7 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
               <Card>
                 <CardContent className="py-8 text-center text-muted-foreground">
                   <Lightbulb className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  Aucune activité de découverte pour ce niveau
+                  Aucune activité pour ce niveau
                 </CardContent>
               </Card>
             ) : (
@@ -449,7 +455,6 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ selectedLevel }) => {
                     <CardContent className="py-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <GripVertical className="w-5 h-5 text-muted-foreground cursor-grab" />
                           <Lightbulb className="w-5 h-5 text-rainbow-orange" />
                           <div>
                             <h3 className="font-semibold">{activity.title}</h3>
