@@ -26,9 +26,9 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // On attend de savoir si le compte est admin avant de rediriger (authLoading reste vrai jusque-là)
     if (!authLoading && user) {
-      if (isAdmin) navigate('/admin');
-      else navigate('/');
+      navigate(isAdmin ? '/admin' : '/', { replace: true });
     }
   }, [user, isAdmin, authLoading, navigate]);
 
@@ -121,10 +121,10 @@ const Auth = () => {
 
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || (authLoading && !!user)}
               className="w-full h-12 text-base font-display rounded-2xl btn-3d bg-primary hover:bg-primary/90"
             >
-              {isLoading ? (
+              {isLoading || (authLoading && !!user) ? (
                 <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Connexion…</>
               ) : (
                 <><Shield className="w-5 h-5 mr-2" />Se connecter</>

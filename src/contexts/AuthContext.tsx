@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -43,6 +43,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  // Utilisateur dont le rôle (admin ou non) est déjà connu
+  const roleKnownFor = useRef<string | null>(null);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -84,12 +86,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
+        const userId = session.user.id;
+        // Nouvelle connexion : tant que le rôle n'est pas connu, on reste « en chargement ».
+        // Sinon la page de connexion voyait un utilisateur « non admin » pendant un instant
+        // et renvoyait vers l'accueil au lieu de l'espace admin.
+        // (Pas pour un simple renouvellement de session du même utilisateur : l'admin ne doit pas clignoter.)
+        if (roleKnownFor.current !== userId) setIsLoading(true);
         setTimeout(async () => {
-          setProfile(await fetchProfile(session.user.id));
-          setIsAdmin(await checkAdminRole(session.user.id));
+          const [p, admin] = await Promise.all([fetchProfile(userId), checkAdminRole(userId)]);
+          setProfile(p);
+          setIsAdmin(admin);
+          roleKnownFor.current = userId;
           setIsLoading(false);
         }, 0);
       } else {
+        roleKnownFor.current = null;
         setProfile(null);
         setIsAdmin(false);
         setIsLoading(false);
@@ -103,6 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const [p, admin] = await Promise.all([fetchProfile(session.user.id), checkAdminRole(session.user.id)]);
         setProfile(p);
         setIsAdmin(admin);
+        roleKnownFor.current = session.user.id;
       }
       setIsLoading(false);
     });
@@ -117,6 +129,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    roleKnownFor.current = null;
     setUser(null);
     setSession(null);
     setProfile(null);
