@@ -8,6 +8,8 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Plus, Trash2, Edit, Save, X, Upload, Eye, EyeOff, Image, Loader2 } from 'lucide-react';
 import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
+import { SortableList } from './SortableList';
+import { saveOrder } from './MoveButtons';
 
 type CourseLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
@@ -169,6 +171,16 @@ export const ClassPhotosManager: React.FC<ClassPhotosManagerProps> = ({ selected
     setShowForm(true);
   };
 
+  // Glisser-déposer des albums : affichage immédiat, puis enregistrement des positions modifiées
+  const reorderAlbums = async (ordered: typeof items) => {
+    setItems(ordered.map((item, position) => ({ ...item, order_index: position })));
+    const error = await saveOrder('class_photos', ordered, 'order_index');
+    if (error) {
+      toast({ title: "L'ordre n'a pas pu être enregistré", description: error.message, variant: 'destructive' });
+      fetchItems();
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm('Supprimer cet élément ?')) return;
     const { error } = await (supabase as any).from('class_photos').delete().eq('id', id);
@@ -267,9 +279,18 @@ export const ClassPhotosManager: React.FC<ClassPhotosManagerProps> = ({ selected
             </div>
 
             {formData.image_urls.length > 0 && (
-              <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {formData.image_urls.map((img, idx) => (
-                  <div key={idx} className="relative group rounded-lg overflow-hidden border border-border">
+              <SortableList
+                items={formData.image_urls}
+                getId={img => img.url}
+                getLabel={img => img.name || 'photo'}
+                onReorder={ordered => setFormData(prev => ({ ...prev, image_urls: ordered }))}
+                layout="grid"
+                className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"
+                itemClassName="relative group rounded-lg overflow-hidden border border-border bg-card"
+              >
+                {(img, handle, idx) => (
+                  <>
+                    <span className="absolute top-1 left-1 rounded-md bg-card/90">{handle}</span>
                     <img
                       src={img.url}
                       alt={img.name}
@@ -277,14 +298,16 @@ export const ClassPhotosManager: React.FC<ClassPhotosManagerProps> = ({ selected
                     />
                     <button
                       onClick={() => removeImage(idx)}
-                      className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      aria-label={`Retirer ${img.name || 'la photo'}`}
+                      title="Retirer la photo"
+                      className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1.5"
                     >
                       <X className="w-3 h-3" />
                     </button>
                     <p className="text-xs text-muted-foreground truncate px-1 py-0.5">{img.name}</p>
-                  </div>
-                ))}
-              </div>
+                  </>
+                )}
+              </SortableList>
             )}
           </div>
 
@@ -315,11 +338,18 @@ export const ClassPhotosManager: React.FC<ClassPhotosManagerProps> = ({ selected
           <p>Aucune photo d'activité pour ce niveau.</p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {items.map(item => (
-            <div key={item.id} className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-start justify-between mb-3">
-                <div>
+        <SortableList
+          items={items}
+          getLabel={item => item.title}
+          onReorder={reorderAlbums}
+          className="space-y-4"
+          itemClassName="bg-card border border-border rounded-xl p-4"
+        >
+          {(item, handle) => (
+            <>
+              <div className="flex items-start gap-2 mb-3">
+                {handle}
+                <div className="min-w-0 flex-1">
                   <h4 className="font-display text-foreground">{item.title}</h4>
                   {item.description && (
                     <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
@@ -355,9 +385,9 @@ export const ClassPhotosManager: React.FC<ClassPhotosManagerProps> = ({ selected
                   ))}
                 </div>
               )}
-            </div>
-          ))}
-        </div>
+            </>
+          )}
+        </SortableList>
       )}
     </div>
   );

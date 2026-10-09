@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { move, MoveButtons, PublishToggle } from './MoveButtons';
+import { move, MoveButtons, PublishToggle, saveOrder } from './MoveButtons';
+import { SortableList } from './SortableList';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -111,8 +112,22 @@ export const RevisionPathManager: React.FC = () => {
   };
 
   const remove = async (id: string) => {
+    if (!confirm('Supprimer cette ressource ?')) return;
     await (supabase as any).from('revision_path_resources').delete().eq('id', id);
     fetch();
+  };
+
+  // Glisser-déposer à l'intérieur d'une étape : affichage immédiat, puis enregistrement des positions modifiées
+  const reorderStep = async (step: number, ordered: Resource[]) => {
+    setItems(prev => [
+      ...prev.filter(r => r.step !== step),
+      ...ordered.map((r, position) => ({ ...r, display_order: position })),
+    ]);
+    const error = await saveOrder('revision_path_resources', ordered);
+    if (error) {
+      toast({ title: "L'ordre n'a pas pu être enregistré", description: error.message, variant: 'destructive' });
+      fetch();
+    }
   };
 
   return (
@@ -179,10 +194,15 @@ export const RevisionPathManager: React.FC = () => {
         return (
           <Card key={step.id} className="p-4">
             <h3 className="font-display mb-3">{step.id}. {step.label}</h3>
-            <div className="space-y-2">
-              {stepItems.map((r, i) => (
+            <SortableList
+              items={stepItems}
+              getLabel={r => r.title}
+              onReorder={ordered => reorderStep(step.id, ordered)}
+              className="space-y-2"
+            >
+              {(r, handle, i) => (
                 editingId === r.id ? (
-                  <div key={r.id} className="space-y-2 p-3 rounded border border-rainbow-blue/50">
+                  <div className="space-y-2 p-3 rounded border border-rainbow-blue/50">
                     <Select value={editForm.kind} onValueChange={v => setEditForm(f => ({ ...f, kind: v }))}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>{KINDS.map(k => <SelectItem key={k} value={k}>{k}</SelectItem>)}</SelectContent>
@@ -214,8 +234,9 @@ export const RevisionPathManager: React.FC = () => {
                     </div>
                   </div>
                 ) : (
-                  <div key={r.id} className="flex items-start justify-between gap-3 p-2 rounded bg-muted/40">
-                    <div className="min-w-0">
+                  <div className="flex flex-wrap items-start gap-2 p-2 rounded bg-muted/40">
+                    {handle}
+                    <div className="min-w-0 flex-[1_1_12rem]">
                       <p className="font-semibold">{r.title} <span className="text-xs text-muted-foreground">({r.kind})</span></p>
                       {r.description && <p className="text-sm text-muted-foreground">{r.description}</p>}
                       <div className="flex flex-wrap gap-3">
@@ -223,16 +244,16 @@ export const RevisionPathManager: React.FC = () => {
                         {r.correction_url && <a href={r.correction_url} target="_blank" rel="noreferrer" className="text-xs text-rainbow-green underline">Voir le corrigé</a>}
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center gap-1 shrink-0 ml-auto">
                       <Button variant="ghost" size="icon" onClick={() => startEdit(r)}><Pencil className="w-4 h-4" /></Button>
                       <PublishToggle table="revision_path_resources" id={r.id} published={(r as any).is_published} onDone={fetch} /><MoveButtons index={i} total={stepItems.length} onMove={d => move('revision_path_resources', stepItems, i, d, fetch)} />
               <Button variant="ghost" size="icon" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                     </div>
                   </div>
                 )
-              ))}
-              {stepItems.length === 0 && <p className="text-xs text-muted-foreground italic">Aucune ressource.</p>}
-            </div>
+              )}
+            </SortableList>
+            {stepItems.length === 0 && <p className="text-xs text-muted-foreground italic">Aucune ressource.</p>}
           </Card>
         );
       })}

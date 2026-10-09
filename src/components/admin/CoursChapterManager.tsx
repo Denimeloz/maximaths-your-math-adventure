@@ -8,7 +8,8 @@ import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Trash2, Upload, Loader2, BookOpen, Lightbulb, Dumbbell, HeartHandshake, Clapperboard, Pencil, Save, X, CheckCircle2 } from 'lucide-react';
-import { move, MoveButtons, PublishToggle } from './MoveButtons';
+import { move, MoveButtons, PublishToggle, saveOrder } from './MoveButtons';
+import { SortableList } from './SortableList';
 import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
 
 type Level = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
@@ -170,6 +171,73 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
     fetchResources();
   };
 
+  // --- Glisser-déposer : affichage immédiat, puis enregistrement des seules positions modifiées
+  const reportOrderError = (error: { message: string } | null, refresh: () => void) => {
+    if (!error) return;
+    toast({ title: "L'ordre n'a pas pu être enregistré", description: error.message, variant: 'destructive' });
+    refresh();
+  };
+
+  const reorderChapters = async (ordered: Chapter[]) => {
+    setChapters(ordered.map((c, position) => ({ ...c, display_order: position })));
+    reportOrderError(await saveOrder('tab_chapters', ordered), () => fetchChapters());
+  };
+
+  const reorderResources = async (section: string, ordered: Resource[]) => {
+    setResources(prev => [
+      ...prev.filter(r => r.section !== section),
+      ...ordered.map((r, position) => ({ ...r, display_order: position })),
+    ]);
+    reportOrderError(await saveOrder('chapter_resources', ordered), fetchResources);
+  };
+
+  const reorderPodcasts = async (ordered: Podcast[]) => {
+    setPodcasts(ordered.map((p, position) => ({ ...p, display_order: position })));
+    reportOrderError(await saveOrder('chapter_podcasts', ordered), fetchResources);
+  };
+
+  // Liste des ressources d'une rubrique du chapitre (les cinq rubriques partagent le même affichage)
+  const resourceList = (section: string, showCorrection: boolean) => {
+    const sectionResources = resources.filter(r => r.section === section);
+    return (
+      <SortableList
+        items={sectionResources}
+        getLabel={r => r.title}
+        onReorder={ordered => reorderResources(section, ordered)}
+        className="space-y-2"
+      >
+        {(r, handle, i) => (
+          editingId === r.id ? (
+            <ResourceEditForm resource={r} onUpload={uploadFile} uploading={uploading}
+              onCancel={() => setEditingId(null)} onSave={values => updateResource(r.id, values)} showCorrection={showCorrection} />
+          ) : (
+            <Card className="p-3 flex flex-wrap items-start gap-2">
+              {handle}
+              <div className="min-w-0 flex-[1_1_12rem]">
+                <p className="font-semibold">{r.title} <span className="text-xs text-muted-foreground">({r.kind})</span></p>
+                {r.description && <p className="text-sm text-muted-foreground">{r.description}</p>}
+                <div className="flex flex-wrap gap-3 mt-1">
+                  {r.url && <a href={r.url} target="_blank" rel="noreferrer" className="text-xs text-rainbow-blue underline">{showCorrection ? 'Voir le fichier' : 'Voir la ressource'}</a>}
+                  {showCorrection && r.correction_url && (
+                    <a href={r.correction_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-rainbow-green underline">
+                      <CheckCircle2 className="w-3 h-3" /> Voir le corrigé
+                    </a>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-1 shrink-0 ml-auto">
+                <PublishToggle table="chapter_resources" id={r.id} published={(r as any).is_published} onDone={fetchResources} />
+                <MoveButtons index={i} total={sectionResources.length} onMove={d => move('chapter_resources', sectionResources, i, d, fetchResources)} />
+                <Button variant="ghost" size="icon" onClick={() => setEditingId(r.id)}><Pencil className="w-4 h-4" /></Button>
+                <Button variant="ghost" size="icon" onClick={() => deleteResource(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+              </div>
+            </Card>
+          )
+        )}
+      </SortableList>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Chapters list */}
@@ -185,15 +253,22 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
             <Button onClick={createChapter}>Créer</Button>
           </div>
         )}
-        <div className="flex flex-wrap gap-2">
-          {chapters.map((c, i) => (
-            <div key={c.id} className="flex items-center gap-1">
-              <MoveButtons index={i} total={chapters.length} horizontal onMove={d => move('tab_chapters', chapters, i, d, () => fetchChapters())} />
+        <SortableList
+          items={chapters}
+          getLabel={c => c.title}
+          onReorder={reorderChapters}
+          layout="grid"
+          className="flex flex-wrap gap-2"
+          itemClassName="flex max-w-full items-center gap-1 rounded-lg bg-card"
+        >
+          {(c, handle) => (
+            <>
+              {handle}
               <Button
                 variant={selectedChapter === c.id ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setSelectedChapter(c.id)}
-                className={c.is_published === false ? 'opacity-60 border-dashed' : ''}
+                className={`h-auto min-h-9 min-w-0 shrink whitespace-normal py-1.5 text-left ${c.is_published === false ? 'opacity-60 border-dashed' : ''}`}
                 title={c.is_published === false ? 'Chapitre masqué aux élèves' : undefined}
               >
                 {c.title}{c.is_published === false ? ' (masqué)' : ''}
@@ -204,10 +279,10 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
                 <Pencil className="w-4 h-4" />
               </Button>
               <Button variant="ghost" size="icon" title="Supprimer le chapitre" aria-label={`Supprimer le chapitre ${c.title}`} onClick={() => deleteChapter(c.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-            </div>
-          ))}
-          {chapters.length === 0 && <p className="text-sm text-muted-foreground">Aucun chapitre pour cette classe et cette année.</p>}
-        </div>
+            </>
+          )}
+        </SortableList>
+        {chapters.length === 0 && <p className="text-sm text-muted-foreground">Aucun chapitre pour cette classe et cette année.</p>}
         {editingChapter && (
           <div className="space-y-2 mt-4 p-3 rounded-lg border border-rainbow-blue/50">
             <p className="text-sm font-semibold">Modifier le chapitre</p>
@@ -223,86 +298,47 @@ export const CoursChapterManager: React.FC<Props> = ({ selectedLevel }) => {
 
       {selectedChapter && (
         <Tabs defaultValue="activite_decouverte" className="w-full">
-          <TabsList className="grid h-auto grid-cols-2 gap-1 sm:grid-cols-3 xl:grid-cols-5 w-full">
+          <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1">
             {SUBSECTIONS.map(s => (
-              <TabsTrigger key={s.id} value={s.id}><s.icon className="w-4 h-4 mr-1" />{s.label}</TabsTrigger>
+              <TabsTrigger key={s.id} value={s.id} className="grow"><s.icon className="w-4 h-4 mr-1" />{s.label}</TabsTrigger>
             ))}
-            <TabsTrigger value="multimedia"><Clapperboard className="w-4 h-4 mr-1" />Vidéo, Podcast & autres</TabsTrigger>
+            <TabsTrigger value="multimedia" className="grow"><Clapperboard className="w-4 h-4 mr-1" />Vidéo, Podcast & autres</TabsTrigger>
           </TabsList>
 
           {SUBSECTIONS.map(s => (
             <TabsContent key={s.id} value={s.id} className="space-y-4">
               <ResourceForm onAdd={(kind, title, url, desc, correction) => addResource(s.id, kind, title, url, desc, correction)} onUpload={uploadFile} uploading={uploading} />
-              <div className="space-y-2">
-                {resources.filter(r => r.section === s.id).map((r, i, arr) => (
-                  editingId === r.id ? (
-                    <ResourceEditForm key={r.id} resource={r} onUpload={uploadFile} uploading={uploading}
-                      onCancel={() => setEditingId(null)} onSave={values => updateResource(r.id, values)} />
-                  ) : (
-                    <Card key={r.id} className="p-3 flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="font-semibold">{r.title} <span className="text-xs text-muted-foreground">({r.kind})</span></p>
-                        {r.description && <p className="text-sm text-muted-foreground">{r.description}</p>}
-                        <div className="flex flex-wrap gap-3 mt-1">
-                          {r.url && <a href={r.url} target="_blank" rel="noreferrer" className="text-xs text-rainbow-blue underline">Voir le fichier</a>}
-                          {r.correction_url && (
-                            <a href={r.correction_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-rainbow-green underline">
-                              <CheckCircle2 className="w-3 h-3" /> Voir le corrigé
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <PublishToggle table="chapter_resources" id={r.id} published={(r as any).is_published} onDone={fetchResources} /><MoveButtons index={i} total={arr.length} onMove={d => move('chapter_resources', arr, i, d, fetchResources)} />
-                        <Button variant="ghost" size="icon" onClick={() => setEditingId(r.id)}><Pencil className="w-4 h-4" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => deleteResource(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                      </div>
-                    </Card>
-                  )
-                ))}
-              </div>
+              {resourceList(s.id, true)}
             </TabsContent>
           ))}
 
           <TabsContent value="multimedia" className="space-y-4">
             <ResourceForm onAdd={(kind, title, url, desc) => addResource('multimedia', kind, title, url, desc, '')} onUpload={uploadFile} uploading={uploading} showCorrection={false} />
-            <div className="space-y-2">
-              {resources.filter(r => r.section === 'multimedia').map((r, i, arr) => (
-                editingId === r.id ? (
-                  <ResourceEditForm key={r.id} resource={r} onUpload={uploadFile} uploading={uploading}
-                    onCancel={() => setEditingId(null)} onSave={values => updateResource(r.id, values)} showCorrection={false} />
-                ) : (
-                  <Card key={r.id} className="p-3 flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="font-semibold">{r.title} <span className="text-xs text-muted-foreground">({r.kind})</span></p>
-                      {r.description && <p className="text-sm text-muted-foreground">{r.description}</p>}
-                      {r.url && <a href={r.url} target="_blank" rel="noreferrer" className="text-xs text-rainbow-blue underline">Voir la ressource</a>}
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <PublishToggle table="chapter_resources" id={r.id} published={(r as any).is_published} onDone={fetchResources} /><MoveButtons index={i} total={arr.length} onMove={d => move('chapter_resources', arr, i, d, fetchResources)} />
-                      <Button variant="ghost" size="icon" onClick={() => setEditingId(r.id)}><Pencil className="w-4 h-4" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => deleteResource(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                    </div>
-                  </Card>
-                )
-              ))}
-              {podcasts.map((p, i) => (
-                <Card key={p.id} className="p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
+            {resourceList('multimedia', false)}
+            <SortableList
+              items={podcasts}
+              getLabel={p => p.title}
+              onReorder={reorderPodcasts}
+              className="space-y-2"
+            >
+              {(p, handle, i) => (
+                <Card className="p-3">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    {handle}
+                    <div className="min-w-0 flex-[1_1_12rem]">
                       <p className="font-semibold">{p.title}</p>
                       {p.description && <p className="text-sm text-muted-foreground">{p.description}</p>}
                       {p.duration_seconds && <p className="text-xs text-muted-foreground">{Math.floor(p.duration_seconds / 60)}:{(p.duration_seconds % 60).toString().padStart(2,'0')}</p>}
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 ml-auto">
                       <PublishToggle table="chapter_podcasts" id={p.id} published={(p as any).is_published} onDone={fetchResources} /><MoveButtons index={i} total={podcasts.length} onMove={d => move('chapter_podcasts', podcasts, i, d, fetchResources)} />
                       <Button variant="ghost" size="icon" onClick={() => deletePodcast(p.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                     </div>
                   </div>
                   <audio controls src={p.audio_url} className="w-full" />
                 </Card>
-              ))}
-            </div>
+              )}
+            </SortableList>
           </TabsContent>
         </Tabs>
       )}
