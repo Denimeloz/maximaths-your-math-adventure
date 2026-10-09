@@ -8,17 +8,22 @@ import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Eye, EyeOff } from '
  * Seules les lignes dont la position change sont écrites, ce qui rend un déplacement
  * presque instantané même dans une longue liste.
  */
-export const saveOrder = async (table: string, ordered: { id: string; display_order?: number | null }[]) => {
+export const saveOrder = async (
+  table: string,
+  ordered: { id: string }[],
+  /** Colonne qui porte l'ordre : `display_order` ou `order_index` selon la table */
+  column: 'display_order' | 'order_index' = 'display_order',
+) => {
   const changed = ordered
     .map((item, position) => ({ item, position }))
-    .filter(({ item, position }) => item.display_order !== position);
+    .filter(({ item, position }) => (item as Record<string, unknown>)[column] !== position);
   const results = await Promise.all(
-    changed.map(({ item, position }) => (supabase as any).from(table).update({ display_order: position }).eq('id', item.id)),
+    changed.map(({ item, position }) => (supabase as any).from(table).update({ [column]: position }).eq('id', item.id)),
   );
   return results.find(r => r?.error)?.error ?? null;
 };
 
-export const move = async (table: string, list: { id: string; display_order?: number | null }[], index: number, dir: -1 | 1, refresh: () => void) => {
+export const move = async (table: string, list: { id: string }[], index: number, dir: -1 | 1, refresh: () => void) => {
   const target = index + dir;
   if (target < 0 || target >= list.length) return;
   const reordered = [...list];
