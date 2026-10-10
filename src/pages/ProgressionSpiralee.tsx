@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Spline, FileText, Link as LinkIcon, Video, Dumbbell, Download, Search } from 'lucide-react';
+import { PROJECT_TYPE } from '@/lib/studentProjects';
 
 type Level = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
@@ -55,6 +56,8 @@ const ProgressionSpiralee: React.FC = () => {
         .from('spiral_resources')
         .select('*')
         .eq('is_published', true)
+        // Les projets des élèves partagent cette table : ils ont leur propre page
+        .neq('resource_type', PROJECT_TYPE)
         .order('order_index', { ascending: true });
       setItems(data || []);
       setLoading(false);

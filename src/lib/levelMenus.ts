@@ -12,12 +12,14 @@ import {
   HeartHandshake,
   Info,
   Lightbulb,
+  Presentation,
   Route,
   Star,
   Target,
   Video,
   Zap,
 } from 'lucide-react';
+import { isProjectLevel, projectsPath } from '@/lib/studentProjects';
 
 export interface LevelMenuItem {
   id: string;
@@ -109,6 +111,10 @@ const newMenu = (levelId: string): LevelMenuItem[] => {
   const items: LevelMenuItem[] = [
     { id: 'infos', label: 'Infos pour la classe', description: 'Informations importantes', icon: Info },
     { id: 'automatismes', label: 'Automatismes', description: 'Entraînement régulier', icon: Zap },
+    // Projets des élèves : seulement pour les classes concernées (3ème et Seconde)
+    ...(isProjectLevel(levelId)
+      ? [{ id: 'projets-eleves', label: 'Projets des élèves', description: 'Les élèves expliquent le cours', icon: Presentation }]
+      : []),
     { id: 'chap-activite', label: 'Activité de découverte', description: 'Découverte des notions', icon: Lightbulb },
     { id: 'chap-cours', label: 'Cours', description: 'Leçons et chapitres', icon: BookOpen },
     { id: 'chap-exercices', label: "Exercices d'entraînement", description: 'Pour pratiquer', icon: Dumbbell },
@@ -134,6 +140,7 @@ export const getLevelMenu = (levelId: string, isNewArchitecture: boolean): Level
 /** Adresse d'une rubrique pour une classe et une année données. */
 export const levelMenuPath = (levelId: string, itemId: string, yearId?: string | null): string => {
   if (itemId === 'ressources-dnb') return '/ressources-dnb';
+  if (itemId === 'projets-eleves') return projectsPath(levelId, yearId);
   if (itemId === 'automatismes' || itemId === 'parcours-revision') {
     const params = new URLSearchParams();
     if (yearId) params.set('year', yearId);

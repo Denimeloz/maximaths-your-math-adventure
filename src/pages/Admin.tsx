@@ -26,6 +26,7 @@ import { DnbRevisionResourcesManager } from '@/components/admin/DnbRevisionResou
 import SpiralResourcesManager from '@/components/admin/SpiralResourcesManager';
 import { AcademicYearsManager } from '@/components/admin/AcademicYearsManager';
 import { AutomatismsManager } from '@/components/admin/AutomatismsManager';
+import { StudentProjectsManager } from '@/components/admin/StudentProjectsManager';
 import { RevisionPathManager } from '@/components/admin/RevisionPathManager';
 import { ParentResourcesManager } from '@/components/admin/ParentResourcesManager';
 import { CoursChapterManager } from '@/components/admin/CoursChapterManager';
@@ -623,10 +624,16 @@ const AdminInner = () => {
                   ? 'Club Jules Verne'
                   : activeLevel === 'ressources-parents'
                   ? 'Ressources pour les parents'
+                  : activeLevel === 'automatismes'
+                  ? 'Automatismes'
+                  : activeLevel === 'projets-eleves'
+                  ? 'Projets des élèves'
+                  : activeLevel === 'parcours-revision'
+                  ? 'Parcours de révision'
                   : activeLevel === 'spiral-progression'
                   ? `Progression Spiralée — ${getLevelLabel(activeTab as CourseLevel)}`
                   : getLevelLabel(activeLevel as CourseLevel)
-                }{activeLevel !== 'spiral-progression' && activeLevel !== 'ressources-parents' && ` - ${
+                }{!['spiral-progression', 'ressources-parents', 'automatismes', 'projets-eleves', 'parcours-revision'].includes(activeLevel) && ` - ${
                   activeTab === 'infos' ? 'Informations pour la classe' :
                   activeTab === 'cours' ? "Cours et chapitres" :
                   activeTab === 'activites' ? (isNewArchitecture ? "Espace d'approfondissement" : 'Activité de découverte') :
@@ -702,6 +709,9 @@ const AdminInner = () => {
 
           {/* Automatismes - transverse */}
           {activeLevel === 'automatismes' && <AutomatismsManager />}
+
+          {/* Projets des élèves - transverse (3ème et Seconde) */}
+          {activeLevel === 'projets-eleves' && <StudentProjectsManager />}
 
           {/* Parcours de révision - transverse */}
           {activeLevel === 'parcours-revision' && <RevisionPathManager />}

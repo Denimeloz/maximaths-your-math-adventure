@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FileText, Link as LinkIcon, Puzzle, Route, Spline, UsersRound, Zap, type LucideIcon } from "lucide-react";
+import { FileText, Link as LinkIcon, Presentation, Puzzle, Route, Spline, UsersRound, Zap, type LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAcademicYears } from "@/contexts/AcademicYearContext";
 import { usesNewArchitecture } from "@/lib/levelMenus";
@@ -20,7 +20,7 @@ interface Tile {
 
 /**
  * Espaces communs à toutes les classes, regroupés en un seul bloc sur l'accueil.
- * Les automatismes et l'espace parents restent mis en avant ; les autres sont en tuiles.
+ * Les automatismes, les projets des élèves et l'espace parents sont mis en avant ; les autres sont en tuiles.
  */
 const QuickAccessSection = () => {
   const { years } = useAcademicYears();
@@ -58,7 +58,7 @@ const QuickAccessSection = () => {
           Pour toutes les classes
         </h2>
 
-        <div className={`grid gap-5 ${hasNewArchitectureYear ? 'lg:grid-cols-2' : ''}`}>
+        <div className={`grid gap-5 ${hasNewArchitectureYear ? 'md:grid-cols-2 lg:grid-cols-3' : ''}`}>
           {hasNewArchitectureYear && (
             <Link
               to="/automatismes"
@@ -75,9 +75,25 @@ const QuickAccessSection = () => {
             </Link>
           )}
 
+          {hasNewArchitectureYear && (
+            <Link
+              to="/projets-eleves"
+              className="card-sticker flex flex-col bg-card border-primary p-6 md:p-8 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Presentation className="w-8 h-8 text-primary" aria-hidden="true" />
+              <h3 className="mt-4 font-display text-2xl font-semibold text-foreground">Projets des élèves</h3>
+              <p className="mt-2 font-body text-muted-foreground max-w-md">
+                Des élèves de 3ème et de Seconde expliquent le cours en vidéo, en audio ou en diaporama.
+              </p>
+              <span className="mt-auto pt-5 font-body font-bold text-primary underline underline-offset-4">
+                Voir les projets
+              </span>
+            </Link>
+          )}
+
           <Link
             to="/ressources-parents"
-            className="card-sticker flex flex-col bg-primary border-primary text-primary-foreground p-6 md:p-8 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className={`card-sticker flex flex-col bg-primary border-primary text-primary-foreground p-6 md:p-8 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${hasNewArchitectureYear ? 'md:col-span-2 lg:col-span-1' : ''}`}
           >
             <UsersRound className="w-8 h-8 text-secondary" aria-hidden="true" />
             <h3 className="mt-4 font-display text-2xl font-semibold">Espace parents</h3>

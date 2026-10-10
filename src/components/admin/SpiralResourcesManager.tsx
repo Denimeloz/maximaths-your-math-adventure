@@ -14,6 +14,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
 import { useCurrentAcademicYearId } from '@/contexts/AcademicYearContext';
+import { PROJECT_TYPE } from '@/lib/studentProjects';
 
 type SpiralLevel = '6eme' | '5eme' | '4eme' | '3eme' | 'seconde' | 'premiere' | 'terminale';
 
@@ -85,6 +86,8 @@ export const SpiralResourcesManager: React.FC<Props> = ({ selectedLevel }) => {
       .from('spiral_resources')
       .select('*')
       .eq('level', selectedLevel)
+      // Les projets des élèves partagent cette table : ils ont leur propre écran
+      .neq('resource_type', PROJECT_TYPE)
       .order('order_index', { ascending: true });
     if (error) {
       console.error('Error loading spiral resources:', error);
