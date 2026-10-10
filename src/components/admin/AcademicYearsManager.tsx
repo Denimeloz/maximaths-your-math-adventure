@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Plus, Trash2, CalendarRange, GraduationCap, Star } from 'lucide-react';
 import { toast } from 'sonner';
-import { useAcademicYears } from '@/contexts/AcademicYearContext';
+import { useAcademicYears, type YearClass } from '@/contexts/AcademicYearContext';
+import { SortableList } from './SortableList';
+import { saveOrder } from './MoveButtons';
 
 const ALL_LEVELS = [
   { id: '6eme', label: '6ème' },
@@ -71,6 +73,13 @@ export const AcademicYearsManager: React.FC = () => {
     });
     if (error) toast.error(error.message);
     else { setNewLevels(p => ({ ...p, [yearId]: '' })); refresh(); }
+  };
+
+  // Ordre des classes d'une année : c'est l'ordre des boutons « Choisis ta classe » sur l'accueil
+  const reorderClasses = async (ordered: YearClass[]) => {
+    const error = await saveOrder('year_classes', ordered);
+    if (error) toast.error(error.message);
+    refresh();
   };
 
   const removeClass = async (classId: string, label: string) => {
@@ -145,17 +154,25 @@ export const AcademicYearsManager: React.FC = () => {
                 {yClasses.length === 0 ? (
                   <p className="text-sm text-muted-foreground italic">Aucune classe ouverte pour cette année.</p>
                 ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {yClasses.map(c => (
-                      <span key={c.id} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted text-sm">
+                  <SortableList
+                    items={yClasses}
+                    getLabel={c => levelLabel(c.class_level)}
+                    onReorder={reorderClasses}
+                    layout="grid"
+                    className="flex flex-wrap gap-2"
+                    itemClassName="inline-flex items-center gap-1 pl-1 pr-3 py-1 rounded-full bg-muted text-sm"
+                  >
+                    {(c, handle) => (
+                      <>
+                        {handle}
                         <GraduationCap className="w-3.5 h-3.5" />
                         {levelLabel(c.class_level)}
                         <button onClick={() => removeClass(c.id, levelLabel(c.class_level))} aria-label="Retirer">
                           <Trash2 className="w-3.5 h-3.5 text-destructive" />
                         </button>
-                      </span>
-                    ))}
-                  </div>
+                      </>
+                    )}
+                  </SortableList>
                 )}
 
                 {availableLevels.length > 0 && (

@@ -30,6 +30,8 @@ import { RevisionPathManager } from '@/components/admin/RevisionPathManager';
 import { ParentResourcesManager } from '@/components/admin/ParentResourcesManager';
 import { CoursChapterManager } from '@/components/admin/CoursChapterManager';
 import PDFViewer from '@/components/PDFViewer';
+import { SortableList } from '@/components/admin/SortableList';
+import { saveOrder } from '@/components/admin/MoveButtons';
 import { AcademicYearProvider, useAcademicYears } from '@/contexts/AcademicYearContext';
 
 import { 
@@ -441,6 +443,20 @@ const AdminInner = () => {
         title: "Succès",
         description: "Cours supprimé",
       });
+      fetchCourses();
+    }
+  };
+
+  // Glisser-déposer des cours d'une classe : affichage immédiat, puis enregistrement des positions modifiées
+  const reorderCourses = async (ordered: Course[]) => {
+    const level = ordered[0]?.level;
+    setCourses(prev => [
+      ...prev.filter(c => c.level !== level),
+      ...ordered.map((c, position) => ({ ...c, order_index: position })),
+    ]);
+    const error = await saveOrder('courses', ordered, 'order_index');
+    if (error) {
+      toast({ title: "Erreur", description: "L'ordre n'a pas pu être enregistré", variant: "destructive" });
       fetchCourses();
     }
   };
@@ -1033,12 +1049,17 @@ const AdminInner = () => {
                     <p className="text-muted-foreground font-body">Aucun cours pour ce niveau</p>
                   </div>
                 ) : (
-                  courses.filter(c => c.level === activeLevel).map((course) => (
-                    <div 
-                      key={course.id}
-                      className="card-cartoon bg-card border-border p-6 flex items-center justify-between"
-                    >
+                  <SortableList
+                    items={courses.filter(c => c.level === activeLevel)}
+                    getLabel={course => course.title}
+                    onReorder={reorderCourses}
+                    className="space-y-4"
+                    itemClassName="card-cartoon bg-card border-border p-6 flex items-center justify-between"
+                  >
+                    {(course, handle) => (
+                    <>
                       <div className="flex items-center gap-4">
+                        {handle}
                         {course.image_url ? (
                           <img src={course.image_url} alt={course.title} className="w-16 h-16 rounded-xl object-cover" />
                         ) : (
@@ -1089,8 +1110,9 @@ const AdminInner = () => {
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
-                    </div>
-                  ))
+                    </>
+                    )}
+                  </SortableList>
                 )}
               </div>
             </div>
