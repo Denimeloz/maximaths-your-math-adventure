@@ -20,6 +20,7 @@ const ClubMaths = lazy(() => import("./pages/ClubMaths"));
 const DnbRevisionResources = lazy(() => import("./pages/DnbRevisionResources"));
 const ProgressionSpiralee = lazy(() => import("./pages/ProgressionSpiralee"));
 const Automatismes = lazy(() => import("./pages/Automatismes"));
+const ProjetsEleves = lazy(() => import("./pages/ProjetsEleves"));
 const ParcoursRevision = lazy(() => import("./pages/ParcoursRevision"));
 const ParentResources = lazy(() => import("./pages/ParentResources"));
 
@@ -59,6 +60,7 @@ const App = () => (
                 <Route path="/ressources-dnb" element={<DnbRevisionResources />} />
                 <Route path="/progression-spiralee" element={<ProgressionSpiralee />} />
                 <Route path="/automatismes" element={<Automatismes />} />
+                <Route path="/projets-eleves" element={<ProjetsEleves />} />
                 <Route path="/parcours-revision" element={<ParcoursRevision />} />
                 <Route path="/ressources-parents" element={<ParentResources />} />
 
