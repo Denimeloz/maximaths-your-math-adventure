@@ -9,9 +9,11 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY");
 const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY");
 const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") ?? "mailto:maximathsclass@gmail.com";
+// Mot de passe de la tâche planifiée : la fonction est déployée sans vérification JWT
+const CRON_SECRET = Deno.env.get("CRON_SECRET");
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
-  throw new Error("SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, VAPID_PUBLIC_KEY et VAPID_PRIVATE_KEY doivent être définis.");
+if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY || !CRON_SECRET) {
+  throw new Error("SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY et CRON_SECRET doivent être définis.");
 }
 
 webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
@@ -32,7 +34,11 @@ const json = (body: unknown, status = 200) =>
 const libelle = (titre: string, niveau: string | null) =>
   niveau && NIVEAUX[niveau] ? `${titre} (${NIVEAUX[niveau]})` : titre;
 
-Deno.serve(async () => {
+Deno.serve(async (req) => {
+  if (req.headers.get("x-cron-secret") !== CRON_SECRET) {
+    return json({ erreur: "non autorisé" }, 401);
+  }
+
   const { data: file, error } = await supabaseAdmin
     .from("pending_notifications")
     .select("id, title, level, created_at")

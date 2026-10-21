@@ -27,10 +27,16 @@
 Tableau de bord Supabase → **SQL Editor** → coller tout le fichier `supabase/migrations/20261021200000_notifications_push.sql` → **Run**. (Ou `npx supabase db push` depuis le dépôt, connecté au compte secondaire.)
 
 ### 2. Ranger les clés (Supabase, 2 min)
-**Edge Functions → Secrets** (ou Project Settings → Edge Functions) → ajouter :
+Ce n'est **pas** dans Settings → API Keys. Les secrets des fonctions sont dans la rubrique **Edge Functions** de la barre de gauche, onglet **Secrets**. Lien direct :
+https://supabase.com/dashboard/project/aqztamfuvtiidsevjawr/functions/secrets
+
+Ajouter quatre secrets (bouton **Add new secret**, nom à gauche, valeur à droite, puis **Save**) :
 - `VAPID_PUBLIC_KEY` : la même valeur que `VITE_VAPID_PUBLIC_KEY` dans `.env`
-- `VAPID_PRIVATE_KEY` : la clé privée, dans `secrets/.env` du dépôt Jarvis (`MAXIMATHS_VAPID_PRIVATE_KEY`). **Ne jamais la mettre dans ce dépôt.**
+- `VAPID_PRIVATE_KEY` : dans `secrets/.env` du dépôt Jarvis (`MAXIMATHS_VAPID_PRIVATE_KEY`). **Ne jamais la mettre dans ce dépôt.**
+- `CRON_SECRET` : dans `secrets/.env` du dépôt Jarvis (`MAXIMATHS_CRON_SECRET`). C'est le mot de passe de la tâche planifiée.
 - `VAPID_SUBJECT` : `mailto:maximathsclass@gmail.com`
+
+`SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` sont déjà fournis par Supabase à toutes les fonctions : ne pas les ajouter.
 
 ### 3. Déployer la fonction d'envoi (5 min)
 Depuis le dossier du dépôt :
@@ -38,13 +44,16 @@ Depuis le dossier du dépôt :
 npx supabase login            # avec le compte secondaire
 npx supabase functions deploy send-push-notifications --project-ref aqztamfuvtiidsevjawr
 ```
-(Autre possibilité : Edge Functions → Deploy a new function → coller `index.ts`.)
+Le fichier `supabase/config.toml` désactive la vérification JWT pour cette fonction : le projet utilise les nouvelles clés (`sb_secret_…`), qui ne sont pas des JWT. La fonction se protège elle-même avec `CRON_SECRET`.
+(Autre possibilité : Edge Functions → Deploy a new function → coller `index.ts`, puis dans les détails de la fonction, **désactiver « Verify JWT »**.)
 
 ### 4. Lancer l'envoi toutes les 5 minutes (Supabase, 3 min)
 **Integrations → Cron** → activer → **Create job** :
 - Nom : `envoyer-notifications` ; planning : `*/5 * * * *`
-- Type : **Supabase Edge Function** → `send-push-notifications`, méthode POST
-- Ajouter l'en-tête d'autorisation proposé (clé de service).
+- Type : **HTTP Request**, méthode **POST**
+- URL : `https://aqztamfuvtiidsevjawr.supabase.co/functions/v1/send-push-notifications`
+- En-tête (Header) : nom `x-cron-secret`, valeur : la même que le secret `CRON_SECRET`
+- Corps : `{}`
 
 ### 5. Mettre le site à jour
 Sur GitHub, fusionner la branche `claude/notifications-push` dans `main` (pull request). Lovable récupère le code ; dans Lovable, **Publish → Update** pour mettre maximaths.com à jour.
