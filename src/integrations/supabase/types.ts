@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
@@ -1240,6 +1240,36 @@ export type Database = {
           },
         ]
       }
+      pending_notifications: {
+        Row: {
+          created_at: string
+          id: number
+          level: string | null
+          row_id: string
+          sent_at: string | null
+          source_table: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          level?: string | null
+          row_id: string
+          sent_at?: string | null
+          source_table: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          level?: string | null
+          row_id?: string
+          sent_at?: string | null
+          source_table?: string
+          title?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1279,6 +1309,39 @@ export type Database = {
           profession?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          last_seen_at: string
+          level: string | null
+          p256dh: string
+          user_agent: string | null
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          last_seen_at?: string
+          level?: string | null
+          p256dh: string
+          user_agent?: string | null
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          last_seen_at?: string
+          level?: string | null
+          p256dh?: string
+          user_agent?: string | null
         }
         Relationships: []
       }
@@ -1336,7 +1399,6 @@ export type Database = {
           created_at: string
           description: string | null
           display_order: number
-          files: Json
           id: string
           is_published: boolean
           kind: string
@@ -1344,7 +1406,7 @@ export type Database = {
           step: number
           title: string
           updated_at: string
-          url: string | null
+          url: string
         }
         Insert: {
           academic_year_id?: string | null
@@ -1352,15 +1414,14 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number
-          files?: Json
           id?: string
           is_published?: boolean
           kind: string
           level: string
-          step?: number
+          step: number
           title: string
           updated_at?: string
-          url?: string | null
+          url: string
         }
         Update: {
           academic_year_id?: string | null
@@ -1368,7 +1429,6 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number
-          files?: Json
           id?: string
           is_published?: boolean
           kind?: string
@@ -1376,7 +1436,7 @@ export type Database = {
           step?: number
           title?: string
           updated_at?: string
-          url?: string | null
+          url?: string
         }
         Relationships: [
           {
@@ -1741,18 +1801,13 @@ export type Database = {
         Args: {
           p_auth: string
           p_endpoint: string
-          p_level?: string | null
+          p_level?: string
           p_p256dh: string
-          p_user_agent?: string | null
+          p_user_agent?: string
         }
         Returns: undefined
       }
-      unsubscribe_push: {
-        Args: {
-          p_endpoint: string
-        }
-        Returns: undefined
-      }
+      unsubscribe_push: { Args: { p_endpoint: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "user"
