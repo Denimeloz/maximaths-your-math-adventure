@@ -45,7 +45,7 @@ const QuickAccessSection = () => {
 
   const tiles: Tile[] = [
     ...(hasNewArchitectureYear
-      ? [{ to: '/parcours-revision', title: 'Parcours de révision', text: '5 étapes pour réactiver, revoir, t\'entraîner, vérifier et t\'autoévaluer.', icon: Route }]
+      ? [{ to: '/parcours-revision', title: 'Parcours de révision', text: 'Les fiches de révision de ta classe, avec leurs corrigés.', icon: Route }]
       : []),
     { to: '/progression-spiralee', title: 'Progression spiralée', text: "Fiches, exercices et vidéos à travailler toute l'année, par classe.", icon: Spline },
     { to: '/club-maths', title: 'Club Jules Verne', text: 'Énigmes, défis et projets mathématiques.', icon: Puzzle },
