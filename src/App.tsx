@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AcademicYearProvider } from "@/contexts/AcademicYearContext";
 import ScrollManager from "@/components/ScrollManager";
+import { InstallAppBanner } from "@/components/InstallApp";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -39,6 +40,7 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          <InstallAppBanner />
           <BrowserRouter>
             <ScrollManager />
             <Suspense fallback={<PageLoader />}>
