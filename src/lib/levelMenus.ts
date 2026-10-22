@@ -126,7 +126,7 @@ const newMenu = (levelId: string): LevelMenuItem[] => {
     { id: 'activites', label: "Espace d'approfondissement", description: 'Pour aller plus loin', icon: Lightbulb },
     { id: 'tests-entrainement', label: is3eme ? 'Tests ou Mini DNB' : 'Test', description: 'Tests', icon: Target },
     { id: 'evaluations', label: 'Évaluations', description: 'Tests et examens', icon: FileCheck },
-    { id: 'parcours-revision', label: 'Parcours de révision', description: '5 étapes pour réviser', icon: Route },
+    { id: 'parcours-revision', label: 'Parcours de révision', description: 'Fiches et corrigés pour réviser', icon: Route },
   ];
   if (is3eme) items.push(prepaDnb);
   items.push({ id: 'devoirs', label: 'Devoirs de niveaux', description: 'Devoirs de niveaux', icon: ClipboardList });

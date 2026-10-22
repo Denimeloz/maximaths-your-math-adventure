@@ -23,7 +23,7 @@ interface ResourceEntry {
 const RESOURCE_ENTRIES: ResourceEntry[] = [
   { to: '/automatismes', label: 'Automatismes', description: 'Entraînement régulier', icon: Zap, newArchitectureOnly: true },
   { to: '/projets-eleves', label: 'Projets des élèves', description: 'Les élèves expliquent le cours', icon: Presentation, newArchitectureOnly: true },
-  { to: '/parcours-revision', label: 'Parcours de révision', description: '5 étapes pour réviser', icon: Route, newArchitectureOnly: true },
+  { to: '/parcours-revision', label: 'Parcours de révision', description: 'Fiches et corrigés pour réviser', icon: Route, newArchitectureOnly: true },
   { to: '/progression-spiralee', label: 'Progression spiralée', description: "Fiches et exercices pour toute l'année", icon: Spline },
   { to: '/ressources-dnb', label: 'Ressources DNB', description: 'Fiches et annales du brevet', icon: GraduationCap },
   { to: '/club-maths', label: 'Club Jules Verne', description: 'Énigmes, défis et projets', icon: Puzzle },

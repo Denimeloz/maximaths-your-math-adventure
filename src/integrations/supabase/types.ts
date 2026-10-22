@@ -1336,6 +1336,7 @@ export type Database = {
           created_at: string
           description: string | null
           display_order: number
+          files: Json
           id: string
           is_published: boolean
           kind: string
@@ -1343,7 +1344,7 @@ export type Database = {
           step: number
           title: string
           updated_at: string
-          url: string
+          url: string | null
         }
         Insert: {
           academic_year_id?: string | null
@@ -1351,14 +1352,15 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number
+          files?: Json
           id?: string
           is_published?: boolean
           kind: string
           level: string
-          step: number
+          step?: number
           title: string
           updated_at?: string
-          url: string
+          url?: string | null
         }
         Update: {
           academic_year_id?: string | null
@@ -1366,6 +1368,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number
+          files?: Json
           id?: string
           is_published?: boolean
           kind?: string
@@ -1373,7 +1376,7 @@ export type Database = {
           step?: number
           title?: string
           updated_at?: string
-          url?: string
+          url?: string | null
         }
         Relationships: [
           {
