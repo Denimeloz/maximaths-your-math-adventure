@@ -1734,6 +1734,22 @@ export type Database = {
         }
         Returns: boolean
       }
+      subscribe_push: {
+        Args: {
+          p_auth: string
+          p_endpoint: string
+          p_level?: string | null
+          p_p256dh: string
+          p_user_agent?: string | null
+        }
+        Returns: undefined
+      }
+      unsubscribe_push: {
+        Args: {
+          p_endpoint: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"

@@ -1,1 +1,5 @@
 project_id = "aqztamfuvtiidsevjawr"
+
+# Appelée par la tâche planifiée avec l'en-tête x-cron-secret (les nouvelles clés sb_secret ne sont pas des JWT)
+[functions.send-push-notifications]
+verify_jwt = false

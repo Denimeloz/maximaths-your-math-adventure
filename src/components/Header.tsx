@@ -8,6 +8,7 @@ import { fetchSiteLabels } from '@/lib/siteLabels';
 import { LEVEL_GROUPS, LEVEL_LABELS, LEVEL_STYLES, type LevelId } from '@/lib/levels';
 import { getLevelMenu, levelMenuPath, usesNewArchitecture } from '@/lib/levelMenus';
 import SiteSearch from '@/components/SiteSearch';
+import NotificationButton from '@/components/NotificationButton';
 
 interface ResourceEntry {
   to: string;
@@ -252,6 +253,8 @@ const Header = () => {
             <Search className="w-5 h-5" />
           </button>
 
+          <NotificationButton className="flex items-center justify-center h-10 w-10 rounded-full transition-colors hover:bg-rainbow-blue/20 disabled:opacity-50" />
+
           <Button asChild size="sm" className="gap-2 rounded-full ml-1">
             <Link to="/ressources-parents">
               <UsersRound className="w-4 h-4" />
@@ -277,6 +280,7 @@ const Header = () => {
         >
           <Search className="w-6 h-6" />
         </button>
+        <NotificationButton className="p-2 rounded-xl bg-muted hover:bg-rainbow-blue/20 transition-colors disabled:opacity-50" iconClassName="w-6 h-6" />
         <button
           className="p-2 rounded-xl bg-muted hover:bg-rainbow-blue/20 transition-colors"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
