@@ -3,3 +3,7 @@ project_id = "aqztamfuvtiidsevjawr"
 # Appelée par la tâche planifiée avec l'en-tête x-cron-secret (les nouvelles clés sb_secret ne sont pas des JWT)
 [functions.send-push-notifications]
 verify_jwt = false
+
+# Visites du site pour le tableau de bord : appelée par un administrateur connecté, vérifié dans la fonction
+[functions.statistiques-site]
+verify_jwt = false
