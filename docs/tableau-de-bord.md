@@ -8,11 +8,9 @@ SQL Editor : exécuter `supabase/migrations/20261024230000_tableau_de_bord.sql` 
 
 ## 2. Visites du site (Cloudflare, 5 min)
 
-1. **ID de zone** : Cloudflare › maximaths.com › Vue d'ensemble, colonne de droite « API » › **ID de zone**. Le copier.
-2. **Jeton en lecture seule** : en haut à droite, icône du profil › **Mon profil** › **Jetons API** › **Créer un jeton** › modèle **« Lire les analyses et les journaux »** (Read analytics and logs) › Ressources de zone : *Inclure* › *Zone spécifique* › `maximaths.com` › Continuer › Créer. Copier le jeton (il n'est affiché qu'une fois).
-3. **Supabase** › Edge Functions › **Secrets** : ajouter
-   - `CLOUDFLARE_API_TOKEN` = le jeton ;
-   - `CLOUDFLARE_ZONE_ID` = l'ID de zone.
+1. **Jeton en lecture seule** : en haut à droite, icône du profil › **Mon profil** › **Jetons API** › **Créer un jeton** › modèle **« Lire les analyses et les journaux »** (Read analytics and logs). Dans « Autorisations », **ajouter une ligne** : *Zone* › *Zone* › *Lire* (pour que la fonction retrouve maximaths.com toute seule). Ressources de zone : *Inclure* › *Zone spécifique* › `maximaths.com` › Continuer › Créer. Copier le jeton (il n'est affiché qu'une fois).
+2. **Supabase** › Edge Functions › **Secrets** : ajouter `CLOUDFLARE_API_TOKEN` = le jeton.
+3. Facultatif : `CLOUDFLARE_ZONE_ID` = l'**ID de zone** (bloc « API » tout en bas de la page Vue d'ensemble de maximaths.com, sur un écran étroit). Inutile si le jeton a la permission *Zone › Zone › Lire*.
    Garder aussi le jeton dans `secrets/.env` de Jarvis (`CLOUDFLARE_API_TOKEN`), jamais ailleurs.
 4. **Déployer la fonction** (PowerShell, dans le dossier du projet) :
    ```
