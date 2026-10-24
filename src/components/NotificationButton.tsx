@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Bell, BellOff, BellRing } from 'lucide-react';
 import { toast } from 'sonner';
-import { disablePush, enablePush, getPushState, type PushState } from '@/lib/push';
+import { disablePush, enablePush, getPushState, onPushChange, type PushState } from '@/lib/push';
 
 interface NotificationButtonProps {
   className?: string;
@@ -15,6 +15,7 @@ const NotificationButton = ({ className, iconClassName = 'w-5 h-5' }: Notificati
 
   useEffect(() => {
     getPushState().then(setState).catch(() => setState('unsupported'));
+    return onPushChange(setState);
   }, []);
 
   if (state === 'unsupported') return null;
@@ -50,12 +51,18 @@ const NotificationButton = ({ className, iconClassName = 'w-5 h-5' }: Notificati
     }
   };
 
-  const label = state === 'on' ? 'Désactiver les notifications' : 'Être prévenu des nouveaux documents';
+  const label = state === 'on'
+    ? 'Notifications activées : touche pour les couper'
+    : state === 'denied'
+      ? 'Notifications bloquées dans le navigateur'
+      : 'Activer les notifications des nouveaux documents';
   const Icon = state === 'on' ? BellRing : state === 'denied' ? BellOff : Bell;
 
   return (
-    <button type="button" onClick={handleClick} disabled={busy} aria-label={label} title={label} className={className}>
+    <button type="button" onClick={handleClick} disabled={busy} aria-label={label} title={label} className={`relative ${className ?? ''}`}>
       <Icon className={iconClassName} />
+      {/* Pastille tant que les notifications ne sont pas activées : la cloche attire l'œil */}
+      {state === 'off' && <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-rainbow-orange animate-pulse" />}
     </button>
   );
 };
