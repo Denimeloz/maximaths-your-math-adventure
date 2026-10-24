@@ -5,6 +5,18 @@ const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undef
 
 export type PushState = 'unsupported' | 'ios-install' | 'denied' | 'off' | 'on';
 
+// Prévient les autres boutons (cloche, invitation) quand les notifications sont activées ou coupées
+const EVENEMENT_PUSH = 'maximaths:push-change';
+const signaler = (etat: PushState) => {
+  window.dispatchEvent(new CustomEvent<PushState>(EVENEMENT_PUSH, { detail: etat }));
+  return etat;
+};
+export const onPushChange = (rappel: (etat: PushState) => void) => {
+  const ecouteur = (e: Event) => rappel((e as CustomEvent<PushState>).detail);
+  window.addEventListener(EVENEMENT_PUSH, ecouteur);
+  return () => window.removeEventListener(EVENEMENT_PUSH, ecouteur);
+};
+
 export const isIos = () =>
   /iphone|ipad|ipod/i.test(navigator.userAgent) ||
   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -43,7 +55,7 @@ export const getPushState = async (): Promise<PushState> => {
 export const enablePush = async (level?: string | null): Promise<PushState> => {
   if (!pushSupported()) return 'unsupported';
   const permission = await Notification.requestPermission();
-  if (permission !== 'granted') return permission === 'denied' ? 'denied' : 'off';
+  if (permission !== 'granted') return signaler(permission === 'denied' ? 'denied' : 'off');
 
   const registration = (await navigator.serviceWorker.getRegistration()) ?? (await navigator.serviceWorker.register('/sw.js'));
   await navigator.serviceWorker.ready;
@@ -66,7 +78,7 @@ export const enablePush = async (level?: string | null): Promise<PushState> => {
     await subscription.unsubscribe();
     throw error;
   }
-  return 'on';
+  return signaler('on');
 };
 
 export const disablePush = async (): Promise<PushState> => {
@@ -76,5 +88,5 @@ export const disablePush = async (): Promise<PushState> => {
     await supabase.rpc('unsubscribe_push', { p_endpoint: subscription.endpoint });
     await subscription.unsubscribe();
   }
-  return 'off';
+  return signaler('off');
 };

@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { AcademicYearProvider } from "@/contexts/AcademicYearContext";
 import ScrollManager from "@/components/ScrollManager";
 import { InstallAppBanner } from "@/components/InstallApp";
+import NotificationInvite from "@/components/NotificationInvite";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -44,6 +45,7 @@ const App = () => (
           <InstallAppBanner />
           <BrowserRouter>
             <ScrollManager />
+            <NotificationInvite />
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
