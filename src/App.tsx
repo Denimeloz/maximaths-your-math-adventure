@@ -24,6 +24,7 @@ const Automatismes = lazy(() => import("./pages/Automatismes"));
 const ProjetsEleves = lazy(() => import("./pages/ProjetsEleves"));
 const ParcoursRevision = lazy(() => import("./pages/ParcoursRevision"));
 const ParentResources = lazy(() => import("./pages/ParentResources"));
+const Nouveautes = lazy(() => import("./pages/Nouveautes"));
 
 const queryClient = new QueryClient();
 
@@ -65,6 +66,7 @@ const App = () => (
                 <Route path="/projets-eleves" element={<ProjetsEleves />} />
                 <Route path="/parcours-revision" element={<ParcoursRevision />} />
                 <Route path="/ressources-parents" element={<ParentResources />} />
+                <Route path="/nouveautes" element={<Nouveautes />} />
 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

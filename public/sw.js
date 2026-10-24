@@ -4,7 +4,7 @@ self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
 self.addEventListener("push", (event) => {
-  let data = { title: "MAXIMATHS", body: "Du nouveau sur le site", url: "/" };
+  let data = { title: "MAXIMATHS", body: "Du nouveau sur le site", url: "/nouveautes" };
   try {
     data = { ...data, ...event.data.json() };
   } catch {
@@ -16,16 +16,21 @@ self.addEventListener("push", (event) => {
       icon: "/icon-192.png",
       badge: "/favicon-32.png",
       data: { url: data.url },
-      tag: "maximaths-nouveautes",
+      // Une étiquette par document : les notifications s'empilent au lieu de se remplacer
+      tag: data.tag || `maximaths-${Date.now()}`,
       renotify: true,
+      // Sur ordinateur, la notification reste affichée jusqu'à ce qu'on la ferme ou qu'on clique
+      requireInteraction: true,
+      vibrate: [200, 100, 200],
+      timestamp: Date.now(),
     }),
   );
 });
 
-// Un clic sur la notification ouvre le site (ou revient sur l'onglet déjà ouvert)
+// Un clic sur la notification ouvre la liste des nouveautés (ou revient sur l'onglet déjà ouvert)
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const cible = new URL(event.notification.data?.url || "/", self.location.origin).href;
+  const cible = new URL(event.notification.data?.url || "/nouveautes", self.location.origin).href;
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((fenetres) => {
       for (const f of fenetres) {

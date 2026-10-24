@@ -9,6 +9,7 @@ import { LEVEL_GROUPS, LEVEL_LABELS, LEVEL_STYLES, type LevelId } from '@/lib/le
 import { getLevelMenu, levelMenuPath, usesNewArchitecture } from '@/lib/levelMenus';
 import SiteSearch from '@/components/SiteSearch';
 import NotificationButton from '@/components/NotificationButton';
+import NewsButton from '@/components/NewsButton';
 import { InstallAppButton } from '@/components/InstallApp';
 
 interface ResourceEntry {
@@ -254,6 +255,8 @@ const Header = () => {
             <Search className="w-5 h-5" />
           </button>
 
+          <NewsButton className="flex items-center justify-center h-10 w-10 rounded-full transition-colors hover:bg-rainbow-pink/20" />
+
           <NotificationButton className="flex items-center justify-center h-10 w-10 rounded-full transition-colors hover:bg-rainbow-blue/20 disabled:opacity-50" />
 
           <InstallAppButton className="flex items-center justify-center h-10 w-10 rounded-full transition-colors hover:bg-rainbow-blue/20" />
@@ -283,6 +286,7 @@ const Header = () => {
         >
           <Search className="w-6 h-6" />
         </button>
+        <NewsButton className="p-2 rounded-xl bg-muted hover:bg-rainbow-pink/20 transition-colors" iconClassName="w-6 h-6" />
         <NotificationButton className="p-2 rounded-xl bg-muted hover:bg-rainbow-blue/20 transition-colors disabled:opacity-50" iconClassName="w-6 h-6" />
         <InstallAppButton className="p-2 rounded-xl bg-muted hover:bg-rainbow-blue/20 transition-colors" iconClassName="w-6 h-6" />
         <button
