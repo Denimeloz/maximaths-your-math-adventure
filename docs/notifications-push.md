@@ -6,7 +6,7 @@
 
 - Une **cloche** apparaît dans l'en-tête (ordinateur et téléphone). Un clic, le navigateur demande l'autorisation, et l'appareil est abonné. Pas besoin de compte.
 - Dès qu'un contenu est **publié** (création déjà publiée, ou passage de brouillon à publié) dans l'une des 22 tables de documents, il entre dans une file d'attente (`pending_notifications`).
-- Toutes les 5 minutes, la fonction `send-push-notifications` envoie **un seul message** pour la série : « Nouveau sur MAXIMATHS : Fiche vecteurs (2nde) », ou « 4 nouveautés sur MAXIMATHS : … ». Elle attend 5 minutes sans nouveau dépôt avant d'envoyer, pour ne pas inonder les élèves quand l'administrateur publie plusieurs fichiers à la suite.
+- **Depuis le 24/10/2026** (voir la section « Notifications fluides » en bas) : la fonction `send-push-notifications` est appelée **dès la publication** et envoie **une notification par document**. Au-delà de 5 documents en 2 minutes, les suivants partent en un seul résumé après 1 minute de calme.
 - Un clic sur la notification ouvre le site.
 - **iPhone** : les notifications ne marchent que si le site a été ajouté à l'écran d'accueil (iOS 16.4 ou plus). La cloche l'explique à l'élève.
 - Plus tard, la colonne `level` des abonnements permettra de n'envoyer à chaque élève que ce qui concerne sa classe.
@@ -68,3 +68,29 @@ Sur GitHub, fusionner la branche `claude/notifications-push` dans `main` (pull r
 - Les 22 tables surveillées sont listées en bas de la migration : en retirer une suffit à ne plus l'annoncer.
 - Coût : nul sur l'offre gratuite de Supabase (500 000 appels de fonction par mois ; ici, environ 9 000).
 - La publication sur le Play Store (application Android qui ouvre le site) se fera ensuite avec PWABuilder ; elle demandera un fichier `/.well-known/assetlinks.json`.
+
+
+## Notifications fluides (24/10/2026)
+
+Ce qui change :
+- **Envoi immédiat** : le déclencheur `send_push_now` appelle la fonction dès qu'un document est publié (extension `pg_net`). La tâche planifiée reste en secours.
+- **Une notification par document**, qui s'empile avec les autres au lieu de remplacer la précédente ; résumé au-delà de 5 documents en 2 minutes.
+- **La notification reste affichée** sur ordinateur jusqu'à ce qu'on la ferme (`requireInteraction`). Un clic ouvre la page **« Quoi de neuf »**.
+- **Page `/nouveautes`** (bouton étincelles avec pastille dans l'en-tête) : tout ce qui a été publié ces 7 derniers jours, groupé par jour, même sans notifications.
+- **Administration › Notifications** : appareils abonnés (Windows, Android…), essai sur tous les appareils ou sur l'appareil en main, file d'attente, journal des envois avec le résultat pour chaque appareil.
+
+Mise en service, dans l'ordre :
+
+1. **SQL Editor** : exécuter `supabase/migrations/20261024200000_notifications_fluides.sql`.
+2. **SQL Editor**, une seule fois : ranger le mot de passe de la fonction dans le coffre de Supabase (remplacer par la valeur de `CRON_SECRET`, celle de `MAXIMATHS_CRON_SECRET` dans `secrets/.env` de Jarvis ; ne pas l'écrire ailleurs) :
+   ```sql
+   select vault.create_secret('VALEUR_DE_CRON_SECRET', 'maximaths_cron_secret');
+   ```
+3. **Déployer la fonction** (PowerShell, dans le dossier du projet) :
+   ```
+   npx.cmd supabase functions deploy send-push-notifications --project-ref aqztamfuvtiidsevjawr
+   ```
+4. **Integrations › Cron** : passer la tâche `envoyer-notifications` à **chaque minute** (`* * * * *`). Elle ne sert plus qu'en secours et pour les résumés.
+5. **Fusionner la branche** `claude/notifications-fluides`, puis **Publish** dans Lovable.
+6. **Cloudflare** (conseillé) : *Règles › Cache Rules* : pour le chemin `/sw.js`, « Contourner le cache », sinon les appareils peuvent garder l'ancien service worker jusqu'à 4 heures.
+7. **Tester** : Administration › Notifications › « Tester sur tous les appareils », puis publier un vrai document.

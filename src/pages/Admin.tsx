@@ -25,6 +25,7 @@ import { GamesGeniallyManager } from '@/components/admin/GamesGeniallyManager';
 import { DnbRevisionResourcesManager } from '@/components/admin/DnbRevisionResourcesManager';
 import SpiralResourcesManager from '@/components/admin/SpiralResourcesManager';
 import { AcademicYearsManager } from '@/components/admin/AcademicYearsManager';
+import { NotificationsManager } from '@/components/admin/NotificationsManager';
 import { AutomatismsManager } from '@/components/admin/AutomatismsManager';
 import { StudentProjectsManager } from '@/components/admin/StudentProjectsManager';
 import { RevisionPathManager } from '@/components/admin/RevisionPathManager';
@@ -686,6 +687,9 @@ const AdminInner = () => {
 
           {/* Academic Years Manager */}
           {activeTab === 'academic-years' && !activeLevel && <AcademicYearsManager />}
+
+          {/* Contrôle des notifications (24/10/2026) */}
+          {activeTab === 'notifications' && !activeLevel && <NotificationsManager />}
 
           {/* Class Info Section */}
           {activeTab === 'infos' && activeLevel && activeLevel !== 'club-maths' && activeLevel !== 'spiral-progression' && (

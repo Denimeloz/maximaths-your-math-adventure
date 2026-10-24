@@ -35,6 +35,7 @@ import {
   Spline,
   CalendarRange,
   CalendarPlus,
+  BellRing,
   Zap,
   Route,
   Presentation,
@@ -205,6 +206,15 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange: onTabChangeP
                 >
                   <CalendarPlus className="w-4 h-4 mr-2" />
                   <span>Nouvelle année</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => onTabChange?.('notifications', null, null)}
+                  className={`cursor-pointer transition-colors ${activeTab === 'notifications' ? 'bg-rainbow-purple/10 text-rainbow-purple font-medium' : 'hover:bg-muted/50'}`}
+                >
+                  <BellRing className="w-4 h-4 mr-2" />
+                  <span>Notifications</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
