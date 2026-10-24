@@ -18,4 +18,5 @@ Mise en service, dans l'ordre :
 
 À savoir :
 - Le lien d'invitation est valable 24 heures et une seule fois ; « Lien de connexion » en recrée un.
+- **Depuis le 25/10** : le lien mène à la page `/activer` du site, où la personne touche « Activer mon compte ». Avant, il menait directement à Supabase et l'aperçu automatique de WhatsApp l'utilisait avant le clic : le lien ne marchait plus et on tombait sur la page de connexion. Les comptes non administrateurs qui se connectent arrivent sur leur profil.
 - Aucun e-mail n'est envoyé par Supabase : c'est toi qui envoies le lien (le service d'e-mail gratuit de Supabase n'écrit qu'aux membres de l'équipe du projet).

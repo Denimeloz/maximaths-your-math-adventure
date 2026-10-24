@@ -40,7 +40,7 @@ const NotificationInvite = () => {
   }, []);
 
   // Pas sur l'administration ni la connexion ; seulement si l'activation est possible et pas encore faite
-  const pageAdmin = pathname.startsWith('/admin') || pathname.startsWith('/auth');
+  const pageAdmin = ['/admin', '/auth', '/activer', '/profil'].some((p) => pathname.startsWith(p));
   if (!visible || fermee || pageAdmin || etat !== 'off') return null;
 
   const plusTard = () => {
