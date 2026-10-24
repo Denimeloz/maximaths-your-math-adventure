@@ -36,6 +36,7 @@ import {
   CalendarRange,
   CalendarPlus,
   BellRing,
+  UserRound,
   Zap,
   Route,
   Presentation,
@@ -337,6 +338,12 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange: onTabChangeP
                 >
                   <Users className="w-4 h-4 mr-2" />
                   <span>Utilisateurs</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton onClick={() => navigate('/profil')} className="cursor-pointer transition-colors hover:bg-muted/50">
+                  <UserRound className="w-4 h-4 mr-2" />
+                  <span>Mon profil</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

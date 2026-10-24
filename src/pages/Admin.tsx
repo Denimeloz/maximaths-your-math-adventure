@@ -26,6 +26,7 @@ import { DnbRevisionResourcesManager } from '@/components/admin/DnbRevisionResou
 import SpiralResourcesManager from '@/components/admin/SpiralResourcesManager';
 import { AcademicYearsManager } from '@/components/admin/AcademicYearsManager';
 import { NotificationsManager } from '@/components/admin/NotificationsManager';
+import { UsersManager } from '@/components/admin/UsersManager';
 import { AutomatismsManager } from '@/components/admin/AutomatismsManager';
 import { StudentProjectsManager } from '@/components/admin/StudentProjectsManager';
 import { RevisionPathManager } from '@/components/admin/RevisionPathManager';
@@ -480,64 +481,6 @@ const AdminInner = () => {
       if (newPublished) {
       }
       fetchCourses();
-    }
-  };
-
-  const handleToggleUserRole = async (userId: string, currentRole: string) => {
-    const newRole = currentRole === 'admin' ? 'user' : 'admin';
-    
-    const { error } = await supabase
-      .from('user_roles')
-      .update({ role: newRole })
-      .eq('user_id', userId);
-
-    if (error) {
-      toast({
-        title: "Erreur",
-        description: "Impossible de modifier le rôle",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Succès",
-        description: `Rôle modifié en ${newRole}`,
-      });
-      fetchUsers();
-    }
-  };
-
-  const handleDeleteUser = async (userId: string) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) return;
-    setIsLoading(true);
-
-    try {
-      const { data, error } = await supabase.functions.invoke("delete-user", {
-        body: JSON.stringify({ userId }),
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      const response = typeof data === 'string' ? JSON.parse(data) : data;
-      if (!response?.success) {
-        throw new Error(response?.error || 'Impossible de supprimer l\'utilisateur');
-      }
-
-      toast({
-        title: "Succès",
-        description: "Utilisateur supprimé",
-      });
-      await fetchUsers();
-    } catch (error) {
-      console.error('deleteUser error:', error);
-      toast({
-        title: "Erreur",
-        description: error?.message || 'Impossible de supprimer l\'utilisateur',
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -1177,70 +1120,8 @@ const AdminInner = () => {
             <FileVideoManager courses={courses.map(c => ({ id: c.id, title: c.title }))} />
           )}
 
-          {/* Users Tab */}
-          {activeTab === 'users' && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-display text-foreground">Gestion des Utilisateurs</h2>
-              
-              <div className="space-y-4">
-                {users.map((userItem) => (
-                  <div 
-                    key={userItem.id}
-                    className="card-cartoon bg-card border-border p-6 flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-rainbow-purple to-rainbow-pink flex items-center justify-center">
-                        <span className="text-lg font-display text-secondary-foreground">
-                          {userItem.first_name?.[0]?.toUpperCase() || '?'}
-                        </span>
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-display text-foreground">
-                            {userItem.first_name} {userItem.last_name}
-                          </h3>
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-body ${
-                            userItem.role === 'admin'
-                              ? 'bg-rainbow-purple/20 text-rainbow-purple'
-                              : 'bg-muted text-muted-foreground'
-                          }`}>
-                            {userItem.role === 'admin' ? 'Admin' : 'Utilisateur'}
-                          </span>
-                        </div>
-                        <p className="text-sm text-muted-foreground font-body">{userItem.email}</p>
-                        {userItem.level && (
-                          <p className="text-xs text-muted-foreground font-body mt-1">
-                            {userItem.profession} • {userItem.level}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant={userItem.role === 'admin' ? 'outline' : 'default'}
-                        onClick={() => handleToggleUserRole(userItem.user_id, userItem.role || 'user')}
-                        className="rounded-xl"
-                        disabled={userItem.user_id === user?.id}
-                      >
-                        <Shield className="w-4 h-4 mr-2" />
-                        {userItem.role === 'admin' ? 'Retirer Admin' : 'Promouvoir Admin'}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleDeleteUser(userItem.user_id)}
-                        className="rounded-full text-destructive hover:text-destructive"
-                        disabled={userItem.user_id === user?.id}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Utilisateurs (25/10/2026) */}
+          {activeTab === 'users' && <UsersManager />}
         </main>
       </div>
     </SidebarProvider>
