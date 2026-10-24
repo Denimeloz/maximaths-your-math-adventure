@@ -27,6 +27,7 @@ const ParcoursRevision = lazy(() => import("./pages/ParcoursRevision"));
 const ParentResources = lazy(() => import("./pages/ParentResources"));
 const Nouveautes = lazy(() => import("./pages/Nouveautes"));
 const Profil = lazy(() => import("./pages/Profil"));
+const Activer = lazy(() => import("./pages/Activer"));
 
 const queryClient = new QueryClient();
 
@@ -71,6 +72,7 @@ const App = () => (
                 <Route path="/ressources-parents" element={<ParentResources />} />
                 <Route path="/nouveautes" element={<Nouveautes />} />
                 <Route path="/profil" element={<Profil />} />
+                <Route path="/activer" element={<Activer />} />
 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

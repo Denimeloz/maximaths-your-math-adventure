@@ -2,7 +2,8 @@
 // Corps : { action, ... }
 // - list : tous les comptes (profil, rôle, dernière connexion, e-mail confirmé)
 // - invite { email, first_name, last_name, account_type?, admin? } : crée le compte et renvoie un lien
-//   d'invitation à envoyer (WhatsApp ou e-mail) ; la personne y choisit son mot de passe
+//   d'invitation à envoyer (WhatsApp ou e-mail) ; la personne y choisit son mot de passe.
+//   Le lien mène à la page /activer du site (et non à Supabase) : l'aperçu de WhatsApp ne peut pas l'user.
 // - link { userId } : nouveau lien pour choisir un mot de passe (compte déjà créé)
 // - set_admin { userId, admin } ; update { userId, ...champs du profil } ; delete { userId }
 // Garde-fous : on ne se retire pas soi-même les droits, on garde au moins un administrateur,
@@ -56,6 +57,10 @@ const definirRole = async (userId: string, admin: boolean) => {
   const { error } = await supabaseAdmin.from("user_roles").insert({ user_id: userId, role: admin ? "admin" : "user" });
   if (error) throw new Error(error.message);
 };
+
+// Lien du site : le code n'est utilisé qu'au clic sur « Activer mon compte » (page /activer)
+const lienDuSite = (hashedToken: string, type: "invite" | "recovery") =>
+  `${SITE}/activer?token_hash=${encodeURIComponent(hashedToken)}&type=${type}`;
 
 const nettoyer = (champs: Record<string, unknown>) => {
   const propre: Record<string, unknown> = {};
@@ -125,7 +130,7 @@ Deno.serve(async (req) => {
       const champs = nettoyer({ account_type: corps.account_type, classes: corps.classes });
       if (Object.keys(champs).length) await supabaseAdmin.from("profiles").update(champs).eq("user_id", id);
       if (corps.admin === true) await definirRole(id, true);
-      return json({ ok: true, lien: data.properties.action_link, userId: id });
+      return json({ ok: true, lien: lienDuSite(data.properties.hashed_token, "invite"), userId: id });
     }
 
     if (action === "link") {
@@ -139,7 +144,7 @@ Deno.serve(async (req) => {
         options: { redirectTo: `${SITE}/profil?${type === "invite" ? "bienvenue" : "mot-de-passe"}=1` },
       });
       if (error) throw new Error(error.message);
-      return json({ ok: true, lien: data.properties.action_link });
+      return json({ ok: true, lien: lienDuSite(data.properties.hashed_token, type) });
     }
 
     if (action === "set_admin") {

@@ -28,7 +28,8 @@ const Auth = () => {
   useEffect(() => {
     // On attend de savoir si le compte est admin avant de rediriger (authLoading reste vrai jusque-là)
     if (!authLoading && user) {
-      navigate(isAdmin ? '/admin' : '/', { replace: true });
+      // Un administrateur va à l'administration, les autres comptes à leur profil
+      navigate(isAdmin ? '/admin' : '/profil', { replace: true });
     }
   }, [user, isAdmin, authLoading, navigate]);
 
@@ -71,11 +72,11 @@ const Auth = () => {
             <img src={newLogo} alt="MAXIMATHS" className="w-16 h-16 mx-auto mb-4 object-contain" />
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-rainbow-purple/20 rounded-full mb-4">
               <Shield className="w-4 h-4 text-rainbow-purple" />
-              <span className="text-rainbow-purple font-body font-semibold text-sm">Espace administrateur</span>
+              <span className="text-rainbow-purple font-body font-semibold text-sm">Espace membres</span>
             </div>
             <h1 className="text-2xl font-display text-foreground">Connexion</h1>
             <p className="text-muted-foreground font-body text-sm mt-1">
-              Accès réservé à l'administrateur du site.
+              Connecte-toi avec le compte créé pour toi. Pas encore de mot de passe ? Utilise le lien reçu.
             </p>
           </div>
 
