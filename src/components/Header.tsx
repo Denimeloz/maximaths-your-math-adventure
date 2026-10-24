@@ -1,4 +1,4 @@
-import { Menu, X, Home, Info, ChevronDown, GraduationCap, UsersRound, Zap, Route, Spline, Puzzle, Presentation, Search, type LucideIcon } from "lucide-react";
+import { Menu, X, Home, Info, ChevronDown, GraduationCap, UsersRound, Zap, Route, Spline, Puzzle, Presentation, Search, UserRound, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -11,6 +11,7 @@ import SiteSearch from '@/components/SiteSearch';
 import NotificationButton from '@/components/NotificationButton';
 import NewsButton from '@/components/NewsButton';
 import { InstallAppButton } from '@/components/InstallApp';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ResourceEntry {
   to: string;
@@ -37,6 +38,7 @@ const Header = () => {
   const menuRef = useRef<HTMLElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const isHomePage = location.pathname === '/';
   const [searchOpen, setSearchOpen] = useState(false);
   const { years, classes, selectedYearId, setSelectedYearId } = useAcademicYears();
@@ -260,6 +262,13 @@ const Header = () => {
           <NotificationButton className="flex items-center justify-center h-10 w-10 rounded-full transition-colors hover:bg-rainbow-blue/20 disabled:opacity-50" />
 
           <InstallAppButton className="flex items-center justify-center h-10 w-10 rounded-full transition-colors hover:bg-rainbow-blue/20" />
+
+          {/* Compte connecté : accès au profil */}
+          {user && (
+            <Link to="/profil" aria-label="Mon profil" title="Mon profil" className="flex items-center justify-center h-10 w-10 rounded-full transition-colors hover:bg-rainbow-blue/20">
+              <UserRound className="w-5 h-5" />
+            </Link>
+          )}
 
           <Button asChild size="sm" className="gap-2 rounded-full ml-1">
             <Link to="/ressources-parents">

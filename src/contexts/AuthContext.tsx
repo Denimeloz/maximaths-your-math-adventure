@@ -12,6 +12,15 @@ interface Profile {
   level: string | null;
   bio: string | null;
   avatar_url: string | null;
+  // Champs ajoutés le 25/10/2026 (page Profil)
+  phone?: string | null;
+  account_type?: string | null;
+  classes?: string[];
+  school?: string | null;
+  city?: string | null;
+  country?: string | null;
+  jules_verne?: boolean;
+  access_until?: string | null;
   created_at: string;
   updated_at: string;
 }

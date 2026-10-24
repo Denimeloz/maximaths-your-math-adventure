@@ -7,3 +7,7 @@ verify_jwt = false
 # Visites du site pour le tableau de bord : appelée par un administrateur connecté, vérifié dans la fonction
 [functions.statistiques-site]
 verify_jwt = false
+
+# Gestion des comptes depuis l'administration : administrateur vérifié dans la fonction
+[functions.admin-users]
+verify_jwt = false
