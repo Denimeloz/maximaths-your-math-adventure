@@ -22,6 +22,7 @@ Utiliser le compte Google de Maximaths (**maximathsclasse@gmail.com**), pas un c
    - Accepter le règlement, **Créer**.
 4. **Image de marque** (Branding) :
    - Page d'accueil : `https://maximaths.com`.
+   - **Règles de confidentialité** : `https://maximaths.com/confidentialite` (page ajoutée par cette PR, en ligne après la publication). Les **conditions d'utilisation** sont facultatives.
    - **Domaines autorisés** : ajouter `maximaths.com` et `aqztamfuvtiidsevjawr.supabase.co` (Google refuse `supabase.co` seul, qui est partagé par tous les projets Supabase).
    - Ne pas ajouter de logo pour l'instant : un logo déclenche une vérification de Google qui peut prendre plusieurs jours. On pourra l'ajouter plus tard.
    - Enregistrer.
