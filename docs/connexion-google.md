@@ -22,7 +22,7 @@ Utiliser le compte Google de Maximaths (**maximathsclasse@gmail.com**), pas un c
    - Accepter le règlement, **Créer**.
 4. **Image de marque** (Branding) :
    - Page d'accueil : `https://maximaths.com`.
-   - **Domaines autorisés** : ajouter `maximaths.com` et `supabase.co`.
+   - **Domaines autorisés** : ajouter `maximaths.com` et `aqztamfuvtiidsevjawr.supabase.co` (Google refuse `supabase.co` seul, qui est partagé par tous les projets Supabase).
    - Ne pas ajouter de logo pour l'instant : un logo déclenche une vérification de Google qui peut prendre plusieurs jours. On pourra l'ajouter plus tard.
    - Enregistrer.
 5. **Accès aux données** (Data access) : rien à ajouter. Les autorisations de base (e-mail, profil, openid) suffisent et ne demandent pas de vérification.
