@@ -6,12 +6,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
-import { ArrowLeft, Loader2, Mail, Lock, Shield, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Loader2, User, Lock, Shield, Eye, EyeOff, MessageCircle } from 'lucide-react';
 import newLogo from "@/assets/new-logo.png";
+import { adresseDeConnexion, lienOubli } from '@/lib/eleves';
 
+// Un élève se connecte avec son pseudo (prenom.nom) et son code de 6 chiffres ; un adulte avec son e-mail
+// et son mot de passe (28/10/2026). Le même champ accepte les deux.
 const signInSchema = z.object({
-  email: z.string().email('Email invalide'),
-  password: z.string().min(1, 'Mot de passe requis'),
+  email: z.string().trim().min(3, 'Écris ton pseudo ou ton e-mail')
+    .refine((v) => (v.includes('@') ? z.string().email().safeParse(v).success : /^[a-z0-9.]+$/i.test(v)), 'Pseudo ou e-mail invalide'),
+  password: z.string().min(1, 'Code ou mot de passe requis'),
 });
 
 const Auth = () => {
@@ -44,13 +48,13 @@ const Auth = () => {
       return;
     }
     setIsLoading(true);
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(adresseDeConnexion(email), password);
     setIsLoading(false);
     if (error) {
       toast({
         title: 'Connexion impossible',
         description: error.message.includes('Invalid login credentials')
-          ? 'Email ou mot de passe incorrect.'
+          ? 'Identifiant ou code incorrect. Un pseudo s’écrit prenom.nom, sans accent.'
           : error.message,
         variant: 'destructive',
       });
@@ -76,21 +80,26 @@ const Auth = () => {
             </div>
             <h1 className="text-2xl font-display text-foreground">Connexion</h1>
             <p className="text-muted-foreground font-body text-sm mt-1">
-              Connecte-toi avec le compte créé pour toi. Pas encore de mot de passe ? Utilise le lien reçu.
+              Élève : ton pseudo (prenom.nom) et ton code. Adulte : ton e-mail et ton mot de passe.
+              Pas encore de compte ? Utilise le lien ou le QR code donné par ton professeur.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email" className="font-body font-semibold flex items-center gap-2">
-                <Mail className="w-4 h-4 text-rainbow-pink" /> Email
+                <User className="w-4 h-4 text-rainbow-pink" /> Pseudo ou e-mail
               </Label>
               <Input
                 id="email"
-                type="email"
+                type="text"
+                inputMode="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@maximaths.fr"
+                placeholder="awa.kone"
                 className="rounded-xl border-2 focus:border-rainbow-pink h-12"
               />
               {errors.email && <p className="text-destructive text-sm">{errors.email}</p>}
@@ -98,12 +107,13 @@ const Auth = () => {
 
             <div className="space-y-2">
               <Label htmlFor="password" className="font-body font-semibold flex items-center gap-2">
-                <Lock className="w-4 h-4 text-rainbow-green" /> Mot de passe
+                <Lock className="w-4 h-4 text-rainbow-green" /> Code ou mot de passe
               </Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
@@ -132,6 +142,16 @@ const Auth = () => {
               )}
             </Button>
           </form>
+
+          {/* Pas d'e-mail de récupération : la demande part sur WhatsApp, l'administration envoie un nouveau code */}
+          <a
+            href={lienOubli(email)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-5 flex items-center justify-center gap-2 text-sm font-body text-muted-foreground hover:text-foreground"
+          >
+            <MessageCircle className="w-4 h-4" /> J’ai oublié mon code ou mon mot de passe
+          </a>
         </div>
       </div>
     </div>
