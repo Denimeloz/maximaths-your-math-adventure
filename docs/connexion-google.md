@@ -32,7 +32,7 @@ Utiliser le compte Google de Maximaths (**maximathsclasse@gmail.com**), pas un c
    - **Origines JavaScript autorisées** : `https://maximaths.com`.
    - **URI de redirection autorisés** : `https://aqztamfuvtiidsevjawr.supabase.co/auth/v1/callback` (c'est l'adresse de Supabase, pas celle du site).
    - **Créer**. Google affiche l'**ID client** et le **Code secret du client** : les copier tout de suite (bouton de téléchargement JSON possible).
-8. Ranger l'ID et le secret dans le gestionnaire de mots de passe (et, côté Jarvis, dans `secrets/.env` : `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`). Ne jamais les coller dans le code ni sur WhatsApp.
+8. Ranger l'ID et le secret dans le gestionnaire de mots de passe (et, côté Jarvis, dans `secrets/.env` : `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`). Ne jamais les coller dans le code ni sur WhatsApp.
 
 ## 2. Brancher Google dans Supabase
 
