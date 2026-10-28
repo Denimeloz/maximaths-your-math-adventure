@@ -11,3 +11,7 @@ verify_jwt = false
 # Gestion des comptes depuis l'administration : administrateur vérifié dans la fonction
 [functions.admin-users]
 verify_jwt = false
+
+# Inscription par classe (QR code ou lien) : publique, le lien est vérifié dans la fonction
+[functions.inscription-classe]
+verify_jwt = false

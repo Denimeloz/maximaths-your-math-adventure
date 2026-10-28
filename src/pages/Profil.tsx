@@ -11,9 +11,12 @@ import { Camera, KeyRound, LogOut, Save, ShieldCheck, UserRound } from 'lucide-r
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { LEVEL_IDS, LEVEL_LABELS } from '@/lib/levels';
+import { estCompteEleve, identifiantAffiche } from '@/lib/eleves';
 
 // Mon profil (25/10/2026) : photo, identité, type de compte et classes, établissement, présentation,
 // mot de passe. Après une invitation, la personne arrive ici (?bienvenue=1) pour choisir son mot de passe.
+// Compte élève (pseudo, 28/10/2026) : il arrive ici après l'inscription par classe (?eleve=1) ; son « mot de
+// passe » est un code d'au moins 6 chiffres.
 
 const TYPES: Record<string, string> = { enseignant: 'Enseignant', eleve: 'Élève', parent: 'Parent', autre: 'Autre' };
 
@@ -114,17 +117,20 @@ const Profil: React.FC = () => {
     toast.success('Photo mise à jour');
   };
 
+  const eleve = estCompteEleve(user.email);
+
   const changerMotDePasse = async () => {
-    if (motDePasse.nouveau.length < 8) return toast.error('Au moins 8 caractères');
-    if (motDePasse.nouveau !== motDePasse.confirmation) return toast.error('Les deux mots de passe ne sont pas identiques');
+    if (eleve && !/^\d{6,}$/.test(motDePasse.nouveau)) return toast.error('Ton code : au moins 6 chiffres');
+    if (!eleve && motDePasse.nouveau.length < 8) return toast.error('Au moins 8 caractères');
+    if (motDePasse.nouveau !== motDePasse.confirmation) return toast.error(eleve ? 'Les deux codes ne sont pas identiques' : 'Les deux mots de passe ne sont pas identiques');
     const { error } = await supabase.auth.updateUser({ password: motDePasse.nouveau });
     if (error) return toast.error('Changement impossible', { description: error.message });
     setMotDePasse({ nouveau: '', confirmation: '' });
-    toast.success('Mot de passe enregistré');
+    toast.success(eleve ? 'Code enregistré : note-le bien' : 'Mot de passe enregistré');
     if (accueil) navigate('/profil', { replace: true });
   };
 
-  const nomAffiche = [champs.first_name, champs.last_name].filter(Boolean).join(' ') || user.email;
+  const nomAffiche = [champs.first_name, champs.last_name].filter(Boolean).join(' ') || identifiantAffiche(user.email);
 
   return (
     <div className="min-h-screen bg-hero-gradient">
@@ -134,6 +140,15 @@ const Profil: React.FC = () => {
           <div className="rounded-2xl border-2 border-rainbow-orange bg-rainbow-orange/10 p-4">
             <p className="font-display text-lg">{params.has('bienvenue') ? 'Bienvenue sur MAXIMATHS !' : 'Choisis ton nouveau mot de passe'}</p>
             <p className="text-sm font-body">Commence par choisir ton mot de passe (en bas de la page), puis complète ton profil.</p>
+          </div>
+        )}
+        {params.has('eleve') && (
+          <div className="rounded-2xl border-2 border-rainbow-orange bg-rainbow-orange/10 p-4">
+            <p className="font-display text-lg">Bienvenue sur MAXIMATHS !</p>
+            <p className="text-sm font-body">
+              Ton compte est prêt et rangé dans ta classe. Pour te reconnecter : ton pseudo <strong>{identifiantAffiche(user.email)}</strong> et ton code.
+              Tu peux ajouter une photo et changer ton code plus bas.
+            </p>
           </div>
         )}
 
@@ -154,7 +169,7 @@ const Profil: React.FC = () => {
           <input ref={fichier} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && changerPhoto(e.target.files[0])} />
           <div className="text-center sm:text-left flex-1 min-w-0">
             <h1 className="text-2xl font-display text-foreground truncate">{nomAffiche}</h1>
-            <p className="text-sm text-muted-foreground">{user.email}</p>
+            <p className="text-sm text-muted-foreground">{eleve ? `Pseudo : ${identifiantAffiche(user.email)}` : user.email}</p>
             <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-2">
               {isAdmin && <span className="px-2 py-0.5 rounded-full text-xs bg-rainbow-orange/20 text-rainbow-orange font-semibold">Administrateur</span>}
               {champs.account_type && <span className="px-2 py-0.5 rounded-full text-xs bg-rainbow-blue/10 text-rainbow-blue font-semibold">{TYPES[champs.account_type]}</span>}
@@ -220,13 +235,14 @@ const Profil: React.FC = () => {
           <p className="text-xs text-muted-foreground">Ces informations sont gérées par l’administration.</p>
         </Section>
 
-        <Section titre={accueil ? 'Choisis ton mot de passe' : 'Mot de passe'} icone={KeyRound}>
+        <Section titre={eleve ? 'Mon code' : accueil ? 'Choisis ton mot de passe' : 'Mot de passe'} icone={KeyRound}>
+          {eleve && <p className="text-xs text-muted-foreground">Ton code sert à te connecter avec ton pseudo. Choisis au moins 6 chiffres, et ne le donne à personne.</p>}
           <div className="grid sm:grid-cols-2 gap-3">
-            <div><Label>Nouveau mot de passe</Label><Input type="password" autoComplete="new-password" value={motDePasse.nouveau} onChange={(e) => setMotDePasse({ ...motDePasse, nouveau: e.target.value })} /></div>
-            <div><Label>Confirmation</Label><Input type="password" autoComplete="new-password" value={motDePasse.confirmation} onChange={(e) => setMotDePasse({ ...motDePasse, confirmation: e.target.value })} /></div>
+            <div><Label>{eleve ? 'Nouveau code' : 'Nouveau mot de passe'}</Label><Input type="password" inputMode={eleve ? 'numeric' : undefined} autoComplete="new-password" value={motDePasse.nouveau} onChange={(e) => setMotDePasse({ ...motDePasse, nouveau: e.target.value })} /></div>
+            <div><Label>Confirmation</Label><Input type="password" inputMode={eleve ? 'numeric' : undefined} autoComplete="new-password" value={motDePasse.confirmation} onChange={(e) => setMotDePasse({ ...motDePasse, confirmation: e.target.value })} /></div>
           </div>
           <div className="flex justify-end">
-            <Button onClick={changerMotDePasse} variant={accueil ? 'default' : 'outline'} className="gap-2"><KeyRound className="w-4 h-4" /> Enregistrer le mot de passe</Button>
+            <Button onClick={changerMotDePasse} variant={accueil ? 'default' : 'outline'} className="gap-2"><KeyRound className="w-4 h-4" /> {eleve ? 'Enregistrer le code' : 'Enregistrer le mot de passe'}</Button>
           </div>
         </Section>
       </main>

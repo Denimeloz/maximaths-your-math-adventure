@@ -5,10 +5,12 @@
 //   d'invitation à envoyer (WhatsApp ou e-mail) ; la personne y choisit son mot de passe.
 //   Le lien mène à la page /activer du site (et non à Supabase) : l'aperçu de WhatsApp ne peut pas l'user.
 // - link { userId } : nouveau lien pour choisir un mot de passe (compte déjà créé)
+// - reset_code { userId } : compte élève (pseudo, sans e-mail) : nouveau code de 6 chiffres, à envoyer (28/10/2026)
 // - set_admin { userId, admin } ; update { userId, ...champs du profil } ; delete { userId }
 // Garde-fous : on ne se retire pas soi-même les droits, on garde au moins un administrateur,
 // on ne supprime ni soi-même ni un administrateur.
 import { createClient } from "npm:@supabase/supabase-js@2.89.0";
+import { DOMAINE_ELEVES, nouveauCode } from "../_shared/eleves.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -145,6 +147,18 @@ Deno.serve(async (req) => {
       });
       if (error) throw new Error(error.message);
       return json({ ok: true, lien: lienDuSite(data.properties.hashed_token, type) });
+    }
+
+    if (action === "reset_code") {
+      const userId = String(corps.userId);
+      const { data: cible } = await supabaseAdmin.auth.admin.getUserById(userId);
+      if (!cible?.user?.email?.endsWith(`@${DOMAINE_ELEVES}`)) {
+        return json({ erreur: "Ce compte a une adresse e-mail : utilise « Lien de connexion »." }, 400);
+      }
+      const code = nouveauCode();
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, { password: code });
+      if (error) throw new Error(error.message);
+      return json({ ok: true, code });
     }
 
     if (action === "set_admin") {

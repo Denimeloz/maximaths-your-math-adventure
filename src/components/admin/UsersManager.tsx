@@ -5,8 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Copy, KeyRound, MessageCircle, Pencil, RefreshCw, Shield, ShieldOff, Trash2, UserPlus } from 'lucide-react';
+import { Copy, Hash, KeyRound, MessageCircle, Pencil, RefreshCw, Shield, ShieldOff, Trash2, UserPlus } from 'lucide-react';
 import { LEVEL_IDS, LEVEL_LABELS } from '@/lib/levels';
+import { estCompteEleve, identifiantAffiche } from '@/lib/eleves';
+import { InscriptionsManager } from '@/components/admin/InscriptionsManager';
 
 // Gestion des comptes (25/10/2026) : liste avec dernière connexion, invitation par lien, rôles,
 // modification des profils et suppression des comptes qui ne sont pas administrateurs.
@@ -100,6 +102,8 @@ export const UsersManager: React.FC = () => {
   const [edition, setEdition] = useState<{ compte: Compte; form: Formulaire } | null>(null);
   const [suppression, setSuppression] = useState<{ compte: Compte; saisie: string } | null>(null);
   const [lien, setLien] = useState<{ pour: string; url: string; bienvenue: boolean } | null>(null);
+  // Compte élève (pseudo, sans e-mail) : nouveau code de 6 chiffres à lui envoyer (28/10/2026)
+  const [codeEleve, setCodeEleve] = useState<{ pour: string; pseudo: string; code: string } | null>(null);
 
   const charger = useCallback(async () => {
     setChargement(true);
@@ -146,6 +150,15 @@ export const UsersManager: React.FC = () => {
     if (data?.lien) setLien({ pour: nom(c) || c.email, url: data.lien, bienvenue: !c.email_confirmed_at });
   };
 
+  const nouveauCode = async (c: Compte) => {
+    const data = await action({ action: 'reset_code', userId: c.id }, 'Nouveau code créé');
+    if (data?.code) setCodeEleve({ pour: nom(c) || identifiantAffiche(c.email), pseudo: identifiantAffiche(c.email), code: data.code });
+  };
+
+  const messageCode = codeEleve
+    ? `Bonjour ${codeEleve.pour}, voici ton accès MAXIMATHS (maximaths.com, « Connexion ») : pseudo ${codeEleve.pseudo}, nouveau code ${codeEleve.code}. Garde-le pour toi.`
+    : '';
+
   const enregistrer = async () => {
     if (!edition) return;
     const { form, compte } = edition;
@@ -179,7 +192,7 @@ export const UsersManager: React.FC = () => {
         <div>
           <h2 className="text-2xl font-display text-foreground">Utilisateurs</h2>
           <p className="text-sm text-muted-foreground font-body">
-            {comptes.length} compte{comptes.length > 1 ? 's' : ''}, dont {admins} administrateur{admins > 1 ? 's' : ''}. Les inscriptions publiques sont fermées : les comptes se créent ici, par invitation.
+            {comptes.length} compte{comptes.length > 1 ? 's' : ''}, dont {admins} administrateur{admins > 1 ? 's' : ''}. Les inscriptions publiques sont fermées : les comptes se créent ici, par invitation, ou par les liens d’inscription par classe.
           </p>
         </div>
         <div className="flex gap-2">
@@ -192,6 +205,8 @@ export const UsersManager: React.FC = () => {
         </div>
       </div>
 
+      <InscriptionsManager />
+
       {chargement && comptes.length === 0 ? (
         <p className="text-muted-foreground">Chargement…</p>
       ) : (
@@ -199,6 +214,7 @@ export const UsersManager: React.FC = () => {
           {comptes.map((c) => {
             const n = nom(c);
             const type = c.profil?.account_type ? TYPES_COMPTE[c.profil.account_type] : null;
+            const eleve = estCompteEleve(c.email);
             return (
               <div key={c.id} className="card-cartoon bg-card border-border p-4 flex flex-col lg:flex-row lg:items-center gap-4">
                 <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -220,7 +236,7 @@ export const UsersManager: React.FC = () => {
                       {c.profil?.jules_verne && <span className="px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700 font-semibold">Jules Verne</span>}
                       {!c.email_confirmed_at && <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-800 font-semibold">Invitation en attente</span>}
                     </div>
-                    <p className="text-sm text-muted-foreground truncate">{c.email}</p>
+                    <p className="text-sm text-muted-foreground truncate">{eleve ? `Pseudo : ${identifiantAffiche(c.email)}` : c.email}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       Créé le {date(c.created_at)} · {c.last_sign_in_at ? `dernière connexion le ${dateHeure(c.last_sign_in_at)}` : 'jamais connecté'}
                       {(c.profil?.classes ?? []).length > 0 && ` · ${(c.profil?.classes ?? []).map((x) => LEVEL_LABELS[x as keyof typeof LEVEL_LABELS] ?? x).join(', ')}`}
@@ -251,9 +267,15 @@ export const UsersManager: React.FC = () => {
                   >
                     <Pencil className="w-4 h-4" /> Modifier
                   </Button>
-                  <Button variant="outline" size="sm" className="gap-1" disabled={occupe} onClick={() => nouveauLien(c)}>
-                    <KeyRound className="w-4 h-4" /> Lien de connexion
-                  </Button>
+                  {eleve ? (
+                    <Button variant="outline" size="sm" className="gap-1" disabled={occupe} onClick={() => nouveauCode(c)}>
+                      <Hash className="w-4 h-4" /> Nouveau code
+                    </Button>
+                  ) : (
+                    <Button variant="outline" size="sm" className="gap-1" disabled={occupe} onClick={() => nouveauLien(c)}>
+                      <KeyRound className="w-4 h-4" /> Lien de connexion
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
@@ -332,12 +354,36 @@ export const UsersManager: React.FC = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Nouveau code d'un compte élève */}
+      <Dialog open={!!codeEleve} onOpenChange={(o) => !o && setCodeEleve(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Nouveau code pour {codeEleve?.pour}</DialogTitle>
+            <DialogDescription>L’ancien code ne marche plus. Envoie celui-ci uniquement à l’élève (ou à son parent).</DialogDescription>
+          </DialogHeader>
+          <div className="rounded-xl bg-muted p-4 text-center">
+            <p className="text-sm">Pseudo : <strong>{codeEleve?.pseudo}</strong></p>
+            <p className="text-3xl font-display tracking-[0.3em] mt-1">{codeEleve?.code}</p>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => navigator.clipboard.writeText(messageCode).then(() => toast.success('Message copié'))}>
+              <Copy className="w-4 h-4" /> Copier le message
+            </Button>
+            <Button className="gap-2" asChild>
+              <a href={`https://wa.me/?text=${encodeURIComponent(messageCode)}`} target="_blank" rel="noopener noreferrer">
+                <MessageCircle className="w-4 h-4" /> Envoyer par WhatsApp
+              </a>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Modifier un profil */}
       <Dialog open={!!edition} onOpenChange={(o) => !o && setEdition(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Modifier le profil</DialogTitle>
-            <DialogDescription>{edition?.compte.email}</DialogDescription>
+            <DialogDescription>{identifiantAffiche(edition?.compte.email)}</DialogDescription>
           </DialogHeader>
           {edition && (
             <div className="grid gap-3">
@@ -368,16 +414,16 @@ export const UsersManager: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Supprimer ce compte ?</DialogTitle>
             <DialogDescription>
-              Le compte et son profil sont effacés définitivement. Pour confirmer, tape l’adresse : <strong>{suppression?.compte.email}</strong>
+              Le compte et son profil sont effacés définitivement. Pour confirmer, tape {estCompteEleve(suppression?.compte.email) ? 'le pseudo' : 'l’adresse'} : <strong>{identifiantAffiche(suppression?.compte.email)}</strong>
             </DialogDescription>
           </DialogHeader>
-          <Input value={suppression?.saisie ?? ''} onChange={(e) => suppression && setSuppression({ ...suppression, saisie: e.target.value })} placeholder={suppression?.compte.email} />
+          <Input value={suppression?.saisie ?? ''} onChange={(e) => suppression && setSuppression({ ...suppression, saisie: e.target.value })} placeholder={identifiantAffiche(suppression?.compte.email)} />
           <DialogFooter>
             <Button variant="outline" onClick={() => setSuppression(null)}>Annuler</Button>
             <Button
               variant="destructive"
               onClick={supprimer}
-              disabled={occupe || suppression?.saisie.trim().toLowerCase() !== suppression?.compte.email.toLowerCase()}
+              disabled={occupe || suppression?.saisie.trim().toLowerCase() !== identifiantAffiche(suppression?.compte.email).toLowerCase()}
             >
               Supprimer définitivement
             </Button>
