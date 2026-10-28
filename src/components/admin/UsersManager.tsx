@@ -33,6 +33,7 @@ interface Compte {
   created_at: string;
   last_sign_in_at: string | null;
   email_confirmed_at: string | null;
+  google?: boolean;
   admin: boolean;
   moi: boolean;
   profil: Profil | null;
@@ -234,6 +235,7 @@ export const UsersManager: React.FC = () => {
                       </span>
                       {type && <span className="px-2 py-0.5 rounded-full text-xs bg-rainbow-blue/10 text-rainbow-blue font-semibold">{type}</span>}
                       {c.profil?.jules_verne && <span className="px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700 font-semibold">Jules Verne</span>}
+                      {c.google && <span className="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 font-semibold">Google</span>}
                       {!c.email_confirmed_at && <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-800 font-semibold">Invitation en attente</span>}
                     </div>
                     <p className="text-sm text-muted-foreground truncate">{eleve ? `Pseudo : ${identifiantAffiche(c.email)}` : c.email}</p>
