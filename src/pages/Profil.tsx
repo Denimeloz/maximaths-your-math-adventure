@@ -12,6 +12,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { LEVEL_IDS, LEVEL_LABELS } from '@/lib/levels';
 import { estCompteEleve, identifiantAffiche } from '@/lib/eleves';
+import { adresseGoogle, delierGoogle, erreurRetourGoogle, identiteGoogle, lierGoogle } from '@/lib/google';
+import GoogleLogo from '@/components/GoogleLogo';
 
 // Mon profil (25/10/2026) : photo, identité, type de compte et classes, établissement, présentation,
 // mot de passe. Après une invitation, la personne arrive ici (?bienvenue=1) pour choisir son mot de passe.
@@ -57,6 +59,16 @@ const Profil: React.FC = () => {
   useEffect(() => {
     if (!isLoading && !user) navigate('/auth', { replace: true });
   }, [isLoading, user, navigate]);
+
+  // Retour de Google après « Lier mon compte Google » (28/10/2026)
+  useEffect(() => {
+    const erreur = erreurRetourGoogle();
+    if (erreur) toast.error('Compte Google non relié', { description: erreur });
+    else if (params.has('google')) {
+      toast.success('Compte Google relié : tu peux maintenant te connecter avec Google');
+      navigate('/profil', { replace: true });
+    }
+  }, [params, navigate]);
 
   useEffect(() => {
     if (!user) return;
@@ -118,6 +130,19 @@ const Profil: React.FC = () => {
   };
 
   const eleve = estCompteEleve(user.email);
+  const google = identiteGoogle(user);
+
+  const relierGoogle = async () => {
+    const { error } = await lierGoogle();
+    if (error) toast.error('Liaison impossible', { description: error.message });
+  };
+
+  const retirerGoogle = async () => {
+    const { error } = await delierGoogle(user);
+    if (error) return toast.error('Impossible de délier Google', { description: error.message });
+    await supabase.auth.refreshSession();
+    toast.success('Compte Google délié');
+  };
 
   const changerMotDePasse = async () => {
     if (eleve && !/^\d{6,}$/.test(motDePasse.nouveau)) return toast.error('Ton code : au moins 6 chiffres');
@@ -147,7 +172,7 @@ const Profil: React.FC = () => {
             <p className="font-display text-lg">Bienvenue sur MAXIMATHS !</p>
             <p className="text-sm font-body">
               Ton compte est prêt et rangé dans ta classe. Pour te reconnecter : ton pseudo <strong>{identifiantAffiche(user.email)}</strong> et ton code.
-              Tu peux ajouter une photo et changer ton code plus bas.
+              Plus bas, tu peux ajouter une photo, changer ton code ou relier ton compte Google pour te connecter plus vite.
             </p>
           </div>
         )}
@@ -233,6 +258,23 @@ const Profil: React.FC = () => {
             {extra.access_until && ` Accès ouvert jusqu’au ${new Date(extra.access_until).toLocaleDateString('fr-FR')}.`}
           </p>
           <p className="text-xs text-muted-foreground">Ces informations sont gérées par l’administration.</p>
+        </Section>
+
+        <Section titre="Connexion avec Google" icone={GoogleLogo}>
+          {google ? (
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm font-body">Relié à <strong>{adresseGoogle(user) ?? 'ton compte Google'}</strong> : tu peux te connecter avec le bouton « Se connecter avec Google ».</p>
+              <Button variant="outline" onClick={retirerGoogle}>Délier</Button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm font-body">
+                Relie ton compte Google pour te connecter en un geste, sans {eleve ? 'pseudo ni code' : 'mot de passe'}.
+                {eleve && <> Utilise <strong>ton propre compte Google</strong>, jamais celui d’un parent : sinon, il ouvrirait ton compte MAXIMATHS.</>}
+              </p>
+              <Button variant="outline" onClick={relierGoogle} className="gap-2"><GoogleLogo /> Lier mon compte Google</Button>
+            </div>
+          )}
         </Section>
 
         <Section titre={eleve ? 'Mon code' : accueil ? 'Choisis ton mot de passe' : 'Mot de passe'} icone={KeyRound}>

@@ -105,6 +105,8 @@ Deno.serve(async (req) => {
           last_sign_in_at: u.last_sign_in_at ?? null,
           email_confirmed_at: u.email_confirmed_at ?? null,
           invited_at: u.invited_at ?? null,
+          // Compte Google relié (raccourci de connexion, 28/10/2026)
+          google: (u.identities ?? []).some((i) => i.provider === "google"),
           admin: (roles ?? []).some((r) => r.user_id === u.id && r.role === "admin"),
           moi: u.id === moi.id,
           profil,

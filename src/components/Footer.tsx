@@ -34,6 +34,7 @@ const Footer = () => {
             <Link to="/ressources-parents" className="text-foreground hover:underline underline-offset-4">Espace parents</Link>
             <Link to="/about" className="text-foreground hover:underline underline-offset-4">À propos</Link>
             <a href="mailto:maximathsclasse@gmail.com" className="text-foreground hover:underline underline-offset-4">Contact</a>
+            <Link to="/confidentialite" className="text-foreground hover:underline underline-offset-4">Confidentialité</Link>
             <Link to="/auth" className="text-muted-foreground hover:underline underline-offset-4 text-sm">Admin</Link>
           </nav>
 

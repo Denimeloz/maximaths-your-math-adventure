@@ -9,6 +9,8 @@ import { z } from 'zod';
 import { ArrowLeft, Loader2, User, Lock, Shield, Eye, EyeOff, MessageCircle } from 'lucide-react';
 import newLogo from "@/assets/new-logo.png";
 import { adresseDeConnexion, lienOubli } from '@/lib/eleves';
+import { connexionGoogle, erreurRetourGoogle } from '@/lib/google';
+import GoogleLogo from '@/components/GoogleLogo';
 
 // Un élève se connecte avec son pseudo (prenom.nom) et son code de 6 chiffres ; un adulte avec son e-mail
 // et son mot de passe (28/10/2026). Le même champ accepte les deux.
@@ -28,6 +30,17 @@ const Auth = () => {
   const { signIn, user, isAdmin, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Retour de Google avec une erreur (compte Google relié à aucun compte, connexion annulée…)
+  useEffect(() => {
+    const erreur = erreurRetourGoogle();
+    if (erreur) toast({ title: 'Connexion avec Google', description: erreur, variant: 'destructive' });
+  }, [toast]);
+
+  const avecGoogle = async () => {
+    const { error } = await connexionGoogle();
+    if (error) toast({ title: 'Connexion avec Google impossible', description: error.message, variant: 'destructive' });
+  };
 
   useEffect(() => {
     // On attend de savoir si le compte est admin avant de rediriger (authLoading reste vrai jusque-là)
@@ -142,6 +155,14 @@ const Auth = () => {
               )}
             </Button>
           </form>
+
+          <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="h-px flex-1 bg-border" /> ou <span className="h-px flex-1 bg-border" />
+          </div>
+          <Button type="button" variant="outline" onClick={avecGoogle} className="w-full h-12 rounded-2xl gap-3 font-body font-semibold">
+            <GoogleLogo /> Se connecter avec Google
+          </Button>
+          <p className="mt-2 text-xs text-center text-muted-foreground font-body">Si tu as relié ton compte Google dans Mon profil.</p>
 
           {/* Pas d'e-mail de récupération : la demande part sur WhatsApp, l'administration envoie un nouveau code */}
           <a

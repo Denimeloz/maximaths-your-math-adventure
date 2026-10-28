@@ -29,6 +29,7 @@ const Nouveautes = lazy(() => import("./pages/Nouveautes"));
 const Profil = lazy(() => import("./pages/Profil"));
 const Activer = lazy(() => import("./pages/Activer"));
 const Rejoindre = lazy(() => import("./pages/Rejoindre"));
+const Confidentialite = lazy(() => import("./pages/Confidentialite"));
 
 const queryClient = new QueryClient();
 
@@ -75,6 +76,7 @@ const App = () => (
                 <Route path="/profil" element={<Profil />} />
                 <Route path="/activer" element={<Activer />} />
                 <Route path="/rejoindre/:code" element={<Rejoindre />} />
+                <Route path="/confidentialite" element={<Confidentialite />} />
 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
