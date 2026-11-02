@@ -6,9 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
-import { ArrowLeft, Loader2, User, Lock, Shield, Eye, EyeOff, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, User, Lock, Shield, Eye, EyeOff, MessageCircle, Mail } from 'lucide-react';
 import newLogo from "@/assets/new-logo.png";
-import { adresseDeConnexion, lienOubli } from '@/lib/eleves';
+import { adresseDeConnexion, lienOubli, lienOubliMail } from '@/lib/eleves';
 import { connexionGoogle, erreurRetourGoogle } from '@/lib/google';
 import GoogleLogo from '@/components/GoogleLogo';
 
@@ -164,15 +164,19 @@ const Auth = () => {
           </Button>
           <p className="mt-2 text-xs text-center text-muted-foreground font-body">Si tu as relié ton compte Google dans Mon profil.</p>
 
-          {/* Pas d'e-mail de récupération : la demande part sur WhatsApp, l'administration envoie un nouveau code */}
-          <a
-            href={lienOubli(email)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-5 flex items-center justify-center gap-2 text-sm font-body text-muted-foreground hover:text-foreground"
-          >
-            <MessageCircle className="w-4 h-4" /> J’ai oublié mon code ou mon mot de passe
-          </a>
+          {/* Pas d'e-mail de récupération automatique : la demande part sur WhatsApp ou par e-mail,
+              l'administration vérifie qui écrit et envoie un nouveau code */}
+          <div className="mt-5 text-center text-sm font-body text-muted-foreground">
+            <p>J’ai oublié mon code ou mon mot de passe :</p>
+            <div className="mt-1 flex items-center justify-center gap-4">
+              <a href={lienOubli(email)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 underline-offset-4 hover:underline hover:text-foreground">
+                <MessageCircle className="w-4 h-4" /> par WhatsApp
+              </a>
+              <a href={lienOubliMail(email)} className="flex items-center gap-1.5 underline-offset-4 hover:underline hover:text-foreground">
+                <Mail className="w-4 h-4" /> par e-mail
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>

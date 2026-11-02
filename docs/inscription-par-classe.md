@@ -30,3 +30,14 @@ Mise en service, dans l'ordre :
 - Un lien sert au plus le nombre de places choisi et jusqu'à sa date limite. Pour une séance en classe, choisir **1 heure** : une photo du QR qui circule ensuite ne sert plus.
 - Le pseudo est `prenom.nom` ; en cas de doublon, `prenom.nom2`, `prenom.nom3`… Il ne se change que depuis l'administration.
 - Un code de 6 chiffres suffit pour un site de cours ; Supabase limite les essais de connexion répétés. Pour l'accès payant, on ajoutera la limite d'appareils par compte.
+
+## Mise à jour du 02/11/2026 : suppression des liens, demande de code par e-mail
+
+- **Supprimer un lien** : bouton **Supprimer** sur chaque lien vide, ou qui ne sert plus (désactivé, expiré, complet), et bouton **Supprimer les liens terminés** quand il y en a plusieurs. Les comptes déjà créés restent, avec leur classe. Un lien ouvert qui a des inscrits se désactive d'abord.
+- **Compteur d'inscrits juste** : quand un compte élève est supprimé, sa place est rendue au lien d'origine.
+- **« J'ai oublié mon code »** : deux choix, **par WhatsApp** (numéro de l'assistance, 07 13 77 73 04, par défaut) ou **par e-mail** (maximathsclasse@gmail.com), avec le message déjà écrit.
+- **Authentication › Sign In / Providers › Email** : **Password requirements** doit rester sur **No required characters**, sinon les codes de 6 chiffres sont refusés (cause de l'échec du 02/11).
+
+Mise en service :
+1. **SQL Editor** : exécuter `supabase/migrations/20261102000000_liens_inscription_compteur.sql` (rend la place quand un compte est supprimé, puis recompte les inscrits de chaque lien).
+2. Fusionner la branche `claude/liens-et-oubli`, puis **Publish** dans Lovable.

@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Copy, MessageCircle, Plus, Power, QrCode, RefreshCw } from 'lucide-react';
+import { Copy, MessageCircle, Plus, Power, QrCode, RefreshCw, Trash2 } from 'lucide-react';
 import { LEVEL_IDS, LEVEL_LABELS, levelLabel } from '@/lib/levels';
 
 // Inscription par classe (28/10/2026) : un lien (et son QR code) par classe, avec une date limite et un
@@ -48,6 +48,11 @@ const etat = (l: LienInscription) => {
   return { texte: 'Ouvert', classe: 'bg-green-100 text-green-700' };
 };
 
+// Un lien se supprime s'il est vide, ou s'il ne sert plus (désactivé, expiré, complet) : les comptes déjà
+// créés restent, avec leur classe. Un lien ouvert qui a des inscrits se désactive d'abord.
+// Le compteur d'inscrits redescend tout seul quand un compte est supprimé (migration du 02/11/2026).
+const supprimable = (l: LienInscription) => l.uses === 0 || etat(l).texte !== 'Ouvert';
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const table = () => (supabase as any).from('signup_links');
 
@@ -55,6 +60,7 @@ export const InscriptionsManager: React.FC = () => {
   const [liens, setLiens] = useState<LienInscription[]>([]);
   const [creation, setCreation] = useState<{ label: string; classe: string; account_type: 'eleve' | 'parent'; jules_verne: boolean; heures: number; max_uses: number } | null>(null);
   const [qr, setQr] = useState<LienInscription | null>(null);
+  const [aSupprimer, setASupprimer] = useState<LienInscription[] | null>(null);
   const [occupe, setOccupe] = useState(false);
 
   const charger = useCallback(async () => {
@@ -103,6 +109,19 @@ export const InscriptionsManager: React.FC = () => {
     charger();
   };
 
+  const supprimer = async () => {
+    if (!aSupprimer?.length) return;
+    setOccupe(true);
+    const { error } = await table().delete().in('id', aSupprimer.map((l) => l.id));
+    setOccupe(false);
+    if (error) return toast.error('Suppression impossible', { description: error.message });
+    toast.success(aSupprimer.length > 1 ? `${aSupprimer.length} liens supprimés` : 'Lien supprimé');
+    setASupprimer(null);
+    charger();
+  };
+
+  const termines = liens.filter((l) => etat(l).texte !== 'Ouvert');
+
   const message = (l: LienInscription) =>
     `Inscris-toi sur MAXIMATHS (${levelLabel(l.classe)}${l.label ? `, ${l.label}` : ''}) : ouvre ce lien, écris ton prénom et ton nom, et note ton pseudo et ton code. ${url(l.code)}`;
 
@@ -115,8 +134,13 @@ export const InscriptionsManager: React.FC = () => {
             Un QR code à projeter en classe ou un lien à poster dans le groupe WhatsApp : chaque élève crée son compte (pseudo et code, sans e-mail), déjà rangé dans la bonne classe.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={charger} className="gap-2"><RefreshCw className="w-4 h-4" /> Actualiser</Button>
+          {termines.length > 1 && (
+            <Button variant="outline" size="sm" onClick={() => setASupprimer(termines)} className="gap-2 text-destructive">
+              <Trash2 className="w-4 h-4" /> Supprimer les liens terminés ({termines.length})
+            </Button>
+          )}
           <Button size="sm" className="gap-2" onClick={() => setCreation({ label: '', classe: '3eme', account_type: 'eleve', jules_verne: true, heures: 1, max_uses: 40 })}>
             <Plus className="w-4 h-4" /> Nouveau lien
           </Button>
@@ -149,6 +173,16 @@ export const InscriptionsManager: React.FC = () => {
                     <a href={`https://wa.me/?text=${encodeURIComponent(message(l))}`} target="_blank" rel="noopener noreferrer"><MessageCircle className="w-4 h-4" /> WhatsApp</a>
                   </Button>
                   <Button variant="outline" size="sm" className="gap-1" onClick={() => basculer(l)}><Power className="w-4 h-4" /> {l.active ? 'Désactiver' : 'Réactiver'}</Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1 text-destructive"
+                    disabled={!supprimable(l)}
+                    title={supprimable(l) ? undefined : 'Des élèves se sont inscrits : désactive d’abord le lien'}
+                    onClick={() => setASupprimer([l])}
+                  >
+                    <Trash2 className="w-4 h-4" /> Supprimer
+                  </Button>
                 </div>
               </div>
             );
@@ -197,6 +231,22 @@ export const InscriptionsManager: React.FC = () => {
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreation(null)}>Annuler</Button>
             <Button onClick={creer} disabled={occupe}>Créer et afficher le QR code</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Suppression d'un lien ou des liens terminés */}
+      <Dialog open={!!aSupprimer} onOpenChange={(o) => !o && setASupprimer(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{aSupprimer && aSupprimer.length > 1 ? `Supprimer ${aSupprimer.length} liens terminés ?` : 'Supprimer ce lien ?'}</DialogTitle>
+            <DialogDescription>
+              Le lien et son QR code ne marcheront plus. Les comptes déjà créés sont conservés, avec leur classe.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setASupprimer(null)}>Annuler</Button>
+            <Button variant="destructive" onClick={supprimer} disabled={occupe}>Supprimer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
