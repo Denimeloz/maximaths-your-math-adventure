@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.maximaths.app",
+      "sha256_cert_fingerprints": [
+        "06:76:90:BC:1C:01:98:16:9A:22:A7:0C:35:B4:5F:30:68:11:EE:30:13:61:62:4E:AA:4E:0C:89:87:5D:5F:A6"
+      ]
+    }
+  }
+]
