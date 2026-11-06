@@ -54,7 +54,7 @@ const FilePreview = ({ url, fileName, title }: FilePreviewProps) => {
         type="button"
         variant="outline"
         size="sm"
-        onClick={() => (estNatif() && kind === "pdf" ? window.open(url, "_blank") : setOpen(v => !v))}
+        onClick={() => (estNatif() && kind !== "image" ? window.open(url, "_blank") : setOpen(v => !v))}
         aria-expanded={open}
         className="rounded-xl gap-2"
       >

@@ -9,6 +9,7 @@ import { AcademicYearProvider } from "@/contexts/AcademicYearContext";
 import ScrollManager from "@/components/ScrollManager";
 import { InstallAppBanner } from "@/components/InstallApp";
 import NotificationInvite from "@/components/NotificationInvite";
+import BandeauHorsConnexion from "@/components/BandeauHorsConnexion";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -30,6 +31,7 @@ const Profil = lazy(() => import("./pages/Profil"));
 const Activer = lazy(() => import("./pages/Activer"));
 const Rejoindre = lazy(() => import("./pages/Rejoindre"));
 const Confidentialite = lazy(() => import("./pages/Confidentialite"));
+const MesDocuments = lazy(() => import("./pages/MesDocuments"));
 
 const queryClient = new QueryClient();
 
@@ -50,6 +52,7 @@ const App = () => (
           <BrowserRouter>
             <ScrollManager />
             <NotificationInvite />
+            <BandeauHorsConnexion />
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -77,6 +80,7 @@ const App = () => (
                 <Route path="/activer" element={<Activer />} />
                 <Route path="/rejoindre/:code" element={<Rejoindre />} />
                 <Route path="/confidentialite" element={<Confidentialite />} />
+                <Route path="/mes-documents" element={<MesDocuments />} />
 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

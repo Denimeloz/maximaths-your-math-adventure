@@ -1,4 +1,5 @@
-import { Menu, X, Home, Info, ChevronDown, GraduationCap, UsersRound, Zap, Route, Spline, Puzzle, Presentation, Search, UserRound, type LucideIcon } from "lucide-react";
+import { Menu, X, Home, Info, ChevronDown, FileText, GraduationCap, UsersRound, Zap, Route, Spline, Puzzle, Presentation, Search, UserRound, type LucideIcon } from "lucide-react";
+import { estNatif } from "@/lib/natif";
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -263,6 +264,13 @@ const Header = () => {
 
           <InstallAppButton className="flex items-center justify-center h-10 w-10 rounded-full transition-colors hover:bg-rainbow-blue/20" />
 
+          {/* Application iPhone : documents disponibles sans connexion */}
+          {estNatif() && (
+            <Link to="/mes-documents" aria-label="Mes documents" title="Mes documents" className="flex items-center justify-center h-10 w-10 rounded-full transition-colors hover:bg-rainbow-blue/20">
+              <FileText className="w-5 h-5" />
+            </Link>
+          )}
+
           {/* Compte connecté : accès au profil */}
           {user && (
             <Link to="/profil" aria-label="Mon profil" title="Mon profil" className="flex items-center justify-center h-10 w-10 rounded-full transition-colors hover:bg-rainbow-blue/20">
@@ -398,6 +406,13 @@ const Header = () => {
                 </div>
               )}
             </div>
+
+            {estNatif() && (
+              <Link to="/mes-documents" onClick={closeAll} className="flex items-center gap-3 h-12 px-3 rounded-xl font-body font-bold hover:bg-muted">
+                <FileText className="w-5 h-5 text-primary" />
+                Mes documents
+              </Link>
+            )}
 
             <Link to="/ressources-parents" onClick={closeAll} className="flex items-center gap-3 h-12 px-3 rounded-xl font-body font-bold hover:bg-muted">
               <UsersRound className="w-5 h-5 text-primary" />

@@ -1,0 +1,56 @@
+# Compilation de l'application iPhone sans Mac. À lancer à la main depuis codemagic.io.
+definitions:
+  scripts:
+    - &preparer
+      name: Compiler le site et synchroniser le projet iOS
+      script: |
+        npm ci
+        npm run build
+        npx cap sync ios
+
+workflows:
+  # Vérifie que l'application compile. Ne demande aucun compte Apple.
+  ios-verification:
+    name: iPhone, vérification sans compte Apple
+    instance_type: mac_mini_m2
+    max_build_duration: 30
+    environment:
+      node: 22
+      xcode: latest
+    scripts:
+      - *preparer
+      - name: Compiler pour le simulateur
+        script: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator \
+            -configuration Debug CODE_SIGNING_ALLOWED=NO build
+
+  # Envoie l'application sur TestFlight. Demande le compte Apple et une clé App Store Connect
+  # enregistrée dans Codemagic sous le nom « maximaths ».
+  ios-testflight:
+    name: iPhone, envoi sur TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+    integrations:
+      app_store_connect: maximaths
+    environment:
+      node: 22
+      xcode: latest
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.maximaths.app
+    scripts:
+      - *preparer
+      - name: Appliquer la signature
+        script: xcode-project use-profiles
+      - name: Numéroter la version
+        script: |
+          cd ios/App
+          agvtool new-version -all "$BUILD_NUMBER"
+      - name: Construire l'application
+        script: xcode-project build-ipa --project ios/App/App.xcodeproj --scheme App
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
