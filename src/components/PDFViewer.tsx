@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Download, Maximize2, Minimize2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { estNatif } from '@/lib/natif';
 
 interface PDFViewerProps {
   url: string;
@@ -15,7 +16,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url, title, className = '' }) => 
   // Check if the URL is a PDF
   const isPDF = url.toLowerCase().endsWith('.pdf') || url.includes('pdf');
 
-  if (!isPDF) {
+  // Dans l'application iPhone, un PDF en cadre n'affiche pas bien ses pages : il s'ouvre dans le lecteur d'iOS
+  if (!isPDF || estNatif()) {
     return (
       <div className={`border border-border rounded-xl p-4 ${className}`}>
         <div className="flex items-center justify-between">

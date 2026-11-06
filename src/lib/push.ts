@@ -1,3 +1,4 @@
+import { estNatif } from '@/lib/natif';
 import { supabase } from '@/integrations/supabase/client';
 
 // Clé publique VAPID (elle peut être publique : la clé privée reste dans les secrets de Supabase)
@@ -30,7 +31,7 @@ const pushSupported = () =>
 
 // Enregistre le service worker (hors aperçu Lovable, qui affiche le site dans un cadre)
 export const registerServiceWorker = () => {
-  if (!('serviceWorker' in navigator) || window.self !== window.top) return;
+  if (estNatif() || !('serviceWorker' in navigator) || window.self !== window.top) return;
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(() => undefined);
   });
@@ -43,6 +44,8 @@ const toUint8Array = (base64: string) => {
 };
 
 export const getPushState = async (): Promise<PushState> => {
+  // Dans l'application iPhone, les notifications web n'existent pas (notifications natives à venir)
+  if (estNatif()) return 'unsupported';
   // Sur iPhone, les notifications ne marchent qu'une fois le site ajouté à l'écran d'accueil
   if (isIos() && !isStandalone()) return 'ios-install';
   if (!pushSupported()) return 'unsupported';

@@ -15,3 +15,7 @@ verify_jwt = false
 # Inscription par classe (QR code ou lien) : publique, le lien est vérifié dans la fonction
 [functions.inscription-classe]
 verify_jwt = false
+
+# Suppression de son propre compte : personne connectée, vérifiée dans la fonction
+[functions.supprimer-mon-compte]
+verify_jwt = false

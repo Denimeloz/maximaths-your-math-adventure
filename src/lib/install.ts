@@ -1,4 +1,5 @@
 import { isIos, isStandalone } from '@/lib/push';
+import { estNatif } from '@/lib/natif';
 
 // Lien de l'application sur le Play Store : à renseigner dans .env le jour où elle est publiée.
 // Les téléphones Android sont alors envoyés vers le Play Store au lieu de l'installation par Chrome.
@@ -39,7 +40,7 @@ export const subscribeInstall = (listener: () => void) => {
 const isAndroid = () => /android/i.test(navigator.userAgent);
 
 export const getInstallMode = (): InstallMode => {
-  if (isStandalone()) return 'none';
+  if (estNatif() || isStandalone()) return 'none';
   if (PLAY_STORE_URL && isAndroid()) return 'play-store';
   if (deferredPrompt) return 'prompt';
   if (isIos()) return 'ios';

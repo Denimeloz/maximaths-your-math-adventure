@@ -90,8 +90,8 @@ const Confidentialite: React.FC = () => (
 
         <Bloc titre="Vos droits">
           <p>
-            Vous pouvez modifier la plupart de vos informations vous-même dans Mon profil. Pour obtenir une copie de vos données, les faire
-            corriger ou supprimer votre compte, écrivez à <a href={`mailto:${CONTACT}`} className="underline underline-offset-4">{CONTACT}</a> :
+            Vous pouvez modifier la plupart de vos informations vous-même dans Mon profil. Vous pouvez aussi y supprimer votre compte.
+            Pour obtenir une copie de vos données ou les faire corriger, écrivez à <a href={`mailto:${CONTACT}`} className="underline underline-offset-4">{CONTACT}</a> :
             nous répondons dans un délai d’un mois. Ces droits sont prévus notamment par la loi ivoirienne n° 2013-450 relative à la
             protection des données à caractère personnel.
           </p>

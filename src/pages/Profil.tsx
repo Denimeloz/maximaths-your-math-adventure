@@ -7,7 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Camera, KeyRound, LogOut, Save, ShieldCheck, UserRound } from 'lucide-react';
+import { Camera, KeyRound, LogOut, Save, ShieldCheck, Trash2, UserRound } from 'lucide-react';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { estNatif } from '@/lib/natif';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { LEVEL_IDS, LEVEL_LABELS } from '@/lib/levels';
@@ -46,6 +51,8 @@ const Section: React.FC<{ titre: string; children: React.ReactNode; icone?: Reac
 
 const Profil: React.FC = () => {
   const navigate = useNavigate();
+  const [confirmation, setConfirmation] = useState('');
+  const [suppression, setSuppression] = useState(false);
   const [params] = useSearchParams();
   const { user, profile, isAdmin, isLoading, refreshProfile, signOut } = useAuth();
   const [champs, setChamps] = useState<Champs | null>(null);
@@ -132,6 +139,20 @@ const Profil: React.FC = () => {
   const eleve = estCompteEleve(user.email);
   const google = identiteGoogle(user);
 
+  const supprimerCompte = async () => {
+    setSuppression(true);
+    const { error } = await supabase.functions.invoke('supprimer-mon-compte', { body: { confirmation: 'SUPPRIMER' } });
+    if (error) {
+      setSuppression(false);
+      toast.error('Suppression impossible', { description: 'Réessaie plus tard, ou écris à l’administration.' });
+      return;
+    }
+    // Le compte n'existe plus : la déconnexion peut échouer côté serveur, seule la session locale compte
+    await supabase.auth.signOut({ scope: 'local' }).catch(() => undefined);
+    toast.success('Ton compte a été supprimé');
+    navigate('/');
+  };
+
   const relierGoogle = async () => {
     const { error } = await lierGoogle();
     if (error) toast.error('Liaison impossible', { description: error.message });
@@ -172,7 +193,7 @@ const Profil: React.FC = () => {
             <p className="font-display text-lg">Bienvenue sur MAXIMATHS !</p>
             <p className="text-sm font-body">
               Ton compte est prêt et rangé dans ta classe. Pour te reconnecter : ton pseudo <strong>{identifiantAffiche(user.email)}</strong> et ton code.
-              Plus bas, tu peux ajouter une photo, changer ton code ou relier ton compte Google pour te connecter plus vite.
+              Plus bas, tu peux ajouter une photo, changer ton code{estNatif() ? '.' : ' ou relier ton compte Google pour te connecter plus vite.'}
             </p>
           </div>
         )}
@@ -260,7 +281,7 @@ const Profil: React.FC = () => {
           <p className="text-xs text-muted-foreground">Ces informations sont gérées par l’administration.</p>
         </Section>
 
-        <Section titre="Connexion avec Google" icone={GoogleLogo}>
+        {!estNatif() && <Section titre="Connexion avec Google" icone={GoogleLogo}>
           {google ? (
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="text-sm font-body">Relié à <strong>{adresseGoogle(user) ?? 'ton compte Google'}</strong> : tu peux te connecter avec le bouton « Se connecter avec Google ».</p>
@@ -275,7 +296,7 @@ const Profil: React.FC = () => {
               <Button variant="outline" onClick={relierGoogle} className="gap-2"><GoogleLogo /> Lier mon compte Google</Button>
             </div>
           )}
-        </Section>
+        </Section>}
 
         <Section titre={eleve ? 'Mon code' : accueil ? 'Choisis ton mot de passe' : 'Mot de passe'} icone={KeyRound}>
           {eleve && <p className="text-xs text-muted-foreground">Ton code sert à te connecter avec ton pseudo. Choisis au moins 6 chiffres, et ne le donne à personne.</p>}
@@ -286,6 +307,34 @@ const Profil: React.FC = () => {
           <div className="flex justify-end">
             <Button onClick={changerMotDePasse} variant={accueil ? 'default' : 'outline'} className="gap-2"><KeyRound className="w-4 h-4" /> {eleve ? 'Enregistrer le code' : 'Enregistrer le mot de passe'}</Button>
           </div>
+        </Section>
+
+        <Section titre="Supprimer mon compte" icone={Trash2}>
+          {isAdmin ? (
+            <p className="text-sm font-body">Un administrateur doit d’abord faire retirer ses droits par un autre administrateur.</p>
+          ) : (
+            <>
+              <p className="text-sm font-body">La suppression efface ton compte, ton profil et ta photo. Elle est définitive. Les documents du site restent consultables.</p>
+              <AlertDialog onOpenChange={() => setConfirmation('')}>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="gap-2 text-destructive"><Trash2 className="w-4 h-4" /> Supprimer mon compte</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Supprimer définitivement ton compte ?</AlertDialogTitle>
+                    <AlertDialogDescription>Cette action ne peut pas être annulée. Écris SUPPRIMER pour confirmer.</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <Input value={confirmation} onChange={(e) => setConfirmation(e.target.value)} placeholder="SUPPRIMER" aria-label="Écris SUPPRIMER pour confirmer" autoCapitalize="characters" />
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                    <AlertDialogAction disabled={confirmation.trim() !== 'SUPPRIMER' || suppression} onClick={(e) => { e.preventDefault(); supprimerCompte(); }}>
+                      Supprimer
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </>
+          )}
         </Section>
       </main>
       <Footer />

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { estNatif } from "@/lib/natif";
 
 type PreviewKind = "office" | "pdf" | "image" | null;
 
@@ -53,7 +54,7 @@ const FilePreview = ({ url, fileName, title }: FilePreviewProps) => {
         type="button"
         variant="outline"
         size="sm"
-        onClick={() => setOpen(v => !v)}
+        onClick={() => (estNatif() && kind === "pdf" ? window.open(url, "_blank") : setOpen(v => !v))}
         aria-expanded={open}
         className="rounded-xl gap-2"
       >

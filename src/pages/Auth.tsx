@@ -11,6 +11,7 @@ import newLogo from "@/assets/new-logo.png";
 import { adresseDeConnexion, lienOubli, lienOubliMail } from '@/lib/eleves';
 import { connexionGoogle, erreurRetourGoogle } from '@/lib/google';
 import GoogleLogo from '@/components/GoogleLogo';
+import { estNatif } from '@/lib/natif';
 
 // Un élève se connecte avec son pseudo (prenom.nom) et son code de 6 chiffres ; un adulte avec son e-mail
 // et son mot de passe (28/10/2026). Le même champ accepte les deux.
@@ -156,13 +157,18 @@ const Auth = () => {
             </Button>
           </form>
 
-          <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="h-px flex-1 bg-border" /> ou <span className="h-px flex-1 bg-border" />
-          </div>
-          <Button type="button" variant="outline" onClick={avecGoogle} className="w-full h-12 rounded-2xl gap-3 font-body font-semibold">
-            <GoogleLogo /> Se connecter avec Google
-          </Button>
-          <p className="mt-2 text-xs text-center text-muted-foreground font-body">Si tu as relié ton compte Google dans Mon profil.</p>
+          {/* Pas de connexion Google dans l'application iPhone : Apple exigerait alors une autre option de connexion */}
+          {!estNatif() && (
+            <>
+              <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="h-px flex-1 bg-border" /> ou <span className="h-px flex-1 bg-border" />
+              </div>
+              <Button type="button" variant="outline" onClick={avecGoogle} className="w-full h-12 rounded-2xl gap-3 font-body font-semibold">
+                <GoogleLogo /> Se connecter avec Google
+              </Button>
+              <p className="mt-2 text-xs text-center text-muted-foreground font-body">Si tu as relié ton compte Google dans Mon profil.</p>
+            </>
+          )}
 
           {/* Pas d'e-mail de récupération automatique : la demande part sur WhatsApp ou par e-mail,
               l'administration vérifie qui écrit et envoie un nouveau code */}

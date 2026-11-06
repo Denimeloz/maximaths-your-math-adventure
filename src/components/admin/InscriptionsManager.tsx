@@ -1,3 +1,4 @@
+import { adresseSite } from '@/lib/natif';
 import React, { useCallback, useEffect, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '@/integrations/supabase/client';
@@ -39,7 +40,7 @@ const DUREES: { label: string; heures: number }[] = [
 const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 const nouveauCode = () => Array.from(crypto.getRandomValues(new Uint32Array(10)), (n) => ALPHABET[n % ALPHABET.length]).join('');
 
-const url = (code: string) => `${window.location.origin}/rejoindre/${code}`;
+const url = (code: string) => adresseSite(`/rejoindre/${code}`);
 
 const etat = (l: LienInscription) => {
   if (!l.active) return { texte: 'Désactivé', classe: 'bg-muted text-muted-foreground' };
