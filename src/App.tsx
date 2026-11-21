@@ -23,6 +23,7 @@ const DnbRevisionResources = lazy(() => import("./pages/DnbRevisionResources"));
 const ProgressionSpiralee = lazy(() => import("./pages/ProgressionSpiralee"));
 const Automatismes = lazy(() => import("./pages/Automatismes"));
 const ProjetsEleves = lazy(() => import("./pages/ProjetsEleves"));
+const CoupsDePouce = lazy(() => import("./pages/CoupsDePouce"));
 const ParcoursRevision = lazy(() => import("./pages/ParcoursRevision"));
 const ParentResources = lazy(() => import("./pages/ParentResources"));
 const Nouveautes = lazy(() => import("./pages/Nouveautes"));
@@ -69,6 +70,7 @@ const App = () => (
                 <Route path="/ressources-dnb" element={<DnbRevisionResources />} />
                 <Route path="/progression-spiralee" element={<ProgressionSpiralee />} />
                 <Route path="/automatismes" element={<Automatismes />} />
+                <Route path="/coups-de-pouce" element={<CoupsDePouce />} />
                 <Route path="/projets-eleves" element={<ProjetsEleves />} />
                 <Route path="/parcours-revision" element={<ParcoursRevision />} />
                 <Route path="/ressources-parents" element={<ParentResources />} />

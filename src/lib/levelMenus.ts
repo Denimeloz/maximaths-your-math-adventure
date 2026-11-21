@@ -12,6 +12,7 @@ import {
   HeartHandshake,
   Info,
   Lightbulb,
+  LifeBuoy,
   Presentation,
   Route,
   Star,
@@ -111,6 +112,7 @@ const newMenu = (levelId: string): LevelMenuItem[] => {
   const items: LevelMenuItem[] = [
     { id: 'infos', label: 'Infos pour la classe', description: 'Informations importantes', icon: Info },
     { id: 'automatismes', label: 'Automatismes', description: 'Entraînement régulier', icon: Zap },
+    { id: 'coups-de-pouce', label: 'Coups de pouce', description: 'Vidéos et conseils sur certaines notions', icon: LifeBuoy },
     // Projets des élèves : seulement pour les classes concernées (3ème et Seconde)
     ...(isProjectLevel(levelId)
       ? [{ id: 'projets-eleves', label: 'Projets des élèves', description: 'Les élèves expliquent le cours', icon: Presentation }]
@@ -141,7 +143,7 @@ export const getLevelMenu = (levelId: string, isNewArchitecture: boolean): Level
 export const levelMenuPath = (levelId: string, itemId: string, yearId?: string | null): string => {
   if (itemId === 'ressources-dnb') return '/ressources-dnb';
   if (itemId === 'projets-eleves') return projectsPath(levelId, yearId);
-  if (itemId === 'automatismes' || itemId === 'parcours-revision') {
+  if (itemId === 'automatismes' || itemId === 'coups-de-pouce' || itemId === 'parcours-revision') {
     const params = new URLSearchParams();
     if (yearId) params.set('year', yearId);
     params.set('level', levelId);

@@ -29,6 +29,7 @@ import { NotificationsManager } from '@/components/admin/NotificationsManager';
 import { UsersManager } from '@/components/admin/UsersManager';
 import { AutomatismsManager } from '@/components/admin/AutomatismsManager';
 import { StudentProjectsManager } from '@/components/admin/StudentProjectsManager';
+import { CoupsDePouceManager } from '@/components/admin/CoupsDePouceManager';
 import { RevisionPathManager } from '@/components/admin/RevisionPathManager';
 import { ParentResourcesManager } from '@/components/admin/ParentResourcesManager';
 import { CoursChapterManager } from '@/components/admin/CoursChapterManager';
@@ -570,6 +571,8 @@ const AdminInner = () => {
                   ? 'Ressources pour les parents'
                   : activeLevel === 'automatismes'
                   ? 'Automatismes'
+                  : activeLevel === 'coups-de-pouce'
+                  ? 'Coups de pouce'
                   : activeLevel === 'projets-eleves'
                   ? 'Projets des élèves'
                   : activeLevel === 'parcours-revision'
@@ -577,7 +580,7 @@ const AdminInner = () => {
                   : activeLevel === 'spiral-progression'
                   ? `Progression Spiralée — ${getLevelLabel(activeTab as CourseLevel)}`
                   : getLevelLabel(activeLevel as CourseLevel)
-                }{!['spiral-progression', 'ressources-parents', 'automatismes', 'projets-eleves', 'parcours-revision'].includes(activeLevel) && ` - ${
+                }{!['spiral-progression', 'ressources-parents', 'automatismes', 'coups-de-pouce', 'projets-eleves', 'parcours-revision'].includes(activeLevel) && ` - ${
                   activeTab === 'infos' ? 'Informations pour la classe' :
                   activeTab === 'cours' ? "Cours et chapitres" :
                   activeTab === 'activites' ? (isNewArchitecture ? "Espace d'approfondissement" : 'Activité de découverte') :
@@ -656,6 +659,9 @@ const AdminInner = () => {
 
           {/* Automatismes - transverse */}
           {activeLevel === 'automatismes' && <AutomatismsManager />}
+
+          {/* Coups de pouce (vidéos et conseils) - transverse */}
+          {activeLevel === 'coups-de-pouce' && <CoupsDePouceManager />}
 
           {/* Projets des élèves - transverse (3ème et Seconde) */}
           {activeLevel === 'projets-eleves' && <StudentProjectsManager />}

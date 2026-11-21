@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BookOpen, ClipboardList, FileText, GraduationCap, Layers, Loader2, Presentation, Search, Spline, UsersRound, Zap, type LucideIcon } from "lucide-react";
+import { BookOpen, ClipboardList, FileText, GraduationCap, Layers, LifeBuoy, Loader2, Presentation, Search, Spline, UsersRound, Zap, type LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -90,10 +90,11 @@ const SiteSearch = ({ open, onOpenChange }: SiteSearchProps) => {
       const detail = (...parts: (string | undefined | null)[]) => parts.filter(Boolean).join(" · ");
 
       try {
-        const [chapters, resources, automatisms, projects, spiral, dnb, parents, courses, ...levelTables] = await Promise.all([
+        const [chapters, resources, automatisms, coups, projects, spiral, dnb, parents, courses, ...levelTables] = await Promise.all([
           db.from("tab_chapters").select("id,title,level,academic_year_id").eq("is_published", true).ilike("title", pattern).limit(PER_SOURCE),
           db.from("chapter_resources").select("id,title,section,chapter_id").eq("is_published", true).ilike("title", pattern).limit(PER_SOURCE * 2),
           db.from("automatisms").select("id,title,level,academic_year_id").eq("is_published", true).ilike("title", pattern).limit(PER_SOURCE),
+          db.from("coups_de_pouce").select("id,title,level,academic_year_id").eq("is_published", true).ilike("title", pattern).limit(PER_SOURCE),
           // Les projets des élèves sont rangés dans la même table que la progression spiralée, sous un type à part
           db.from("spiral_resources").select("id,title,level,academic_year_id").eq("resource_type", PROJECT_TYPE).eq("is_published", true).ilike("title", pattern).limit(PER_SOURCE),
           db.from("spiral_resources").select("id,title,level").neq("resource_type", PROJECT_TYPE).eq("is_published", true).ilike("title", pattern).limit(PER_SOURCE),
@@ -134,6 +135,11 @@ const SiteSearch = ({ open, onOpenChange }: SiteSearchProps) => {
             key: `automatisme-${a.id}`, title: a.title, icon: Zap, yearId: a.academic_year_id,
             detail: detail("Automatismes", levelLabel(a.level), yearLabel(a.academic_year_id)),
             to: withYear(`/automatismes?level=${a.level}`, a.academic_year_id),
+          })),
+          ...(coups.data || []).map((c: any) => ({
+            key: `coup-de-pouce-${c.id}`, title: c.title, icon: LifeBuoy, yearId: c.academic_year_id,
+            detail: detail("Coups de pouce", levelLabel(c.level), yearLabel(c.academic_year_id)),
+            to: withYear(`/coups-de-pouce?level=${c.level}`, c.academic_year_id),
           })),
           ...(projects.data || []).map((p: any) => ({
             key: `projet-${p.id}`, title: p.title, icon: Presentation, yearId: p.academic_year_id,
