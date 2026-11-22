@@ -8,19 +8,19 @@ import ProjectMediaView from '@/components/ProjectMediaView';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { levelLabel } from '@/lib/levels';
-import { COUPS_DE_POUCE_SOUS_TITRE, COUPS_DE_POUCE_TITRE, toCoupDePouce, type CoupDePouce } from '@/lib/coupsDePouce';
+import { VIDEOS_CONSEILS_SOUS_TITRE, VIDEOS_CONSEILS_TITRE, toVideoConseil, type VideoConseil } from '@/lib/videosConseils';
 
 interface Year { id: string; label: string; start_year: number; is_active: boolean; }
 interface YearClass { academic_year_id: string; class_level: string; }
 
-/** Page publique : vidéos et conseils sur certaines notions qui posent difficulté, par année et par classe. */
-const CoupsDePouce = () => {
+/** Page publique : vidéos et conseils pour progresser en mathématiques, par année et par classe. */
+const VideosConseils = () => {
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   const [years, setYears] = useState<Year[]>([]);
   const [classes, setClasses] = useState<YearClass[]>([]);
   const [yearsLoaded, setYearsLoaded] = useState(false);
-  const [items, setItems] = useState<CoupDePouce[]>([]);
+  const [items, setItems] = useState<VideoConseil[]>([]);
   const [loading, setLoading] = useState(false);
 
   const yearId = params.get('year');
@@ -49,11 +49,11 @@ const CoupsDePouce = () => {
     let cancelled = false;
     setLoading(true);
     (async () => {
-      const { data } = await (supabase as any).from('coups_de_pouce')
+      const { data } = await (supabase as any).from('videos_et_conseils_pour_progresser')
         .select('*').eq('academic_year_id', yearId).eq('level', level).eq('is_published', true)
         .order('display_order', { ascending: true });
       if (cancelled) return;
-      setItems((data || []).map(toCoupDePouce));
+      setItems((data || []).map(toVideoConseil));
       setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -69,10 +69,10 @@ const CoupsDePouce = () => {
 
         <div className="flex items-center gap-3 mb-2">
           <LifeBuoy className="w-8 h-8 text-primary" aria-hidden="true" />
-          <h1 className="text-3xl font-display text-foreground">{COUPS_DE_POUCE_TITRE}</h1>
+          <h1 className="text-3xl font-display text-foreground">{VIDEOS_CONSEILS_TITRE}</h1>
         </div>
         <p className="font-body text-muted-foreground max-w-2xl mb-8">
-          {COUPS_DE_POUCE_SOUS_TITRE}, par classe et par année scolaire.
+          {VIDEOS_CONSEILS_SOUS_TITRE}, par classe et par année scolaire.
         </p>
 
         <div className="flex flex-wrap gap-3 mb-8">
@@ -87,14 +87,14 @@ const CoupsDePouce = () => {
         </div>
 
         {yearsLoaded && years.length === 0 && (
-          <p className="text-muted-foreground italic">Les coups de pouce seront disponibles à partir de l'année 2026-2027.</p>
+          <p className="text-muted-foreground italic">Les vidéos et conseils seront disponibles à partir de l'année 2026-2027.</p>
         )}
         {years.length > 0 && !level && <p className="text-muted-foreground italic">Choisis une classe.</p>}
         {loading && <p className="font-body text-muted-foreground" role="status">Chargement…</p>}
         {level && !loading && items.length === 0 && (
           <div className="card-sticker bg-card border-border p-8 text-center">
             <LifeBuoy className="w-10 h-10 mx-auto text-primary/50" aria-hidden="true" />
-            <p className="mt-3 font-display text-lg text-foreground">Pas encore de coup de pouce pour cette classe.</p>
+            <p className="mt-3 font-display text-lg text-foreground">Pas encore de vidéo ni de conseil pour cette classe.</p>
             <p className="mt-1 font-body text-sm text-muted-foreground">Reviens bientôt : de nouvelles vidéos arrivent au fil de l'année.</p>
           </div>
         )}
@@ -123,4 +123,4 @@ const CoupsDePouce = () => {
   );
 };
 
-export default CoupsDePouce;
+export default VideosConseils;

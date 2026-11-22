@@ -1,14 +1,14 @@
 import type { ProjectMedia } from '@/lib/studentProjects';
 
 /**
- * « Coups de pouce » : vidéos et conseils de l'oncle sur certaines notions qui posent difficulté aux élèves.
- * Une table à part (`coups_de_pouce`) ; les médias réutilisent le format des projets des élèves
+ * « Vidéos et conseils pour progresser » : vidéos et conseils de l'oncle pour progresser en mathématiques.
+ * Une table à part (`videos_et_conseils_pour_progresser`) ; les médias réutilisent le format des projets des élèves
  * (vidéo YouTube, fichier envoyé, audio, PDF, image ou lien) et s'affichent avec le même lecteur.
  */
-export const COUPS_DE_POUCE_TITRE = 'Coups de pouce';
-export const COUPS_DE_POUCE_SOUS_TITRE = 'Vidéos et conseils sur certaines notions';
+export const VIDEOS_CONSEILS_TITRE = 'Vidéos et conseils pour progresser';
+export const VIDEOS_CONSEILS_SOUS_TITRE = 'Méthodes et conseils pour progresser en mathématiques';
 
-export interface CoupDePouce {
+export interface VideoConseil {
   id: string;
   level: string;
   academic_year_id: string | null;
@@ -20,8 +20,8 @@ export interface CoupDePouce {
   display_order: number;
 }
 
-/** Transforme une ligne de la table en coup de pouce, sans jamais planter sur un JSON inattendu. */
-export const toCoupDePouce = (row: any): CoupDePouce => ({
+/** Transforme une ligne de la table en vidéo ou conseil, sans jamais planter sur un JSON inattendu. */
+export const toVideoConseil = (row: any): VideoConseil => ({
   id: row.id,
   level: row.level,
   academic_year_id: row.academic_year_id ?? null,
@@ -38,10 +38,10 @@ export const toCoupDePouce = (row: any): CoupDePouce => ({
 });
 
 /** Adresse de la page publique, pour une classe et une année données. */
-export const coupsDePoucePath = (level?: string | null, yearId?: string | null): string => {
+export const videosConseilsPath = (level?: string | null, yearId?: string | null): string => {
   const params = new URLSearchParams();
   if (yearId) params.set('year', yearId);
   if (level) params.set('level', level);
   const query = params.toString();
-  return `/coups-de-pouce${query ? `?${query}` : ''}`;
+  return `/videos-et-conseils-pour-progresser${query ? `?${query}` : ''}`;
 };

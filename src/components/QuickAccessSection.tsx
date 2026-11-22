@@ -45,7 +45,7 @@ const QuickAccessSection = () => {
 
   const tiles: Tile[] = [
     ...(hasNewArchitectureYear
-      ? [{ to: '/coups-de-pouce', title: 'Coups de pouce', text: 'Des vidéos et des conseils sur certaines notions qui posent difficulté.', icon: LifeBuoy }]
+      ? [{ to: '/videos-et-conseils-pour-progresser', title: 'Vidéos et conseils pour progresser', text: 'Des vidéos et des conseils pour progresser en mathématiques.', icon: LifeBuoy }]
       : []),
     ...(hasNewArchitectureYear
       ? [{ to: '/parcours-revision', title: 'Parcours de révision', text: 'Les fiches de révision de ta classe, avec leurs corrigés.', icon: Route }]

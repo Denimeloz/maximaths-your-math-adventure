@@ -14,8 +14,8 @@ import { levelLabel } from '@/lib/levels';
 import { usesNewArchitecture } from '@/lib/levelMenus';
 import { MEDIA_KIND_LABELS, mediaKind, type ProjectMedia } from '@/lib/studentProjects';
 import {
-  COUPS_DE_POUCE_SOUS_TITRE, COUPS_DE_POUCE_TITRE, coupsDePoucePath, toCoupDePouce, type CoupDePouce,
-} from '@/lib/coupsDePouce';
+  VIDEOS_CONSEILS_SOUS_TITRE, VIDEOS_CONSEILS_TITRE, videosConseilsPath, toVideoConseil, type VideoConseil,
+} from '@/lib/videosConseils';
 import { MEDIA_KIND_ICONS } from '@/components/ProjectMediaView';
 import { saveOrder } from './MoveButtons';
 import { SortableList } from './SortableList';
@@ -30,13 +30,13 @@ const hostOf = (url: string) => {
 };
 
 /** Admin : dépôt des vidéos et conseils sur les notions qui posent difficulté (fichiers envoyés ou liens YouTube, Drive…). */
-export const CoupsDePouceManager: React.FC = () => {
+export const VideosConseilsManager: React.FC = () => {
   const { toast } = useToast();
   const academicYearId = useCurrentAcademicYearId();
   const { classes, years } = useAcademicYears();
   const selectedYear = years.find(y => y.id === academicYearId);
   const [level, setLevel] = useState<string>('6eme');
-  const [items, setItems] = useState<CoupDePouce[]>([]);
+  const [items, setItems] = useState<VideoConseil[]>([]);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [uploading, setUploading] = useState<string | null>(null);
@@ -51,18 +51,18 @@ export const CoupsDePouceManager: React.FC = () => {
 
   const fetchItems = async () => {
     if (!academicYearId) { setItems([]); return; }
-    const { data, error } = await (supabase as any).from('coups_de_pouce')
+    const { data, error } = await (supabase as any).from('videos_et_conseils_pour_progresser')
       .select('*').eq('level', level).eq('academic_year_id', academicYearId)
       .order('display_order', { ascending: true });
-    if (error) toast({ title: 'Impossible de charger les coups de pouce', description: error.message, variant: 'destructive' });
-    setItems((data || []).map(toCoupDePouce));
+    if (error) toast({ title: 'Impossible de charger les vidéos et conseils', description: error.message, variant: 'destructive' });
+    setItems((data || []).map(toVideoConseil));
   };
 
   useEffect(() => { fetchItems(); }, [level, academicYearId]);
 
   const resetForm = () => { setEditingId(null); setForm(emptyForm); setLink({ url: '', label: '' }); };
 
-  const startEdit = (item: CoupDePouce) => {
+  const startEdit = (item: VideoConseil) => {
     setEditingId(item.id);
     setForm({ title: item.title, chapter: item.chapter || '', description: item.description || '', is_published: item.is_published, media: item.media });
     setLink({ url: '', label: '' });
@@ -83,7 +83,7 @@ export const CoupsDePouceManager: React.FC = () => {
       }
       setUploading(file.name);
       const ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '');
-      const path = `coups-de-pouce/${level}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const path = `videos-et-conseils-pour-progresser/${level}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
       const { error } = await supabase.storage.from('course-files').upload(path, file, { upsert: false, contentType: file.type || undefined });
       if (error) {
         toast({
@@ -127,36 +127,36 @@ export const CoupsDePouceManager: React.FC = () => {
     };
     setSaving(true);
     const { error } = editingId
-      ? await (supabase as any).from('coups_de_pouce').update(payload).eq('id', editingId)
-      : await (supabase as any).from('coups_de_pouce').insert({ ...payload, level, academic_year_id: academicYearId, display_order: items.length });
+      ? await (supabase as any).from('videos_et_conseils_pour_progresser').update(payload).eq('id', editingId)
+      : await (supabase as any).from('videos_et_conseils_pour_progresser').insert({ ...payload, level, academic_year_id: academicYearId, display_order: items.length });
     setSaving(false);
-    if (error) { toast({ title: "Le coup de pouce n'a pas pu être enregistré", description: error.message, variant: 'destructive' }); return; }
+    if (error) { toast({ title: "Ce contenu n'a pas pu être enregistré", description: error.message, variant: 'destructive' }); return; }
     toast({
-      title: editingId ? 'Coup de pouce modifié' : 'Coup de pouce ajouté',
+      title: editingId ? 'Contenu modifié' : 'Contenu ajouté',
       description: payload.is_published ? 'Il est visible sur le site.' : "Il reste masqué tant qu'il n'est pas publié.",
     });
     resetForm();
     fetchItems();
   };
 
-  const togglePublish = async (item: CoupDePouce) => {
-    const { error } = await (supabase as any).from('coups_de_pouce').update({ is_published: !item.is_published }).eq('id', item.id);
+  const togglePublish = async (item: VideoConseil) => {
+    const { error } = await (supabase as any).from('videos_et_conseils_pour_progresser').update({ is_published: !item.is_published }).eq('id', item.id);
     if (error) toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     fetchItems();
   };
 
-  const remove = async (item: CoupDePouce) => {
+  const remove = async (item: VideoConseil) => {
     if (!confirm(`Supprimer « ${item.title} » ?`)) return;
-    const { error } = await (supabase as any).from('coups_de_pouce').delete().eq('id', item.id);
+    const { error } = await (supabase as any).from('videos_et_conseils_pour_progresser').delete().eq('id', item.id);
     if (error) toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     if (editingId === item.id) resetForm();
     fetchItems();
   };
 
   // Glisser-déposer : affichage immédiat, puis enregistrement des positions modifiées
-  const reorder = async (ordered: CoupDePouce[]) => {
+  const reorder = async (ordered: VideoConseil[]) => {
     setItems(ordered.map((item, position) => ({ ...item, display_order: position })));
-    const error = await saveOrder('coups_de_pouce', ordered, 'display_order');
+    const error = await saveOrder('videos_et_conseils_pour_progresser', ordered, 'display_order');
     if (error) {
       toast({ title: "L'ordre n'a pas pu être enregistré", description: error.message, variant: 'destructive' });
       fetchItems();
@@ -167,9 +167,9 @@ export const CoupsDePouceManager: React.FC = () => {
   if (selectedYear && !usesNewArchitecture(selectedYear.start_year)) {
     return (
       <Card className="p-6">
-        <h2 className="font-display text-xl flex items-center gap-2"><LifeBuoy className="w-5 h-5 text-primary" />{COUPS_DE_POUCE_TITRE}</h2>
+        <h2 className="font-display text-xl flex items-center gap-2"><LifeBuoy className="w-5 h-5 text-primary" />{VIDEOS_CONSEILS_TITRE}</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Les coups de pouce commencent en 2026-2027. Choisis une classe de cette année dans le menu, puis reviens ici.
+          Les vidéos et conseils commencent en 2026-2027. Choisis une classe de cette année dans le menu, puis reviens ici.
         </p>
       </Card>
     );
@@ -178,7 +178,7 @@ export const CoupsDePouceManager: React.FC = () => {
   if (availableLevels.length === 0) {
     return (
       <Card className="p-6">
-        <h2 className="font-display text-xl flex items-center gap-2"><LifeBuoy className="w-5 h-5 text-primary" />{COUPS_DE_POUCE_TITRE}</h2>
+        <h2 className="font-display text-xl flex items-center gap-2"><LifeBuoy className="w-5 h-5 text-primary" />{VIDEOS_CONSEILS_TITRE}</h2>
         <p className="mt-2 text-sm text-muted-foreground">Aucune classe ouverte pour cette année : ouvre-en une dans « Nouvelle année ».</p>
       </Card>
     );
@@ -188,12 +188,12 @@ export const CoupsDePouceManager: React.FC = () => {
     <div className="space-y-6">
       <Card className="p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display text-xl flex items-center gap-2"><LifeBuoy className="w-5 h-5 text-primary" />{COUPS_DE_POUCE_TITRE}</h2>
-          <a href={coupsDePoucePath(level, academicYearId)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary underline underline-offset-4">
+          <h2 className="font-display text-xl flex items-center gap-2"><LifeBuoy className="w-5 h-5 text-primary" />{VIDEOS_CONSEILS_TITRE}</h2>
+          <a href={videosConseilsPath(level, academicYearId)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary underline underline-offset-4">
             <ExternalLink className="w-4 h-4" />Voir la page publique
           </a>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">{COUPS_DE_POUCE_SOUS_TITRE}, pour l'année scolaire sélectionnée.</p>
+        <p className="text-sm text-muted-foreground mt-1">{VIDEOS_CONSEILS_SOUS_TITRE}, pour l'année scolaire sélectionnée.</p>
         <div className="mt-3">
           <Select value={level} onValueChange={v => { setLevel(v); resetForm(); }}>
             <SelectTrigger className="w-60" aria-label="Classe"><SelectValue /></SelectTrigger>
@@ -205,7 +205,7 @@ export const CoupsDePouceManager: React.FC = () => {
       </Card>
 
       <Card className="p-4 space-y-4 bg-muted/30">
-        <h3 className="font-display">{editingId ? 'Modifier le coup de pouce' : `Nouveau coup de pouce — ${levelLabel(level)}`}</h3>
+        <h3 className="font-display">{editingId ? 'Modifier ce contenu' : `Nouveau contenu — ${levelLabel(level)}`}</h3>
 
         <div className="grid gap-3 md:grid-cols-2">
           <div className="space-y-1.5">
@@ -320,7 +320,7 @@ export const CoupsDePouceManager: React.FC = () => {
       </Card>
 
       {items.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Aucun coup de pouce en {levelLabel(level)} pour cette année.</p>
+        <p className="text-sm text-muted-foreground">Aucune vidéo ni conseil en {levelLabel(level)} pour cette année.</p>
       ) : (
         <SortableList
           items={items}
@@ -369,4 +369,4 @@ export const CoupsDePouceManager: React.FC = () => {
   );
 };
 
-export default CoupsDePouceManager;
+export default VideosConseilsManager;

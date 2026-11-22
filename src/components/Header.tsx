@@ -24,7 +24,7 @@ interface ResourceEntry {
 
 const RESOURCE_ENTRIES: ResourceEntry[] = [
   { to: '/automatismes', label: 'Automatismes', description: 'Entraînement régulier', icon: Zap, newArchitectureOnly: true },
-  { to: '/coups-de-pouce', label: 'Coups de pouce', description: 'Vidéos et conseils sur certaines notions', icon: LifeBuoy, newArchitectureOnly: true },
+  { to: '/videos-et-conseils-pour-progresser', label: 'Vidéos et conseils pour progresser', description: 'Méthodes et conseils pour progresser en mathématiques', icon: LifeBuoy, newArchitectureOnly: true },
   { to: '/projets-eleves', label: 'Projets des élèves', description: 'Les élèves expliquent le cours', icon: Presentation, newArchitectureOnly: true },
   { to: '/parcours-revision', label: 'Parcours de révision', description: 'Fiches et corrigés pour réviser', icon: Route, newArchitectureOnly: true },
   { to: '/progression-spiralee', label: 'Progression spiralée', description: "Fiches et exercices pour toute l'année", icon: Spline },

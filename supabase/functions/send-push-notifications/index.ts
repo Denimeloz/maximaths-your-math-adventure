@@ -40,7 +40,7 @@ const RUBRIQUES: Record<string, string> = {
   activities: "Activité", assignments: "Devoir", automatisms: "Automatismes",
   chapter_podcasts: "Podcast", chapter_resources: "Cours", class_info: "Info de classe",
   club_activities: "Club maths", club_subjects: "Club maths", course_files: "Cours",
-  coups_de_pouce: "Coups de pouce",
+  videos_et_conseils_pour_progresser: "Vidéos et conseils pour progresser",
   dnb_content: "Prépa DNB", dnb_revision_resources: "Révision DNB", evaluations: "Évaluation",
   exercises: "Exercices", games_genially: "Jeu", lessons: "Cours", parent_resources: "Espace parents",
   revision_path_files: "Parcours de révision", revision_path_resources: "Parcours de révision",
