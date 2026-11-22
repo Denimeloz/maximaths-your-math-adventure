@@ -29,7 +29,7 @@ const hostOf = (url: string) => {
   try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return url; }
 };
 
-/** Admin : dépôt des vidéos et conseils sur les notions qui posent difficulté (fichiers envoyés ou liens YouTube, Drive…). */
+/** Admin : dépôt des vidéos et conseils pour progresser en maths (fichiers envoyés ou liens YouTube, Drive…). */
 export const VideosConseilsManager: React.FC = () => {
   const { toast } = useToast();
   const academicYearId = useCurrentAcademicYearId();
@@ -210,11 +210,11 @@ export const VideosConseilsManager: React.FC = () => {
         <div className="grid gap-3 md:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="cdp-titre">Titre *</Label>
-            <Input id="cdp-titre" placeholder="Réussir à factoriser avec une identité remarquable" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
+            <Input id="cdp-titre" placeholder="Comment bien réviser un contrôle de maths" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="cdp-notion">Notion ou chapitre (optionnel)</Label>
-            <Input id="cdp-notion" placeholder="Calcul littéral" value={form.chapter} onChange={e => setForm(f => ({ ...f, chapter: e.target.value }))} />
+            <Label htmlFor="cdp-notion">Sujet ou chapitre (optionnel)</Label>
+            <Input id="cdp-notion" placeholder="Méthode de travail" value={form.chapter} onChange={e => setForm(f => ({ ...f, chapter: e.target.value }))} />
           </div>
         </div>
 
