@@ -1,4 +1,4 @@
-import { Menu, X, Home, Info, ChevronDown, GraduationCap, UsersRound, Zap, Route, Spline, Puzzle, Presentation, Search, UserRound, type LucideIcon } from "lucide-react";
+import { Menu, X, Home, Info, ChevronDown, GraduationCap, UsersRound, Zap, LifeBuoy, Route, Spline, Puzzle, Presentation, Search, UserRound, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -24,6 +24,7 @@ interface ResourceEntry {
 
 const RESOURCE_ENTRIES: ResourceEntry[] = [
   { to: '/automatismes', label: 'Automatismes', description: 'Entraînement régulier', icon: Zap, newArchitectureOnly: true },
+  { to: '/videos-et-conseils-pour-progresser', label: 'Vidéos et conseils pour progresser', description: 'Méthodes et conseils pour progresser en mathématiques', icon: LifeBuoy, newArchitectureOnly: true },
   { to: '/projets-eleves', label: 'Projets des élèves', description: 'Les élèves expliquent le cours', icon: Presentation, newArchitectureOnly: true },
   { to: '/parcours-revision', label: 'Parcours de révision', description: 'Fiches et corrigés pour réviser', icon: Route, newArchitectureOnly: true },
   { to: '/progression-spiralee', label: 'Progression spiralée', description: "Fiches et exercices pour toute l'année", icon: Spline },

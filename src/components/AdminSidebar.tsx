@@ -38,6 +38,7 @@ import {
   BellRing,
   UserRound,
   Zap,
+  LifeBuoy,
   Route,
   Presentation,
 } from 'lucide-react';
@@ -53,6 +54,7 @@ export type AdminCourseLevel =
   | 'club-maths'
   | 'spiral-progression'
   | 'automatismes'
+  | 'videos-et-conseils-pour-progresser'
   | 'projets-eleves'
   | 'parcours-revision'
   | 'ressources-parents';
@@ -82,6 +84,7 @@ const getSubSections = (level: AdminCourseLevel, isNewArchitecture: boolean = fa
   }
   if (level === 'spiral-progression') return SPIRAL_SUBSECTIONS;
   if (level === 'automatismes') return [{ id: 'automatismes', label: 'Gérer les supports', icon: Zap }];
+  if (level === 'videos-et-conseils-pour-progresser') return [{ id: 'videos-et-conseils-pour-progresser', label: 'Gérer les vidéos et conseils', icon: LifeBuoy }];
   if (level === 'projets-eleves') return [{ id: 'projets-eleves', label: 'Gérer les projets', icon: Presentation }];
   if (level === 'parcours-revision') return [{ id: 'parcours-revision', label: 'Gérer les parcours', icon: Route }];
   if (level === 'ressources-parents') return [{ id: 'ressources-parents', label: 'Gérer les ressources', icon: Users }];
@@ -293,6 +296,7 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange: onTabChangeP
               { id: 'club-maths' as AdminCourseLevel, label: 'Club Jules Verne', icon: Puzzle },
               { id: 'spiral-progression' as AdminCourseLevel, label: 'Progression Spiralée', icon: Spline },
               { id: 'automatismes' as AdminCourseLevel, label: 'Automatismes', icon: Zap },
+              { id: 'videos-et-conseils-pour-progresser' as AdminCourseLevel, label: 'Vidéos et conseils pour progresser', icon: LifeBuoy },
               { id: 'projets-eleves' as AdminCourseLevel, label: 'Projets des élèves', icon: Presentation },
               { id: 'parcours-revision' as AdminCourseLevel, label: 'Parcours de révision', icon: Route },
               { id: 'ressources-parents' as AdminCourseLevel, label: 'Ressources pour les parents', icon: Users },
@@ -311,7 +315,7 @@ export function AdminSidebar({ activeTab, activeLevel, onTabChange: onTabChangeP
                     {getSubSections(item.id).map(section => (
                       <SidebarMenuItem key={section.id}>
                         <SidebarMenuButton
-                          onClick={() => onTabChange?.(section.id, item.id, (item.id === 'automatismes' || item.id === 'projets-eleves' || item.id === 'parcours-revision') ? (selectedYearId || undefined) : null)}
+                          onClick={() => onTabChange?.(section.id, item.id, (item.id === 'automatismes' || item.id === 'videos-et-conseils-pour-progresser' || item.id === 'projets-eleves' || item.id === 'parcours-revision') ? (selectedYearId || undefined) : null)}
                           className={`cursor-pointer transition-colors text-sm ${activeLevel === item.id && activeTab === section.id ? 'bg-rainbow-purple/10 text-rainbow-purple font-medium' : 'hover:bg-muted/50'}`}
                         >
                           <section.icon className="w-4 h-4 mr-2" />

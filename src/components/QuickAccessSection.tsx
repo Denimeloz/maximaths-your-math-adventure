@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FileText, Link as LinkIcon, Presentation, Puzzle, Route, Spline, UsersRound, Zap, type LucideIcon } from "lucide-react";
+import { FileText, LifeBuoy, Link as LinkIcon, Presentation, Puzzle, Route, Spline, UsersRound, Zap, type LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAcademicYears } from "@/contexts/AcademicYearContext";
 import { usesNewArchitecture } from "@/lib/levelMenus";
@@ -44,6 +44,9 @@ const QuickAccessSection = () => {
   }, []);
 
   const tiles: Tile[] = [
+    ...(hasNewArchitectureYear
+      ? [{ to: '/videos-et-conseils-pour-progresser', title: 'Vidéos et conseils pour progresser', text: 'Des vidéos et des conseils pour progresser en mathématiques.', icon: LifeBuoy }]
+      : []),
     ...(hasNewArchitectureYear
       ? [{ to: '/parcours-revision', title: 'Parcours de révision', text: 'Les fiches de révision de ta classe, avec leurs corrigés.', icon: Route }]
       : []),
@@ -118,7 +121,7 @@ const QuickAccessSection = () => {
           </Link>
         </div>
 
-        <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className={`mt-5 grid gap-5 sm:grid-cols-2 ${tiles.length >= 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'}`}>
           {tiles.map(tile => (
             <Link
               key={tile.to}
